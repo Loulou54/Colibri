@@ -8,5 +8,3 @@ Louis DURAND
 Valentin GUYARD
 Laura JACQUEMOD
 Mariam THIAM
-
-Voilà
