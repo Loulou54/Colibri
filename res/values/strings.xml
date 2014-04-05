@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Colibri</string>
+    <string name="jouer">Continuer</string>
+    <string name="campagne">Campagne</string>
+    <string name="aleat">Carte Aléatoire</string>
+    <string name="multi">Défi Multijoueur</string>
+    <string name="instructions">Instructions</string>
+
+</resources>
