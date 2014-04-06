@@ -9,7 +9,7 @@ import android.app.Activity;
 public class MenuPrinc extends Activity {
 	
 	public int ww,wh;
-	// Salut GitHub !
+	
 	@SuppressWarnings("deprecation")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
