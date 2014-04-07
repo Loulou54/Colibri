@@ -6,7 +6,7 @@ import android.view.View;
 
 public class Carte extends View {
 	
-	Niveau map;
+	Niveau map; // Salut c'est un test de EGit !
 	
 	// Constructeurs
     public Carte(Context context, AttributeSet attrs) {
