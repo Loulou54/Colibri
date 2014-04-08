@@ -16,6 +16,7 @@
         android:gravity="center"
         android:text="@string/jouer"
         android:textColor="@android:color/white"
+        android:onClick="continuer"
         android:textSize="16sp" />
     
     <Button
