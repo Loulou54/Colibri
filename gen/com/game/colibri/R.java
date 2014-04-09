@@ -27,21 +27,25 @@ public final class R {
         public static final int bouton_normal=0x7f020001;
         public static final int bouton_pressed=0x7f020002;
         public static final int boutons=0x7f020003;
-        public static final int fleur=0x7f020004;
-        public static final int fleurm=0x7f020005;
-        public static final int herbe=0x7f020006;
-        public static final int ic_launcher=0x7f020007;
-        public static final int menhir=0x7f020008;
-        public static final int menu=0x7f020009;
+        public static final int colibri_d=0x7f020004;
+        public static final int colibri_d1=0x7f020005;
+        public static final int colibri_d2=0x7f020006;
+        public static final int fleur=0x7f020007;
+        public static final int fleurm=0x7f020008;
+        public static final int herbe=0x7f020009;
+        public static final int ic_launcher=0x7f02000a;
+        public static final int menhir=0x7f02000b;
+        public static final int menu=0x7f02000c;
     }
     public static final class id {
-        public static final int bout1=0x7f070002;
-        public static final int bout2=0x7f070003;
-        public static final int bout3=0x7f070004;
-        public static final int bout4=0x7f070005;
-        public static final int bout5=0x7f070006;
+        public static final int bout1=0x7f070003;
+        public static final int bout2=0x7f070004;
+        public static final int bout3=0x7f070005;
+        public static final int bout4=0x7f070006;
+        public static final int bout5=0x7f070007;
         public static final int carte=0x7f070000;
-        public static final int root=0x7f070001;
+        public static final int colibri=0x7f070001;
+        public static final int root=0x7f070002;
     }
     public static final class layout {
         public static final int activity_jeu=0x7f030000;
@@ -51,6 +55,7 @@ public final class R {
         public static final int aleat=0x7f050003;
         public static final int app_name=0x7f050000;
         public static final int campagne=0x7f050002;
+        public static final int content1=0x7f050006;
         public static final int instructions=0x7f050005;
         public static final int jouer=0x7f050001;
         public static final int multi=0x7f050004;

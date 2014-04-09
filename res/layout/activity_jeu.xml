@@ -10,6 +10,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" />
 
-  
+  <ImageView
+    android:id="@+id/colibri"
+    android:contentDescription="@string/content1"
+    android:background="@drawable/colibri_d"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" />
   
 </RelativeLayout>
