@@ -1,10 +1,9 @@
 package com.game.colibri;
 
 import android.app.Activity;
-import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 public class Jeu extends Activity {
@@ -14,34 +13,43 @@ public class Jeu extends Activity {
 	 */
 	
 	public Carte carte;
-	public ImageView colibri;
-	private RelativeLayout.LayoutParams layoutParams;
+	public MoteurJeu play;
+	public RelativeLayout lay;
+	public Animal colibri;
+	private boolean brandNew=true;
+	public int n_niv=0;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_jeu);
 		carte = (Carte) findViewById(R.id.carte);
-		carte.loadNiveau(Niveaux.getNiveau(0));
-		colibri = (ImageView) findViewById(R.id.colibri);
-		layoutParams = (RelativeLayout.LayoutParams) colibri.getLayoutParams();
+		lay = (RelativeLayout) findViewById(R.id.lay);
+		play = new MoteurJeu(this,carte); // TODO : récupérer le niveau à jouer (à travers un Intent ?)
+		Log.i("onCreate","FINI");
 	}
 	
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
-		layoutParams.width=5*carte.cw/4;
-		layoutParams.height=5*carte.ch/4;
-		layoutParams.leftMargin = carte.ww/2;
-	    layoutParams.topMargin = carte.wh/2;
-	    colibri.setLayoutParams(layoutParams);
-		((AnimationDrawable) colibri.getBackground()).start();
+		if (brandNew) { // Événement appelé lorsque le RelativeLayout "lay" est prêt ! C'est ici que l'on peut charger le niveau et ajouter les View "Animal".
+			carte.loadNiveau(Niveaux.getNiveau(n_niv),lay);
+			play.init();
+			play.start();
+			brandNew=false;
+		}
 	}
 	
 	@Override
 	public boolean onTouchEvent (MotionEvent ev) {
-		layoutParams.leftMargin = (int) ev.getX();
-	    layoutParams.topMargin = (int) ev.getY();
-	    colibri.setLayoutParams(layoutParams);
+	    play.onTouch(ev);
 		return true;
+	}
+	
+	// Événement déclenché par "play" lorsque le niveau a été gagné.
+	public void gagne() {
+		n_niv++;
+		carte.loadNiveau(Niveaux.getNiveau(n_niv),lay);
+		play.init();
+		Log.i("C'est Gagné !","BRAVO !");
 	}
 }

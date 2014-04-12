@@ -7,19 +7,22 @@ import android.graphics.drawable.BitmapDrawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.widget.RelativeLayout;
 
 public class Carte extends View {
 	
 	/**
-	 * View contenant un canvas sur lequel les graphismes statiques sont dessinés (menhirs, fleurs, dynamite)
+	 * View contenant un Canvas sur lequel les graphismes statiques sont dessinés (menhirs, fleurs, dynamite)
 	 * On spécifie le niveau à afficher par la méthode publique loadNiveau.
 	 * La méthode invalidate() permet de lancer onDraw.
 	 * Nécessité de rafraîchir à chaque élément ramassé.
 	 */
 	
 	public int ww,wh,cw,ch; // windowWidth/Height, caseWidth/Height en pixels
-	private Niveau map=null; // Le niveau à afficher
+	public Niveau niv=null; // Le niveau à afficher
 	private Bitmap menhir,fleur,fleurm,menhir0,fleur0,fleurm0; // Les images : -0 sont les originales avant redimensionnement
+	public Animal colibri;
+	//public Animal[] vaches; TODO : implémentation des vaches.
 	
 	// Constructeurs
     public Carte(Context context, AttributeSet attrs) {
@@ -39,22 +42,28 @@ public class Carte extends View {
     }
     
     // Méthode publique pour spécifier le niveau à afficher
-    public void loadNiveau(Niveau niv) {
-    	map=niv;
+    public void loadNiveau(Niveau niveau, RelativeLayout lay) {
+    	if (niv!=null) { // Supprimer les "Animaux" du niveau précédent.
+    		lay.removeView(colibri);
+    	}
+    	niv=niveau;
+    	colibri = new Animal(this.getContext(), R.drawable.colibri_d, niv.db_c*cw, niv.db_l*ch, 5*cw/4, 5*ch/4);
+    	// TODO : créer les vaches
+    	lay.addView(colibri);
     	this.invalidate();
     }
     
     // Dessin du canvas : événement déclenché par this.invalidate()
     @Override
     protected void onDraw(Canvas can) {
-    	if (map!=null) {
+    	if (niv!=null) {
 	    	for (int l=0; l<12; l++) {
 	    		for (int c=0; c<20; c++) {
-	    			if (map.carte[l][c]==1)
+	    			if (niv.carte[l][c]==1)
 	    				can.drawBitmap(menhir, c*cw-cw/8, l*ch-cw/8, null);
-	    			else if (map.carte[l][c]==2)
+	    			else if (niv.carte[l][c]==2)
 	    				can.drawBitmap(fleur, c*cw, l*ch, null);
-	    			else if (map.carte[l][c]==3)
+	    			else if (niv.carte[l][c]==3)
 	    				can.drawBitmap(fleurm, c*cw, l*ch, null);
 	    		}
 	    	}
