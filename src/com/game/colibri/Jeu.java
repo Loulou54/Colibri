@@ -6,11 +6,12 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.RelativeLayout;
 
+/**
+ * ActivitÃ© gÃ©rant le jeu  proprement dit. Elle affiche notamment la View "Carte" en plein Ã©cran.
+ */
 public class Jeu extends Activity {
 	
-	/**
-	 * Activité gérant le jeu à proprement dit. Elle affiche notamment la View "Carte" en plein écran.
-	 */
+	
 	
 	public Carte carte;
 	public MoteurJeu play;
@@ -19,19 +20,25 @@ public class Jeu extends Activity {
 	private boolean brandNew=true;
 	public int n_niv=0;
 	
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_jeu);
 		carte = (Carte) findViewById(R.id.carte);
 		lay = (RelativeLayout) findViewById(R.id.lay);
-		play = new MoteurJeu(this,carte); // TODO : récupérer le niveau à jouer (à travers un Intent ?)
+		play = new MoteurJeu(this,carte); // TODO : rï¿½cupï¿½rer le niveau ï¿½ jouer (ï¿½ travers un Intent ?)
 		Log.i("onCreate","FINI");
 	}
 	
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onWindowFocusChanged(boolean)
+	 */
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
-		if (brandNew) { // Événement appelé lorsque le RelativeLayout "lay" est prêt ! C'est ici que l'on peut charger le niveau et ajouter les View "Animal".
+		if (brandNew) { // ï¿½vï¿½nement appelï¿½ lorsque le RelativeLayout "lay" est prï¿½t ! C'est ici que l'on peut charger le niveau et ajouter les View "Animal".
 			carte.loadNiveau(Niveaux.getNiveau(n_niv),lay);
 			play.init();
 			play.start();
@@ -39,17 +46,24 @@ public class Jeu extends Activity {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onTouchEvent(android.view.MotionEvent)
+	 */
 	@Override
 	public boolean onTouchEvent (MotionEvent ev) {
 	    play.onTouch(ev);
 		return true;
 	}
 	
-	// Événement déclenché par "play" lorsque le niveau a été gagné.
+	// ï¿½vï¿½nement dï¿½clenchï¿½ par "play" lorsque le niveau a ï¿½tï¿½ gagnï¿½.
+	/**
+	 * Affiche que le niveau Ã  Ã©tÃ© gagnÃ© et charge le niveau suivant 
+	 * 
+	 */
 	public void gagne() {
 		n_niv++;
 		carte.loadNiveau(Niveaux.getNiveau(n_niv),lay);
 		play.init();
-		Log.i("C'est Gagné !","BRAVO !");
+		Log.i("C'est Gagnï¿½ !","BRAVO !");
 	}
 }

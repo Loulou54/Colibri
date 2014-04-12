@@ -1,11 +1,15 @@
 package com.game.colibri;
 
+
+
+/**
+ * 
+ * Ici sont stockÃ©s tous les niveaux du jeu dans une table de "Niveau".
+ * La mÃ©thode getNiveau est destinÃ©e  obtenir le niÃ¨me niveau.
+ */
 public class Niveaux {
 	
-	/**
-	 * Ici sont stockés tous les niveaux du jeu dans une table de "Niveau".
-	 * La méthode getNiveau est destinée à obtenir le nième niveau.
-	 */
+	
 	
 	private static Niveau[] niveaux={
 		new Niveau(new int[][] {

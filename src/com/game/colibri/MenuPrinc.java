@@ -7,22 +7,29 @@ import android.widget.RelativeLayout;
 import android.app.Activity;
 import android.content.Intent;
 
+/**
+ * Menu principal : activitÃ© lancÃ©e au dÃ©marage.
+ */
 public class MenuPrinc extends Activity {
 	
-	/**
-	 * Menu principal : activité lancée au démarage.
-	 */
+	
 	
 	public int ww,wh;
 	private Intent jeu;
 	
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_menu_princ);
 	}
 
-	// Le placement des boutons est calculé ici en fonction des dimensions de l'écran. (Astuce pour contourner le temps d'établissement de l'affichage empêchant ces opérations dans le onCreate)
+	// Le placement des boutons est calculï¿½ ici en fonction des dimensions de l'ï¿½cran. (Astuce pour contourner le temps d'ï¿½tablissement de l'affichage empï¿½chant ces opï¿½rations dans le onCreate)
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onWindowFocusChanged(boolean)
+	 */
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		RelativeLayout root = (RelativeLayout) findViewById(R.id.root);
@@ -35,7 +42,11 @@ public class MenuPrinc extends Activity {
 	    btn_lay.setLayoutParams(layoutParams);
 	}
 	
-	// Fonctions appelées par le "onClick" des boutons définis dans activity_menu.xml
+	// 
+	/**
+	 * Fonctions appelÃ©es par le "onClick" des boutons dÃ©finis dans activity_menu.xml
+	 * 		@param v
+	 */
 	public void continuer(View v) {
 		jeu = new Intent(this, Jeu.class);
 		startActivity(jeu);

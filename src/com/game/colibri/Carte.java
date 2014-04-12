@@ -9,51 +9,74 @@ import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 
+
 public class Carte extends View {
 	
 	/**
-	 * View contenant un Canvas sur lequel les graphismes statiques sont dessinés (menhirs, fleurs, dynamite)
-	 * On spécifie le niveau à afficher par la méthode publique loadNiveau.
-	 * La méthode invalidate() permet de lancer onDraw.
-	 * Nécessité de rafraîchir à chaque élément ramassé.
+	 * View contenant un Canvas sur lequel les graphismes statiques sont dessinï¿½s (menhirs, fleurs, dynamite)
+	 * On spï¿½cifie le niveau ï¿½ afficher par la mï¿½thode publique loadNiveau.
+	 * La mï¿½thode invalidate() permet de lancer onDraw.
+	 * Nï¿½cessitï¿½ de rafraï¿½chir ï¿½ chaque ï¿½lï¿½ment ramassï¿½.
 	 */
 	
 	public int ww,wh,cw,ch; // windowWidth/Height, caseWidth/Height en pixels
-	public Niveau niv=null; // Le niveau à afficher
+	public Niveau niv=null; // Le niveau ï¿½ afficher
 	private Bitmap menhir,fleur,fleurm,menhir0,fleur0,fleurm0; // Les images : -0 sont les originales avant redimensionnement
 	public Animal colibri;
-	//public Animal[] vaches; TODO : implémentation des vaches.
+	//public Animal[] vaches; TODO : implï¿½mentation des vaches.
 	
-	// Constructeurs
+    /**
+     * Constructeur une carte 
+     * 		@param context
+     * 		@param attrs
+     */
     public Carte(Context context, AttributeSet attrs) {
         super(context, attrs);
         loadImg(context);
     }
 
+    /**
+     * Construiteur une  carte
+     * 		@param context
+     * 		@param attrs
+     * 		@param defStyle
+     */
     public Carte(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         loadImg(context);
     }
     
+    /**
+     * Charge des images sur la carte 
+     * 		@param context
+     */
     private void loadImg(Context context) {
     	menhir0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.menhir)).getBitmap();
     	fleur0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.fleur)).getBitmap();
     	fleurm0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.fleurm)).getBitmap();
     }
     
-    // Méthode publique pour spécifier le niveau à afficher
+    // Mï¿½thode publique pour spï¿½cifier le niveau ï¿½ afficher
+    /**
+     * Charge un  niveau sur la carte 
+     		* @param niveau le niveau a chargÃ© 
+     		* @param lay
+     */
     public void loadNiveau(Niveau niveau, RelativeLayout lay) {
-    	if (niv!=null) { // Supprimer les "Animaux" du niveau précédent.
+    	if (niv!=null) { // Supprimer les "Animaux" du niveau prï¿½cï¿½dent.
     		lay.removeView(colibri);
     	}
     	niv=niveau;
     	colibri = new Animal(this.getContext(), R.drawable.colibri_d, niv.db_c*cw, niv.db_l*ch, 5*cw/4, 5*ch/4);
-    	// TODO : créer les vaches
+    	// TODO : crï¿½er les vaches
     	lay.addView(colibri);
     	this.invalidate();
     }
     
-    // Dessin du canvas : événement déclenché par this.invalidate()
+    // Dessin du canvas : ï¿½vï¿½nement dï¿½clenchï¿½ par this.invalidate()
+    /* (non-Javadoc)
+     * @see android.view.View#onDraw(android.graphics.Canvas)
+     */
     @Override
     protected void onDraw(Canvas can) {
     	if (niv!=null) {
@@ -71,14 +94,17 @@ public class Carte extends View {
     	}
     }
     
-    // Evénement utilisé pour récupérer les dimensions de la View.
+    // Evï¿½nement utilisï¿½ pour rï¿½cupï¿½rer les dimensions de la View.
+    /* (non-Javadoc)
+     * @see android.view.View#onSizeChanged(int, int, int, int)
+     */
     @Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		// TODO Auto-generated method stub
 		super.onSizeChanged(w, h, oldw, oldh);
 		ww=super.getWidth();
 		wh=super.getHeight();
-		Log.i("Dimensions écran :",ww+"*"+wh);
+		Log.i("Dimensions ï¿½cran :",ww+"*"+wh);
 		cw=ww/20;
 		ch=wh/12;
 		menhir = Bitmap.createScaledBitmap(menhir0, 5*cw/4, 5*ch/4, true);

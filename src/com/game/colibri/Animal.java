@@ -10,7 +10,17 @@ public class Animal extends ImageView {
 	
 	private RelativeLayout.LayoutParams params;
 	
-	// Constructeur java
+	
+	/**
+	 * Constructeur java d'un animal 
+	 * 
+	 * @param context le contexte de cr√©ation 
+	 * @param id_anim
+	 * @param dbx
+	 * @param dby
+	 * @param w
+	 * @param h
+	 */
 	public Animal(Context context, int id_anim, int dbx, int dby, int w, int h) {
 		super(context);
 		params=new RelativeLayout.LayoutParams(w,h);
@@ -20,7 +30,12 @@ public class Animal extends ImageView {
 	    this.setBackgroundResource(id_anim);
 	}
 	
-	// Constructeurs XML (qu'on utilisera pas normalement)
+	
+	/**
+	 * Constructeurs XML d'un animal
+	 * 		@param context
+	 * 		@param attrs
+	 */
 	public Animal(Context context, AttributeSet attrs) {
 		super(context, attrs);
 	}
@@ -29,32 +44,52 @@ public class Animal extends ImageView {
 		super(context, attrs, defStyle);
 	}
 	
-	// MÈthodes
-	// Positionner ‡ (x,y)
+	
+	/**
+	 * Met a jour la  postion 
+	 * 		@param x la nouvelle  abcisse 
+	 * 		@param y le nouveau ordonn√© 
+	 */
 	public void setPos(int x, int y) {
 		params.leftMargin = x;
 	    params.topMargin = y;
 		this.setLayoutParams(params);
 	}
 	
-	// DÈplacer de (dx,dy)
+	
+	/**
+	 * D√©place l'animal rapport a sa position d'origne d'une certaine valeur
+	 * 		@param dx le delta dont il faut d√©placer l'abcisse 
+	 * 		@param dy le delta dont il faut d√©lacer l'ordonn√©
+	 */
 	public void deplacer(int dx, int dy) {
 		params.leftMargin += dx;
 	    params.topMargin += dy;
 		this.setLayoutParams(params);
 	}
 	
-	// Retourne la position {x,y} (on peut aussi utiliser les hÈritages float getX et getY)
+	
+	/**
+	 * Retourne la positon  de l'animal
+	 * 
+	 * 		@return la position {x,y} de l'animal dans un tableau 
+	 */
 	public int[] getPos() {
 	    return new int[] {params.leftMargin , params.topMargin};
 	}
 	
-	// Commencer l'animation
+	
+	/**
+	 * Commencer l'animation
+	 */
 	public void start() {
 		((AnimationDrawable) this.getBackground()).start();
 	}
 	
-	// Stopper l'animation
+	
+	/**
+	 * Stopper l'animation
+	 */
 	public void stop() {
 		((AnimationDrawable) this.getBackground()).stop();
 	}
