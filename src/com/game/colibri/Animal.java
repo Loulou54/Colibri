@@ -9,23 +9,27 @@ import android.widget.RelativeLayout;
 public class Animal extends ImageView {
 	
 	private RelativeLayout.LayoutParams params;
-	
+	private int cw,ch;
 	
 	/**
 	 * Constructeur java d'un animal 
 	 * 
 	 * @param context le contexte de crÃ©ation 
-	 * @param id_anim
-	 * @param dbx
-	 * @param dby
-	 * @param w
-	 * @param h
+	 * @param id_anim la ressource "drawable" de l'animation
+	 * @param dbx abscisse du coin supérieur gauche
+	 * @param dby ordonnée du coin supérieur gauche
+	 * @param w largeur
+	 * @param h hauteur
+	 * @param cw largeur d'une case de la carte
+	 * @param ch hauteur d'une case de la carte
 	 */
-	public Animal(Context context, int id_anim, int dbx, int dby, int w, int h) {
+	public Animal(Context context, int id_anim, int dbx, int dby, int w, int h, int cw, int ch) {
 		super(context);
 		params=new RelativeLayout.LayoutParams(w,h);
 		params.leftMargin = dbx;
 	    params.topMargin = dby;
+	    this.cw=cw;
+	    this.ch=ch;
 	    this.setLayoutParams(params);
 	    this.setBackgroundResource(id_anim);
 	}
@@ -78,6 +82,19 @@ public class Animal extends ImageView {
 	    return new int[] {params.leftMargin , params.topMargin};
 	}
 	
+	/**
+	 * Retourne la ligne sur laquelle se trouve le colibri
+	 */
+	public int getRow() {
+		return params.topMargin/ch;
+	}
+	
+	/**
+	 * Retourne la colonne sur laquelle se trouve le colibri
+	 */
+	public int getCol() {
+		return params.leftMargin/cw;
+	}
 	
 	/**
 	 * Commencer l'animation

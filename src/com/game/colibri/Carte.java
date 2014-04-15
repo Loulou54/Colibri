@@ -67,7 +67,7 @@ public class Carte extends View {
     		lay.removeView(colibri);
     	}
     	niv=niveau;
-    	colibri = new Animal(this.getContext(), R.drawable.colibri_d, niv.db_c*cw, niv.db_l*ch, 5*cw/4, 5*ch/4);
+    	colibri = new Animal(this.getContext(), R.drawable.colibri_d, niv.db_c*cw, niv.db_l*ch, 5*cw/4, 5*ch/4, cw, ch);
     	// TODO : cr�er les vaches
     	lay.addView(colibri);
     	this.invalidate();
