@@ -1,5 +1,11 @@
 package com.game.colibri;
 
+import java.util.LinkedList;
+
+import android.annotation.SuppressLint;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
 import android.view.MotionEvent;
 
 /**
@@ -13,6 +19,8 @@ public class MoteurJeu {
 	private Carte carte;
 	private Niveau niv;
 	private Jeu jeu;
+	private LinkedList <int[]> buf; // la file d'attente des touches
+	private final static int PERIODE=1000/25; // pour 25 frames par secondes
 	
 	/**
 	 * Laura et Mariam :
@@ -38,13 +46,35 @@ public class MoteurJeu {
 	 */
 	
 	/**
-	 * Construicteur 
+	 * Handler de rafraîchissement
+	 * Il appelle la méthode void move() qui elle même appelle moveHandler.sleep(PERIODE) pour boucler.
+	 * Utiliser moveHandler.sleep(PERIODE) pour appeler le handler après PERIODE ms.
+	 * Utiliser moveHandler.removeMessages(0) pour arrêter le cycle.
+	 */
+	
+	public RefreshHandler moveHandler = new RefreshHandler();
+	
+	@SuppressLint("HandlerLeak")
+	class RefreshHandler extends Handler {
+		@Override
+		public void handleMessage(Message msg) {
+			MoteurJeu.this.move();
+		}
+		public void sleep(long delayMillis) {
+			this.removeMessages(0);
+			sendMessageDelayed(obtainMessage(0), delayMillis);
+		}
+	};
+	
+	/**
+	 * Constructeur 
 	 *		@param activ le jeu actif
 	 * 		@param c   la carte 
 	 */
 	public MoteurJeu(Jeu activ, Carte c) {
 		carte = c;
 		jeu=activ;
+		buf = new LinkedList<int[]>();
 	}
 	
 	//
@@ -53,6 +83,7 @@ public class MoteurJeu {
 	 */
 	public void init() {
 		niv=carte.niv; // pour avoir une rï¿½fï¿½rence locale vers le niveau en cours et un nom moins long
+		buf.clear();
 	}
 	
 	/**
@@ -60,6 +91,7 @@ public class MoteurJeu {
 	 */
 	public void start() {
 		// TODO : dï¿½marrer le handler de rafraï¿½chissement
+		moveHandler.sleep(PERIODE);
 		carte.colibri.start();
 		// TODO : dï¿½marrer l'animation des vaches
 	}
@@ -68,7 +100,40 @@ public class MoteurJeu {
 	 * Met le jeu sur pause
 	 */
 	public void pause() {
+		carte.colibri.stop();
+		moveHandler.removeMessages(0);
 		// arrï¿½ter toutes les animations et le handler
+	}
+	
+	/**
+	 * Méthode appelée périodiquement par le handler moveHandler lorsque le jeu est en marche.
+	 * C'est ici que s'effectue les déplacements des animaux.
+	 */
+	private void move() {
+		if (carte.colibri.mx==0 & carte.colibri.my==0) {
+			if (buf.size()>0) carte.colibri.setDirection(buf.poll());
+		}
+		else {
+			carte.colibri.deplacer();
+			int [] co=carte.colibri.getPos();
+			if (co[0]<=0) {
+				carte.colibri.setPos(0, co[1]);
+				carte.colibri.mx=0;
+			}
+			else if (co[0]>=carte.ww-carte.cw) {
+				carte.colibri.setPos(carte.ww-carte.cw, co[1]);
+				carte.colibri.mx=0;
+			}
+			else if (co[1]<=0) {
+				carte.colibri.setPos(co[0], 0);
+				carte.colibri.my=0;
+			}
+			else if (co[1]>=carte.wh-carte.ch) {
+				carte.colibri.setPos(co[0], carte.wh-carte.ch);
+				carte.colibri.my=0;
+			}
+		}
+		moveHandler.sleep(PERIODE);
 	}
 	
 	/**
@@ -76,6 +141,30 @@ public class MoteurJeu {
 	 * 		@param ev  evenement declencheur du mouvement  
 	 */
 	public void onTouch(MotionEvent ev) {
-		carte.colibri.setPos((int) ev.getX(), (int) ev.getY()); // Petit exemple
+		//carte.colibri.setPos((int) ev.getX(), (int) ev.getY()); // Petit exemple
+		int x=(int) ev.getX();
+		int y=(int) ev.getY();
+		if (ev.getActionMasked()==MotionEvent.ACTION_DOWN) {
+			if (y*carte.ww<x*carte.wh) {
+				if (y*carte.ww<(carte.ww-x)*carte.wh) { // appui sur HAUT
+					Log.i("Appui :","HAUT");
+					buf.add(new int[]{0,-1});
+				}
+				else { // Appui sur DROITE
+					Log.i("Appui :","DROITE");
+					buf.add(new int[]{1,0});
+				}
+			}
+			else {
+				if (y*carte.ww<(carte.ww-x)*carte.wh) { // appui sur GAUCHE
+					Log.i("Appui :","GAUCHE");
+					buf.add(new int[]{-1,0});
+				}
+				else { // appui sur BAS
+					Log.i("Appui :","BAS");
+					buf.add(new int[]{0,1});
+				}
+			}
+		}
 	}
 }

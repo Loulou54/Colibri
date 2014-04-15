@@ -9,7 +9,9 @@ import android.widget.RelativeLayout;
 public class Animal extends ImageView {
 	
 	private RelativeLayout.LayoutParams params;
-	private int cw,ch;
+	private int cw,ch; // largeur et hauteur d'une case
+	private int step; // pas des mouvements en px/frame
+	public int mx,my; // mouvement en pixels par frame de l'animal
 	
 	/**
 	 * Constructeur java d'un animal 
@@ -30,6 +32,9 @@ public class Animal extends ImageView {
 	    params.topMargin = dby;
 	    this.cw=cw;
 	    this.ch=ch;
+	    mx=0;
+	    my=0;
+	    step=cw/2;
 	    this.setLayoutParams(params);
 	    this.setBackgroundResource(id_anim);
 	}
@@ -60,6 +65,14 @@ public class Animal extends ImageView {
 		this.setLayoutParams(params);
 	}
 	
+	/**
+	 * Donne la direction de déplacement du colibri, en attribuant les valeurs mx et my.
+	 * 		@param dir un couple donnant la direction x/y de déplacement du colibri. (ex : {0,-1} = vers la gauche)
+	 */
+	public void setDirection(int[] dir) {
+		mx=dir[0]*step;
+		my=dir[1]*step;
+	}
 	
 	/**
 	 * DÃ©place l'animal rapport a sa position d'origne d'une certaine valeur
@@ -72,6 +85,11 @@ public class Animal extends ImageView {
 		this.setLayoutParams(params);
 	}
 	
+	public void deplacer() {
+		params.leftMargin += mx;
+	    params.topMargin += my;
+		this.setLayoutParams(params);
+	}
 	
 	/**
 	 * Retourne la positon  de l'animal
