@@ -1,5 +1,11 @@
 package com.game.colibri;
 
+
+
+import java.util.LinkedList;
+
+import android.os.Handler;
+import android.os.Message;
 import android.view.MotionEvent;
 
 /**
@@ -13,7 +19,6 @@ public class MoteurJeu {
 	private Carte carte;
 	private Niveau niv;
 	private Jeu jeu;
-	
 	/**
 	 * Laura et Mariam :
 	 *   Voici la classe dans laquelle vous devez gérer les déplacements et leurs commandes (cf : onTouch, lisez la doc du MotionEvent si vous voulez gérer les "glisser" plus tard.)
@@ -66,8 +71,9 @@ public class MoteurJeu {
 	
 	/**
 	 * Met le jeu sur pause
+	 * @throws InterruptedException 
 	 */
-	public void pause() {
+	public void pause() throws InterruptedException {
 		// arr�ter toutes les animations et le handler
 	}
 	
@@ -76,6 +82,11 @@ public class MoteurJeu {
 	 * 		@param ev  evenement declencheur du mouvement  
 	 */
 	public void onTouch(MotionEvent ev) {
+
 		carte.colibri.setPos((int) ev.getX(), (int) ev.getY()); // Petit exemple
+		
 	}
+	
+
+	
 }

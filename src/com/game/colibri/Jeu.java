@@ -45,7 +45,6 @@ public class Jeu extends Activity {
 			brandNew=false;
 		}
 	}
-	
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onTouchEvent(android.view.MotionEvent)
 	 */
