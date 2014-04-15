@@ -77,12 +77,11 @@ public class MoteurJeu {
 		buf = new LinkedList<int[]>();
 	}
 	
-	//
 	/**
 	 *  Initialise les variables du moteur de jeu (buffer, niv, ...) : appelï¿½ aprï¿½s chaque appel de carte.loadNiveau
 	 */
 	public void init() {
-		niv=carte.niv; // pour avoir une rï¿½fï¿½rence locale vers le niveau en cours et un nom moins long
+		niv=carte.niv; // pour avoir une référence locale vers le niveau en cours et un nom moins long
 		buf.clear();
 	}
 	
@@ -98,12 +97,17 @@ public class MoteurJeu {
 	
 	/**
 	 * Met le jeu sur pause
+	 * @throws InterruptedException 
 	 */
+
 	public void pause() {
 		carte.colibri.stop();
 		moveHandler.removeMessages(0);
-		// arrï¿½ter toutes les animations et le handler
 	}
+
+	/*public void pause() throws InterruptedException {
+		// arrï¿½ter toutes les animations et le handler
+	}*/
 	
 	/**
 	 * Méthode appelée périodiquement par le handler moveHandler lorsque le jeu est en marche.
@@ -167,4 +171,6 @@ public class MoteurJeu {
 			}
 		}
 	}
+
+	
 }
