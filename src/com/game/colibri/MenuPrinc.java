@@ -26,7 +26,7 @@ public class MenuPrinc extends Activity {
 		setContentView(R.layout.activity_menu_princ);
 	}
 
-	// Le placement des boutons est calcul� ici en fonction des dimensions de l'�cran. (Astuce pour contourner le temps d'�tablissement de l'affichage emp�chant ces op�rations dans le onCreate)
+	// Le placement des boutons est calculé ici en fonction des dimensions de l'écran. (Astuce pour contourner le temps d'établissement de l'affichage empêchant ces opérations dans le onCreate)
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onWindowFocusChanged(boolean)
 	 */
@@ -42,7 +42,6 @@ public class MenuPrinc extends Activity {
 	    btn_lay.setLayoutParams(layoutParams);
 	}
 	
-	// 
 	/**
 	 * Fonctions appelées par le "onClick" des boutons définis dans activity_menu.xml
 	 * 		@param v

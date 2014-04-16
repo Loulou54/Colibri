@@ -13,17 +13,17 @@ import android.widget.RelativeLayout;
 public class Carte extends View {
 	
 	/**
-	 * View contenant un Canvas sur lequel les graphismes statiques sont dessin�s (menhirs, fleurs, dynamite)
-	 * On sp�cifie le niveau � afficher par la m�thode publique loadNiveau.
-	 * La m�thode invalidate() permet de lancer onDraw.
-	 * N�cessit� de rafra�chir � chaque �l�ment ramass�.
+	 * View contenant un Canvas sur lequel les graphismes statiques sont dessinés (menhirs, fleurs, dynamite)
+	 * On spécifie le niveau à afficher par la méthode publique loadNiveau.
+	 * La méthode invalidate() permet de lancer onDraw.
+	 * Nécessité de rafraîchir à chaque élément ramassé.
 	 */
 	
 	public int ww,wh,cw,ch; // windowWidth/Height, caseWidth/Height en pixels
-	public Niveau niv=null; // Le niveau � afficher
+	public Niveau niv=null; // Le niveau à afficher
 	private Bitmap menhir,fleur,fleurm,menhir0,fleur0,fleurm0; // Les images : -0 sont les originales avant redimensionnement
 	public Animal colibri;
-	//public Animal[] vaches; TODO : impl�mentation des vaches.
+	//public Animal[] vaches; TODO : implémentation des vaches.
 	
     /**
      * Constructeur une carte 
@@ -56,24 +56,24 @@ public class Carte extends View {
     	fleurm0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.fleurm)).getBitmap();
     }
     
-    // M�thode publique pour sp�cifier le niveau � afficher
+    // Méthode publique pour spécifier le niveau à afficher
     /**
      * Charge un  niveau sur la carte 
      		* @param niveau le niveau a chargé 
      		* @param lay
      */
     public void loadNiveau(Niveau niveau, RelativeLayout lay) {
-    	if (niv!=null) { // Supprimer les "Animaux" du niveau pr�c�dent.
+    	if (niv!=null) { // Supprimer les "Animaux" du niveau précédent.
     		lay.removeView(colibri);
     	}
     	niv=niveau;
     	colibri = new Animal(this.getContext(), R.drawable.colibri_d, niv.db_c*cw, niv.db_l*ch, 5*cw/4, 5*ch/4, cw, ch);
-    	// TODO : cr�er les vaches
+    	// TODO : créer les vaches
     	lay.addView(colibri);
     	this.invalidate();
     }
     
-    // Dessin du canvas : �v�nement d�clench� par this.invalidate()
+    // Dessin du canvas : événement déclenché par this.invalidate()
     /* (non-Javadoc)
      * @see android.view.View#onDraw(android.graphics.Canvas)
      */
@@ -94,7 +94,7 @@ public class Carte extends View {
     	}
     }
     
-    // Ev�nement utilis� pour r�cup�rer les dimensions de la View.
+    // Événement utilisé pour récupérer les dimensions de la View.
     /* (non-Javadoc)
      * @see android.view.View#onSizeChanged(int, int, int, int)
      */
@@ -104,7 +104,7 @@ public class Carte extends View {
 		super.onSizeChanged(w, h, oldw, oldh);
 		ww=super.getWidth();
 		wh=super.getHeight();
-		Log.i("Dimensions �cran :",ww+"*"+wh);
+		Log.i("Dimensions écran :",ww+"*"+wh);
 		cw=ww/20;
 		ch=wh/12;
 		menhir = Bitmap.createScaledBitmap(menhir0, 5*cw/4, 5*ch/4, true);

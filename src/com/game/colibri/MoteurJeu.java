@@ -30,9 +30,9 @@ public class MoteurJeu {
 	 * dans laquelle vous puisez dès que vous pouvez effectuer une nouvelle action.
 	 * 
 	 * La "carte" contient tout le niveau et gère son affichage.
-	 * - carte.colibri est l'objet graphique "Animal" repr�sentant le colibri.
+	 * - carte.colibri est l'objet graphique "Animal" représentant le colibri.
 	 * Son animation est gèrée dans la classe Animal. S'y référer pour les commandes de position.
-	 * - carte.vaches sera la liste des vaches de type "Animal". On ne s'y int�resse pas tout de suite ! ;)
+	 * - carte.vaches sera la liste des vaches de type "Animal". On ne s'y intéresse pas tout de suite ! ;)
 	 * - carte.loadNiveau permet de charger un nouveau niveau : vous ne devez pas l'utiliser ici.
 	 * - carte.invalidate() : permet de redessiner la carte. Il ne faut l'appeler que lorsqu'un objet statique
 	 * a bougé ou a disparu. Typiquement lorsque l'on mange une fleur ! (miam) Le déplacement des animaux ne
@@ -46,10 +46,10 @@ public class MoteurJeu {
 	 */
 	
 	/**
-	 * Handler de rafra�chissement
-	 * Il appelle la m�thode void move() qui elle m�me appelle moveHandler.sleep(PERIODE) pour boucler.
-	 * Utiliser moveHandler.sleep(PERIODE) pour appeler le handler apr�s PERIODE ms.
-	 * Utiliser moveHandler.removeMessages(0) pour arr�ter le cycle.
+	 * Handler de rafraîchissement
+	 * Il appelle la méthode void move() qui elle même appelle moveHandler.sleep(PERIODE) pour boucler.
+	 * Utiliser moveHandler.sleep(PERIODE) pour appeler le handler après PERIODE ms.
+	 * Utiliser moveHandler.removeMessages(0) pour arrêter le cycle.
 	 */
 	
 	public RefreshHandler moveHandler = new RefreshHandler();
@@ -78,10 +78,10 @@ public class MoteurJeu {
 	}
 	
 	/**
-	 *  Initialise les variables du moteur de jeu (buffer, niv, ...) : appel� apr�s chaque appel de carte.loadNiveau
+	 *  Initialise les variables du moteur de jeu (buffer, niv, ...) : appelé après chaque appel de carte.loadNiveau
 	 */
 	public void init() {
-		niv=carte.niv; // pour avoir une r�f�rence locale vers le niveau en cours et un nom moins long
+		niv=carte.niv; // pour avoir une référence locale vers le niveau en cours et un nom moins long
 		buf.clear();
 	}
 	
@@ -89,10 +89,10 @@ public class MoteurJeu {
 	 *  Commence le jeu 
 	 */
 	public void start() {
-		// TODO : d�marrer le handler de rafra�chissement
+		// TODO : démarrer le handler de rafraîchissement
 		moveHandler.sleep(PERIODE);
 		carte.colibri.start();
-		// TODO : d�marrer l'animation des vaches
+		// TODO : démarrer l'animation des vaches
 	}
 	
 	/**
@@ -106,20 +106,20 @@ public class MoteurJeu {
 	}
 
 	/*public void pause() throws InterruptedException {
-		// arr�ter toutes les animations et le handler
+		// arrêter toutes les animations et le handler
 	}*/
 	
 	/**
-	 * M�thode appel�e p�riodiquement par le handler moveHandler lorsque le jeu est en marche.
-	 * C'est ici que s'effectue les d�placements des animaux.
+	 * Méthode appelée périodiquement par le handler moveHandler lorsque le jeu est en marche.
+	 * C'est ici que s'effectue les déplacements des animaux.
 	 */
 	private void move() {
 		if (carte.colibri.mx==0 & carte.colibri.my==0) {
 			if (buf.size()>0) carte.colibri.setDirection(buf.poll());
-			else carte.colibri.step=0; // La vitesse est mise � 0. Dans le premier cas, la vitesse est conserv�e.
+			else carte.colibri.step=0; // La vitesse est mise à 0. Dans le premier cas, la vitesse est conservée.
 		}
 		else {
-			carte.colibri.deplacer(); // Les arr�ts contre les bords de la map sont g�r�s dans la classe Animal.
+			carte.colibri.deplacer(); // Les arrêts contre les bords de la map sont gérés dans la classe Animal.
 		}
 		moveHandler.sleep(PERIODE);
 	}

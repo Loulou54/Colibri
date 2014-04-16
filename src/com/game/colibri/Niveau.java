@@ -1,9 +1,9 @@
 package com.game.colibri;
+
 /**
- * Classe contenant toutes les donn�es d'UN niveau : carte, position initiale du colibri, solution
+ * Classe contenant toutes les données d'UN niveau : carte, position initiale du colibri, solution
  * TODO : coordonnées des vaches et leur parcours
  */
-
 public class Niveau {
 	
 	

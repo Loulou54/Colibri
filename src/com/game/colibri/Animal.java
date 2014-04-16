@@ -11,7 +11,7 @@ public class Animal extends ImageView {
 	private RelativeLayout.LayoutParams params;
 	private int cw,ch; // largeur et hauteur d'une case
 	public int step; // pas des mouvements en px/frame
-	private int acc; // accÈlÈration en px/frame/frame
+	private int acc; // acc√©l√©ration en px/frame/frame
 	public int mx,my; // mouvement en pixels par frame de l'animal
 	
 	/**
@@ -19,8 +19,8 @@ public class Animal extends ImageView {
 	 * 
 	 * @param context le contexte de cr√©ation 
 	 * @param id_anim la ressource "drawable" de l'animation
-	 * @param dbx abscisse du coin supÈrieur gauche
-	 * @param dby ordonnÈe du coin supÈrieur gauche
+	 * @param dbx abscisse du coin sup√©rieur gauche
+	 * @param dby ordonn√©e du coin sup√©rieur gauche
 	 * @param w largeur
 	 * @param h hauteur
 	 * @param cw largeur d'une case de la carte
@@ -68,8 +68,8 @@ public class Animal extends ImageView {
 	}
 	
 	/**
-	 * Donne la direction de dÈplacement du colibri, en attribuant les valeurs mx et my.
-	 * 		@param dir un couple donnant la direction x/y de dÈplacement du colibri. (ex : {0,-1} = vers la gauche)
+	 * Donne la direction de d√©placement du colibri, en attribuant les valeurs mx et my.
+	 * 		@param dir un couple donnant la direction x/y de d√©placement du colibri. (ex : {0,-1} = vers la gauche)
 	 */
 	public void setDirection(int[] dir) {
 		mx=dir[0];
@@ -88,10 +88,10 @@ public class Animal extends ImageView {
 	}
 	
 	public void deplacer() {
-		step=Math.min(step+acc, cw); // Vitesse plafonnÈe ‡ 1 case/s.
+		step=Math.min(step+acc, cw); // Vitesse plafonn√©e √† 1 case/s.
 		params.leftMargin += mx*step;
 	    params.topMargin += my*step;
-	    if (params.leftMargin<0) { // ArrÍt sontre les bords de la map.
+	    if (params.leftMargin<0) { // Arr√™t contre les bords de la map.
 	    	params.leftMargin=0;
 			mx=0;
 		}
