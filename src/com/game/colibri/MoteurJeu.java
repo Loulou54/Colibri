@@ -24,9 +24,10 @@ public class MoteurJeu {
 	private Jeu jeu;
 	private LinkedList <int[]> buf; // la file d'attente des touches
 	private final static int PERIODE=1000/25; // pour 25 frames par secondes
-	public static int menhir=2;
-	public static int fleur=1;
+	public static int menhir=1;
+	public static int fleur=2;
 	public static int fleurm=3;
+	public static char vide=0;
 	
 	/**
 	 * Laura et Mariam :
@@ -117,11 +118,28 @@ public class MoteurJeu {
 	 */
 	private void move() {
 		if (carte.colibri.mx==0 & carte.colibri.my==0) {
-			if (buf.size()>0) carte.colibri.setDirection(buf.poll());
-			else carte.colibri.step=0; // La vitesse est mise à 0. Dans le premier cas, la vitesse est conservée.
-		}
-		else {
-			carte.colibri.deplacer(); // Les arrêts contre les bords de la map sont gérés dans la classe Animal.
+			if (buf.size()>0)carte.colibri.setDirection(buf.poll());
+			else carte.colibri.step=0; // La vitesse est mise ï¿½ 0. Dans le premier cas, la vitesse est conservï¿½e.
+		}else {	
+				int []dir= carte.colibri.getDirection();
+				int l= carte.colibri.getRow(); // ligne du colibri 
+				int c=carte.colibri.getCol(); //  colone du colibri
+				int mx=dir[1];
+				int my=dir[0];
+				int [][] mat= niv.carte;
+				if(l+mx>0 && l+mx<12 && c+my>0 && c+my<20){
+					if(mat[l+mx][c+my]==fleur){
+						niv.carte[l+mx][c+my]=vide;
+						carte.invalidate();
+					}else if(mat[l+mx][c+my]==menhir){
+						carte.colibri.mx=0;
+						carte.colibri.my=0;
+					}else  if(mat[l+mx][c+my]==fleurm){
+						niv.carte[l+mx][c+my]=menhir;
+						carte.invalidate();
+					}
+				}		
+			carte.colibri.deplacer(); // Les arrï¿½ts contre les bords de la map sont gï¿½rï¿½s dans la classe Animal.
 		}
 		moveHandler.sleep(PERIODE);
 	}

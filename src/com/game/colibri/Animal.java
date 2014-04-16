@@ -11,7 +11,7 @@ public class Animal extends ImageView {
 	private RelativeLayout.LayoutParams params;
 	private int cw,ch; // largeur et hauteur d'une case
 	public int step; // pas des mouvements en px/frame
-	private int acc; // accélération en px/frame/frame
+	private int acc; // accï¿½lï¿½ration en px/frame/frame
 	public int mx,my; // mouvement en pixels par frame de l'animal
 	
 	/**
@@ -19,8 +19,8 @@ public class Animal extends ImageView {
 	 * 
 	 * @param context le contexte de crÃ©ation 
 	 * @param id_anim la ressource "drawable" de l'animation
-	 * @param dbx abscisse du coin supérieur gauche
-	 * @param dby ordonnée du coin supérieur gauche
+	 * @param dbx abscisse du coin supï¿½rieur gauche
+	 * @param dby ordonnï¿½e du coin supï¿½rieur gauche
 	 * @param w largeur
 	 * @param h hauteur
 	 * @param cw largeur d'une case de la carte
@@ -68,14 +68,24 @@ public class Animal extends ImageView {
 	}
 	
 	/**
-	 * Donne la direction de déplacement du colibri, en attribuant les valeurs mx et my.
-	 * 		@param dir un couple donnant la direction x/y de déplacement du colibri. (ex : {0,-1} = vers la gauche)
+	 * Donne la direction de dï¿½placement du colibri, en attribuant les valeurs mx et my.
+	 * 		@param dir un couple donnant la direction x/y de dï¿½placement du colibri. (ex : {0,-1} = vers la gauche)
 	 */
 	public void setDirection(int[] dir) {
 		mx=dir[0];
 		my=dir[1];
 	}
 	
+	/**
+	 * Renvoi la direction de dï¿½placement du colibri{ mx, my}.
+	 *
+	 */
+	public int[] getDirection() {
+		int[] dir = new int[2];
+		dir[0]=mx;
+		dir[1]=my;
+		return dir;
+	}
 	/**
 	 * DÃ©place l'animal rapport a sa position d'origne d'une certaine valeur
 	 * 		@param dx le delta dont il faut dÃ©placer l'abcisse 
@@ -88,10 +98,10 @@ public class Animal extends ImageView {
 	}
 	
 	public void deplacer() {
-		step=Math.min(step+acc, cw); // Vitesse plafonnée à 1 case/s.
+		step=Math.min(step+acc, cw); // Vitesse plafonnï¿½e ï¿½ 1 case/s.
 		params.leftMargin += mx*step;
 	    params.topMargin += my*step;
-	    if (params.leftMargin<0) { // Arrêt sontre les bords de la map.
+	    if (params.leftMargin<0) { // Arrï¿½t sontre les bords de la map.
 	    	params.leftMargin=0;
 			mx=0;
 		}
