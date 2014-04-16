@@ -11,11 +11,7 @@ public class Animal extends ImageView {
 	private RelativeLayout.LayoutParams params;
 	private int cw,ch; // largeur et hauteur d'une case
 	public int step; // pas des mouvements en px/frame
-<<<<<<< HEAD
 	private int acc; // acc�l�ration en px/frame/frame
-=======
-	private int acc; // accélération en px/frame/frame
->>>>>>> FETCH_HEAD
 	public int mx,my; // mouvement en pixels par frame de l'animal
 	
 	/**
@@ -23,13 +19,10 @@ public class Animal extends ImageView {
 	 * 
 	 * @param context le contexte de création 
 	 * @param id_anim la ressource "drawable" de l'animation
-<<<<<<< HEAD
 	 * @param dbx abscisse du coin sup�rieur gauche
 	 * @param dby ordonn�e du coin sup�rieur gauche
-=======
 	 * @param dbx abscisse du coin supérieur gauche
 	 * @param dby ordonnée du coin supérieur gauche
->>>>>>> FETCH_HEAD
 	 * @param w largeur
 	 * @param h hauteur
 	 * @param cw largeur d'une case de la carte
@@ -77,13 +70,10 @@ public class Animal extends ImageView {
 	}
 	
 	/**
-<<<<<<< HEAD
 	 * Donne la direction de d�placement du colibri, en attribuant les valeurs mx et my.
 	 * 		@param dir un couple donnant la direction x/y de d�placement du colibri. (ex : {0,-1} = vers la gauche)
-=======
 	 * Donne la direction de déplacement du colibri, en attribuant les valeurs mx et my.
 	 * 		@param dir un couple donnant la direction x/y de déplacement du colibri. (ex : {0,-1} = vers la gauche)
->>>>>>> FETCH_HEAD
 	 */
 	public void setDirection(int[] dir) {
 		mx=dir[0];
@@ -112,17 +102,11 @@ public class Animal extends ImageView {
 	}
 	
 	public void deplacer() {
-<<<<<<< HEAD
-		step=Math.min(step+acc, cw); // Vitesse plafonn�e � 1 case/s.
-		params.leftMargin += mx*step;
-	    params.topMargin += my*step;
-	    if (params.leftMargin<0) { // Arr�t sontre les bords de la map.
-=======
+
 		step=Math.min(step+acc, cw); // Vitesse plafonnée à 1 case/s.
 		params.leftMargin += mx*step;
 	    params.topMargin += my*step;
 	    if (params.leftMargin<0) { // Arrêt contre les bords de la map.
->>>>>>> FETCH_HEAD
 	    	params.leftMargin=0;
 			mx=0;
 		}

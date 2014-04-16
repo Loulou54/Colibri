@@ -117,7 +117,7 @@ public class MoteurJeu {
 	 */
 	private void move() {
 		if (carte.colibri.mx==0 & carte.colibri.my==0) {
-<<<<<<< HEAD
+
 			if (buf.size()>0)carte.colibri.setDirection(buf.poll());
 			else carte.colibri.step=0; // La vitesse est mise � 0. Dans le premier cas, la vitesse est conserv�e.
 		}else {	
@@ -138,15 +138,10 @@ public class MoteurJeu {
 						niv.carte[l+mx][c+my]=menhir;
 						carte.invalidate();
 					}
-				}		
-			carte.colibri.deplacer(); // Les arr�ts contre les bords de la map sont g�r�s dans la classe Animal.
-=======
-			if (buf.size()>0) carte.colibri.setDirection(buf.poll());
-			else carte.colibri.step=0; // La vitesse est mise à 0. Dans le premier cas, la vitesse est conservée.
-		}
-		else {
+				}
+
+			
 			carte.colibri.deplacer(); // Les arrêts contre les bords de la map sont gérés dans la classe Animal.
->>>>>>> FETCH_HEAD
 		}
 		moveHandler.sleep(PERIODE);
 	}
