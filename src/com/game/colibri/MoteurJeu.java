@@ -1,5 +1,7 @@
 package com.game.colibri;
 
+
+
 import java.util.LinkedList;
 
 import android.annotation.SuppressLint;
@@ -7,6 +9,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.MotionEvent;
+
 
 /**
  * Classe gérant les déplacements des éléments (colibri, vaches, ...) selon les régles
@@ -21,6 +24,9 @@ public class MoteurJeu {
 	private Jeu jeu;
 	private LinkedList <int[]> buf; // la file d'attente des touches
 	private final static int PERIODE=1000/25; // pour 25 frames par secondes
+	public static int menhir=2;
+	public static int fleur=1;
+	public static int fleurm=3;
 	
 	/**
 	 * Laura et Mariam :
@@ -97,7 +103,6 @@ public class MoteurJeu {
 	
 	/**
 	 * Met le jeu sur pause
-	 * @throws InterruptedException 
 	 */
 
 	public void pause() {
@@ -105,10 +110,6 @@ public class MoteurJeu {
 		moveHandler.removeMessages(0);
 	}
 
-	/*public void pause() throws InterruptedException {
-		// arrêter toutes les animations et le handler
-	}*/
-	
 	/**
 	 * Méthode appelée périodiquement par le handler moveHandler lorsque le jeu est en marche.
 	 * C'est ici que s'effectue les déplacements des animaux.
