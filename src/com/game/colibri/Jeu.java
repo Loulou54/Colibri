@@ -29,7 +29,7 @@ public class Jeu extends Activity {
 		setContentView(R.layout.activity_jeu);
 		carte = (Carte) findViewById(R.id.carte);
 		lay = (RelativeLayout) findViewById(R.id.lay);
-		play = new MoteurJeu(this,carte); // TODO : r�cup�rer le niveau � jouer (� travers un Intent ?)
+		play = new MoteurJeu(this,carte); // TODO : récupérer le niveau à jouer (à travers un Intent ?)
 		Log.i("onCreate","FINI");
 	}
 	
@@ -38,13 +38,14 @@ public class Jeu extends Activity {
 	 */
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
-		if (brandNew) { // �v�nement appel� lorsque le RelativeLayout "lay" est pr�t ! C'est ici que l'on peut charger le niveau et ajouter les View "Animal".
+		if (brandNew) { // événement appelé lorsque le RelativeLayout "lay" est prêt ! C'est ici que l'on peut charger le niveau et ajouter les View "Animal".
 			carte.loadNiveau(Niveaux.getNiveau(n_niv),lay);
 			play.init();
 			play.start();
 			brandNew=false;
 		}
 	}
+	
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onTouchEvent(android.view.MotionEvent)
 	 */
@@ -54,7 +55,7 @@ public class Jeu extends Activity {
 		return true;
 	}
 	
-	// �v�nement d�clench� par "play" lorsque le niveau a �t� gagn�.
+	// Événement déclenché par "play" lorsque le niveau a été gagné.
 	/**
 	 * Affiche que le niveau à été gagné et charge le niveau suivant 
 	 * 
@@ -63,6 +64,6 @@ public class Jeu extends Activity {
 		n_niv++;
 		carte.loadNiveau(Niveaux.getNiveau(n_niv),lay);
 		play.init();
-		Log.i("C'est Gagn� !","BRAVO !");
+		Log.i("C'est Gagné !","BRAVO !");
 	}
 }
