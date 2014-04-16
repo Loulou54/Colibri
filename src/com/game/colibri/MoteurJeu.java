@@ -116,26 +116,10 @@ public class MoteurJeu {
 	private void move() {
 		if (carte.colibri.mx==0 & carte.colibri.my==0) {
 			if (buf.size()>0) carte.colibri.setDirection(buf.poll());
+			else carte.colibri.step=0; // La vitesse est mise à 0. Dans le premier cas, la vitesse est conservée.
 		}
 		else {
-			carte.colibri.deplacer();
-			int [] co=carte.colibri.getPos();
-			if (co[0]<=0) {
-				carte.colibri.setPos(0, co[1]);
-				carte.colibri.mx=0;
-			}
-			else if (co[0]>=carte.ww-carte.cw) {
-				carte.colibri.setPos(carte.ww-carte.cw, co[1]);
-				carte.colibri.mx=0;
-			}
-			else if (co[1]<=0) {
-				carte.colibri.setPos(co[0], 0);
-				carte.colibri.my=0;
-			}
-			else if (co[1]>=carte.wh-carte.ch) {
-				carte.colibri.setPos(co[0], carte.wh-carte.ch);
-				carte.colibri.my=0;
-			}
+			carte.colibri.deplacer(); // Les arrêts contre les bords de la map sont gérés dans la classe Animal.
 		}
 		moveHandler.sleep(PERIODE);
 	}

@@ -36,7 +36,7 @@ public class Carte extends View {
     }
 
     /**
-     * Construiteur une  carte
+     * Constructeur une  carte
      * 		@param context
      * 		@param attrs
      * 		@param defStyle

@@ -10,7 +10,8 @@ public class Animal extends ImageView {
 	
 	private RelativeLayout.LayoutParams params;
 	private int cw,ch; // largeur et hauteur d'une case
-	private int step; // pas des mouvements en px/frame
+	public int step; // pas des mouvements en px/frame
+	private int acc; // accélération en px/frame/frame
 	public int mx,my; // mouvement en pixels par frame de l'animal
 	
 	/**
@@ -34,7 +35,8 @@ public class Animal extends ImageView {
 	    this.ch=ch;
 	    mx=0;
 	    my=0;
-	    step=cw/2;
+	    acc=cw/10;
+	    step=0;
 	    this.setLayoutParams(params);
 	    this.setBackgroundResource(id_anim);
 	}
@@ -70,8 +72,8 @@ public class Animal extends ImageView {
 	 * 		@param dir un couple donnant la direction x/y de déplacement du colibri. (ex : {0,-1} = vers la gauche)
 	 */
 	public void setDirection(int[] dir) {
-		mx=dir[0]*step;
-		my=dir[1]*step;
+		mx=dir[0];
+		my=dir[1];
 	}
 	
 	/**
@@ -86,8 +88,25 @@ public class Animal extends ImageView {
 	}
 	
 	public void deplacer() {
-		params.leftMargin += mx;
-	    params.topMargin += my;
+		step=Math.min(step+acc, cw); // Vitesse plafonnée à 1 case/s.
+		params.leftMargin += mx*step;
+	    params.topMargin += my*step;
+	    if (params.leftMargin<0) { // Arrêt sontre les bords de la map.
+	    	params.leftMargin=0;
+			mx=0;
+		}
+		else if (params.leftMargin>19*cw) {
+			params.leftMargin=19*cw;
+			mx=0;
+		}
+		else if (params.topMargin<0) {
+			params.topMargin=0;
+			my=0;
+		}
+		else if (params.topMargin>11*ch) {
+			params.topMargin=11*ch;
+			my=0;
+		}
 		this.setLayoutParams(params);
 	}
 	
