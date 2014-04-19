@@ -11,7 +11,7 @@ public class Animal extends ImageView {
 	private RelativeLayout.LayoutParams params;
 	private int cw,ch; // largeur et hauteur d'une case
 	public int step; // pas des mouvements en px/frame
-	private int acc; // acc�l�ration en px/frame/frame
+	private int acc; // accélération en px/frame/frame
 	public int mx,my; // mouvement en pixels par frame de l'animal
 	
 	/**
@@ -19,8 +19,8 @@ public class Animal extends ImageView {
 	 * 
 	 * @param context le contexte de création 
 	 * @param id_anim la ressource "drawable" de l'animation
-	 * @param dbx abscisse du coin sup�rieur gauche
-	 * @param dby ordonn�e du coin sup�rieur gauche
+	 * @param dbx abscisse du coin supérieur gauche
+	 * @param dby ordonnée du coin supérieur gauche
 	 * @param dbx abscisse du coin supérieur gauche
 	 * @param dby ordonnée du coin supérieur gauche
 	 * @param w largeur
@@ -70,8 +70,8 @@ public class Animal extends ImageView {
 	}
 	
 	/**
-	 * Donne la direction de d�placement du colibri, en attribuant les valeurs mx et my.
-	 * 		@param dir un couple donnant la direction x/y de d�placement du colibri. (ex : {0,-1} = vers la gauche)
+	 * Donne la direction de déplacement du colibri, en attribuant les valeurs mx et my.
+	 * 		@param dir un couple donnant la direction x/y de déplacement du colibri. (ex : {0,-1} = vers la gauche)
 	 * Donne la direction de déplacement du colibri, en attribuant les valeurs mx et my.
 	 * 		@param dir un couple donnant la direction x/y de déplacement du colibri. (ex : {0,-1} = vers la gauche)
 	 */
@@ -81,7 +81,7 @@ public class Animal extends ImageView {
 	}
 	
 	/**
-	 * Renvoi la direction de d�placement du colibri{ mx, my}.
+	 * Renvoi la direction de déplacement du colibri{ mx, my}.
 	 *
 	 */
 	public int[] getDirection() {
@@ -101,12 +101,14 @@ public class Animal extends ImageView {
 		this.setLayoutParams(params);
 	}
 	
+	/**
+	 * Déplace l'animal selon ses paramètres de mouvement mx, my, step et acc.
+	 */
 	public void deplacer() {
-
-		step=Math.min(step+acc, cw); // Vitesse plafonnée à 1 case/s.
+		step=Math.min(step+acc, 3*cw/4); // Vitesse plafonnée à 1 case/frame.
 		params.leftMargin += mx*step;
 	    params.topMargin += my*step;
-	    if (params.leftMargin<0) { // Arrêt contre les bords de la map.
+	    /*if (params.leftMargin<0) { // Arrêt contre les bords de la map.
 	    	params.leftMargin=0;
 			mx=0;
 		}
@@ -121,7 +123,7 @@ public class Animal extends ImageView {
 		else if (params.topMargin>11*ch) {
 			params.topMargin=11*ch;
 			my=0;
-		}
+		}*/
 		this.setLayoutParams(params);
 	}
 	
@@ -135,17 +137,17 @@ public class Animal extends ImageView {
 	}
 	
 	/**
-	 * Retourne la ligne sur laquelle se trouve le colibri
+	 * Retourne la ligne sur laquelle se trouve le centre du colibri
 	 */
 	public int getRow() {
-		return params.topMargin/ch;
+		return (params.topMargin+params.height/2)/ch;
 	}
 	
 	/**
-	 * Retourne la colonne sur laquelle se trouve le colibri
+	 * Retourne la colonne sur laquelle se trouve le centre du colibri
 	 */
 	public int getCol() {
-		return params.leftMargin/cw;
+		return (params.leftMargin+params.width/2)/cw;
 	}
 	
 	/**

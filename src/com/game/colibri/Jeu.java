@@ -18,7 +18,7 @@ public class Jeu extends Activity {
 	public RelativeLayout lay;
 	public Animal colibri;
 	private boolean brandNew=true;
-	public int n_niv=0;
+	public int n_niv=2;
 	
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onCreate(android.os.Bundle)

@@ -117,30 +117,27 @@ public class MoteurJeu {
 	 */
 	private void move() {
 		if (carte.colibri.mx==0 & carte.colibri.my==0) {
-
 			if (buf.size()>0)carte.colibri.setDirection(buf.poll());
-			else carte.colibri.step=0; // La vitesse est mise � 0. Dans le premier cas, la vitesse est conserv�e.
+			else carte.colibri.step=0; // La vitesse est mise à 0. Dans le premier cas, la vitesse est conservée.
 		}else {	
 				int []dir= carte.colibri.getDirection();
 				int l= carte.colibri.getRow(); // ligne du colibri 
 				int c=carte.colibri.getCol(); //  colone du colibri
-				int mx=dir[1];
-				int my=dir[0];
+				int ml=dir[1];
+				int mc=dir[0];
 				int [][] mat= niv.carte;
-				if(l+mx>0 && l+mx<12 && c+my>0 && c+my<20){
-					if(mat[l+mx][c+my]==fleur){
-						niv.carte[l+mx][c+my]=vide;
-						carte.invalidate();
-					}else if(mat[l+mx][c+my]==menhir){
-						carte.colibri.mx=0;
-						carte.colibri.my=0;
-					}else  if(mat[l+mx][c+my]==fleurm){
-						niv.carte[l+mx][c+my]=menhir;
-						carte.invalidate();
-					}
+				if(mat[l][c]==fleur){
+					niv.carte[l][c]=vide;
+					carte.invalidate();
+				}else if(mat[l][c]==fleurm){
+					niv.carte[l][c]=menhir;
+					carte.invalidate();
 				}
-
-			
+				if(l+ml<0 || l+ml>=12 || c+mc<0 || c+mc>=20 || mat[l+ml][c+mc]==menhir){
+					carte.colibri.mx=0;
+					carte.colibri.my=0;
+					carte.colibri.setPos(c*carte.cw, l*carte.ch);
+				}
 			carte.colibri.deplacer(); // Les arrêts contre les bords de la map sont gérés dans la classe Animal.
 		}
 		moveHandler.sleep(PERIODE);
