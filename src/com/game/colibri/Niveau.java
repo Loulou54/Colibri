@@ -2,8 +2,11 @@ package com.game.colibri;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 
 /**
  * Classe contenant toutes les données d'UN niveau : carte, position initiale du colibri, solution
@@ -68,6 +71,36 @@ public class Niveau {
 			   System.out.println(e.toString());
 			  } 
 		return result;
+	}
+	
+	/**
+	 * Écrit la matrice de niveau dans un fichier 
+	 * 		@param filename le nom du fichier dans lequel on va ecrire la matrice 
+	 * 		@param matrice  la matrice à écrir 
+	 * 		@throws IOException
+	 */
+	public static void ecrirNiveau(String filename , int[][] matrice ) throws IOException{
+		try {
+			PrintWriter ecri = new PrintWriter(new FileWriter(filename));
+			 for(int i=0;i<12;i++){
+				   for(int j=0;j<20;j++){
+					    ecri.print(matrice[i][j]);
+					    if(j<19){
+					    ecri.print(",");
+					    }
+				   }
+				    ecri.print("\n");
+					ecri.flush();
+			   }
+			 ecri.close();
+			 
+			 System.out.println("Fichier créé");
+		} catch (IOException ioe) {
+			System.err
+					.println("Erreur levée de type IOException au niveau de la méthode "
+							+ "ecrirNiveau(...) : ");
+			ioe.printStackTrace();
+		}
 	}
 	
 }
