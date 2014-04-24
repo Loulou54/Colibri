@@ -96,18 +96,23 @@ public class MoteurJeu {
 	 *  Commence le jeu 
 	 */
 	public void start() {
-		// TODO : démarrer le handler de rafraîchissement
-		moveHandler.sleep(PERIODE);
 		carte.colibri.start();
-		// TODO : démarrer l'animation des vaches
+		int len=carte.vaches.size();
+		for(int i=0; i<len; i++) {
+			carte.vaches.get(i).start();
+		}
+		moveHandler.sleep(PERIODE);
 	}
 	
 	/**
 	 * Met le jeu sur pause
 	 */
-
 	public void pause() {
 		carte.colibri.stop();
+		int len=carte.vaches.size();
+		for(int i=0; i<len; i++) {
+			carte.vaches.get(i).stop();
+		}
 		moveHandler.removeMessages(0);
 	}
 
@@ -138,9 +143,12 @@ public class MoteurJeu {
 					carte.colibri.my=0;
 					carte.colibri.setPos(c*carte.cw, l*carte.ch);
 				}
-			carte.colibri.deplacer(); // Les arrêts contre les bords de la map sont gérés dans la classe Animal.
+			carte.colibri.deplacer();
 		}
-		carte.vaches.getFirst().deplacer();
+		int len=carte.vaches.size();
+		for(int i=0; i<len; i++) {
+			carte.vaches.get(i).deplacer();
+		}
 		moveHandler.sleep(PERIODE);
 	}
 	

@@ -67,14 +67,20 @@ public class Carte extends View {
     public void loadNiveau(Niveau niveau, RelativeLayout lay) {
     	if (niv!=null) { // Supprimer les "Animaux" du niveau précédent.
     		lay.removeView(colibri);
+    		int len=vaches.size();
+    		for(int i=0; i<len; i++) {
+    			lay.removeView(vaches.get(i));
+    		}
     		vaches.clear();
     	}
     	niv=niveau;
     	colibri = new Animal(this.getContext(), R.drawable.colibri_d, niv.db_c*cw, niv.db_l*ch, 5*cw/4, 5*ch/4, cw, ch, null);
-    	vaches.addLast(new Animal(this.getContext(), R.drawable.colibri_d, cw, ch, 5*cw/4, 5*ch/4, cw, ch, new int[][] {{1,1},{1,4},{3,4},{3,1}}));
     	// TODO : créer les vaches
-    	lay.addView(colibri);
+    	vaches.addLast(new Animal(this.getContext(), R.drawable.vache, cw, ch, cw, ch, cw, ch, new int[][] {{1,1},{1,4},{3,4},{3,1}}));
+    	vaches.addLast(new Animal(this.getContext(), R.drawable.vache, 16*cw, 11*ch, cw, ch, cw, ch, new int[][] {{11,16},{11,19},{11,13},{11,16},{5,16},{5,19},{11,19}}));
     	lay.addView(vaches.getFirst());
+    	lay.addView(vaches.getLast());
+    	lay.addView(colibri);
     	this.invalidate();
     }
     

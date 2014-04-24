@@ -96,6 +96,7 @@ public class Animal extends ImageView {
 		dir[1]=my;
 		return dir;
 	}
+	
 	/**
 	 * Déplace l'animal rapport a sa position d'origne d'une certaine valeur
 	 * 		@param dx le delta dont il faut déplacer l'abcisse 
@@ -114,7 +115,7 @@ public class Animal extends ImageView {
 		step=Math.min(step+acc, 3*cw/4); // Vitesse plafonnée à 1 case/frame.
 		params.leftMargin += mx*step;
 	    params.topMargin += my*step;
-	    if (itineraire!=null) {
+	    if (itineraire!=null) { // Concerne les animaux avec itineraire (vaches)
 	    	// on teste si l'on est arrivé au checkpoint :
 	    	int c=itineraire[chkpt][1];
 	    	int l=itineraire[chkpt][0];
