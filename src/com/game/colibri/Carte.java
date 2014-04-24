@@ -1,5 +1,7 @@
 package com.game.colibri;
 
+import java.util.LinkedList;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -23,7 +25,7 @@ public class Carte extends View {
 	public Niveau niv=null; // Le niveau à afficher
 	private Bitmap menhir,fleur,fleurm,menhir0,fleur0,fleurm0; // Les images : -0 sont les originales avant redimensionnement
 	public Animal colibri;
-	//public Animal[] vaches; TODO : implémentation des vaches.
+	public LinkedList<Animal> vaches = new LinkedList<Animal>(); // TODO : implémentation des vaches.
 	
     /**
      * Constructeur une carte 
@@ -65,11 +67,14 @@ public class Carte extends View {
     public void loadNiveau(Niveau niveau, RelativeLayout lay) {
     	if (niv!=null) { // Supprimer les "Animaux" du niveau précédent.
     		lay.removeView(colibri);
+    		vaches.clear();
     	}
     	niv=niveau;
-    	colibri = new Animal(this.getContext(), R.drawable.colibri_d, niv.db_c*cw, niv.db_l*ch, 5*cw/4, 5*ch/4, cw, ch);
+    	colibri = new Animal(this.getContext(), R.drawable.colibri_d, niv.db_c*cw, niv.db_l*ch, 5*cw/4, 5*ch/4, cw, ch, null);
+    	vaches.addLast(new Animal(this.getContext(), R.drawable.colibri_d, cw, ch, 5*cw/4, 5*ch/4, cw, ch, new int[][] {{1,1},{1,4},{3,4},{3,1}}));
     	// TODO : créer les vaches
     	lay.addView(colibri);
+    	lay.addView(vaches.getFirst());
     	this.invalidate();
     }
     

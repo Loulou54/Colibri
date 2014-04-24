@@ -140,6 +140,7 @@ public class MoteurJeu {
 				}
 			carte.colibri.deplacer(); // Les arrêts contre les bords de la map sont gérés dans la classe Animal.
 		}
+		carte.vaches.getFirst().deplacer();
 		moveHandler.sleep(PERIODE);
 	}
 	

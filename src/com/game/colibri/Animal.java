@@ -12,7 +12,9 @@ public class Animal extends ImageView {
 	private int cw,ch; // largeur et hauteur d'une case
 	public int step; // pas des mouvements en px/frame
 	private int acc; // accélération en px/frame/frame
-	public int mx,my; // mouvement en pixels par frame de l'animal
+	public int mx,my; // sens du mouvement de l'animal (1,-1,0)
+	private int[][] itineraire=null; // itinéraire des vaches/chats. Coordonnées de chaque point de passage. (au moins 2) Ex : {{1,1},{1,4},{3,4}}
+	private int chkpt=0; // le prochain checkpoint de l'animal dans itineraire.
 	
 	/**
 	 * Constructeur java d'un animal 
@@ -21,24 +23,28 @@ public class Animal extends ImageView {
 	 * @param id_anim la ressource "drawable" de l'animation
 	 * @param dbx abscisse du coin supérieur gauche
 	 * @param dby ordonnée du coin supérieur gauche
-	 * @param dbx abscisse du coin supérieur gauche
-	 * @param dby ordonnée du coin supérieur gauche
 	 * @param w largeur
 	 * @param h hauteur
 	 * @param cw largeur d'une case de la carte
 	 * @param ch hauteur d'une case de la carte
 	 */
-	public Animal(Context context, int id_anim, int dbx, int dby, int w, int h, int cw, int ch) {
+	public Animal(Context context, int id_anim, int dbx, int dby, int w, int h, int cw, int ch, int[][] itin) {
 		super(context);
 		params=new RelativeLayout.LayoutParams(w,h);
 		params.leftMargin = dbx;
 	    params.topMargin = dby;
 	    this.cw=cw;
 	    this.ch=ch;
+	    itineraire=itin;
+	    if (itin==null) { // Colibri
+	    	acc=cw/10;
+		    step=0;
+	    } else { // Vache
+	    	acc=0;
+	    	step=cw/20;
+	    }
 	    mx=0;
 	    my=0;
-	    acc=cw/10;
-	    step=0;
 	    this.setLayoutParams(params);
 	    this.setBackgroundResource(id_anim);
 	}
@@ -108,22 +114,18 @@ public class Animal extends ImageView {
 		step=Math.min(step+acc, 3*cw/4); // Vitesse plafonnée à 1 case/frame.
 		params.leftMargin += mx*step;
 	    params.topMargin += my*step;
-	    /*if (params.leftMargin<0) { // Arrêt contre les bords de la map.
-	    	params.leftMargin=0;
-			mx=0;
+	    if (itineraire!=null) {
+	    	// on teste si l'on est arrivé au checkpoint :
+	    	int c=itineraire[chkpt][1];
+	    	int l=itineraire[chkpt][0];
+			if (Math.abs(c*cw-params.leftMargin)<=step && Math.abs(l*ch-params.topMargin)<=step) {
+				params.leftMargin=c*cw;
+				params.topMargin=l*ch;
+				chkpt=(chkpt+1)%itineraire.length;
+				mx=(int) Math.signum(itineraire[chkpt][1]-c);
+				my=(int) Math.signum(itineraire[chkpt][0]-l);
+			}
 		}
-		else if (params.leftMargin>19*cw) {
-			params.leftMargin=19*cw;
-			mx=0;
-		}
-		else if (params.topMargin<0) {
-			params.topMargin=0;
-			my=0;
-		}
-		else if (params.topMargin>11*ch) {
-			params.topMargin=11*ch;
-			my=0;
-		}*/
 		this.setLayoutParams(params);
 	}
 	

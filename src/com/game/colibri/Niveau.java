@@ -22,16 +22,17 @@ public class Niveau {
 	
 	/**
 	 * Consruicteur de niveau 
-	 * 		@param map
-	 * 		@param l
-	 * 		@param c
-	 *		 @param sol
+	 * 		@param map la carte des éléments fixes : matrice 12*20
+	 * 		@param db_l ligne départ colibri
+	 * 		@param db_c colonne départ colibri
+	 * 		@param itineraire itinéraire pour vache ou chat (null pour colibri)
+	 *		@param sol la solution (optionnel)
 	 */
-	public Niveau(int[][] map,int l,int c,int[][] sol) {
+	public Niveau(int[][] map, int db_l, int db_c, int[][] sol) {
 		carte=new int[12][20];
 		System.arraycopy(map, 0, carte, 0, 12); // Copie de l'originale car les modifications durant le cours du jeu (fleurs ramassées, etc) ne doivent pas affecter l'originale
-		db_l=l;
-		db_c=c;
+		this.db_l=db_l;
+		this.db_c=db_c;
 		solution=sol;
 	}
 	/**
