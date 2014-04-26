@@ -124,9 +124,9 @@ public class MoteurJeu {
 		if (carte.colibri.mx==0 & carte.colibri.my==0) {
 			if (buf.size()>0)carte.colibri.setDirection(buf.poll());
 			else carte.colibri.step=0; // La vitesse est mise à 0. Dans le premier cas, la vitesse est conservée.
-		}else {	
+		}else {
 				int []dir= carte.colibri.getDirection();
-				int l= carte.colibri.getRow(); // ligne du colibri 
+				int l= carte.colibri.getRow(); // ligne du colibri
 				int c=carte.colibri.getCol(); //  colone du colibri
 				int ml=dir[1];
 				int mc=dir[0];
@@ -148,8 +148,42 @@ public class MoteurJeu {
 		int len=carte.vaches.size();
 		for(int i=0; i<len; i++) {
 			carte.vaches.get(i).deplacer();
+			collisionVache(carte.vaches.get(i));
 		}
 		moveHandler.sleep(PERIODE);
+	}
+	
+	/**
+	 * Détecte s'il y a colision entre le colibri et une vache, et le cas échéant effectue les opérations nécessaires.
+	 * @param va la vache dont il faut tester la position par rapport au colibri
+	 */
+	private void collisionVache(Animal va) {
+		int[] c_co = carte.colibri.getPos();
+		int cx=c_co[0],cy=c_co[1];
+		int[] c_va = va.getPos();
+		int vx=c_va[0],vy=c_va[1];
+		if(Math.abs(vx-cx)<carte.cw && Math.abs(vy-cy)<carte.ch) { // teste si colision
+			// Choisit de quel côté de la vache il faut replacer le colibri
+			if(carte.cw-Math.abs(vx-cx) < carte.ch-Math.abs(vy-cy)) { // sur l'horizontale
+				if(cx<vx) {
+					carte.colibri.setPos(vx-carte.cw, cy);
+					carte.colibri.mx=Math.min(carte.colibri.mx, 0);
+				}
+				else {
+					carte.colibri.setPos(vx+carte.cw, cy);
+					carte.colibri.mx=Math.max(carte.colibri.mx, 0);
+				}
+			} else { // sur la verticale
+				if(cy<vy) {
+					carte.colibri.setPos(cx, vy-carte.ch);
+					carte.colibri.my=Math.min(carte.colibri.my, 0);
+				}
+				else {
+					carte.colibri.setPos(cx, vy+carte.ch);
+					carte.colibri.my=Math.max(carte.colibri.my, 0);
+				}
+			}
+		}
 	}
 	
 	/**
@@ -184,5 +218,4 @@ public class MoteurJeu {
 		}
 	}
 
-	
 }

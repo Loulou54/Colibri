@@ -94,7 +94,7 @@ public class Carte extends View {
 	    	for (int l=0; l<12; l++) {
 	    		for (int c=0; c<20; c++) {
 	    			if (niv.carte[l][c]==1)
-	    				can.drawBitmap(menhir, c*cw-cw/8, l*ch-cw/8, null);
+	    				can.drawBitmap(menhir, c*cw-cw/8, l*ch, null);
 	    			else if (niv.carte[l][c]==2)
 	    				can.drawBitmap(fleur, c*cw, l*ch, null);
 	    			else if (niv.carte[l][c]==3)
