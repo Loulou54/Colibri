@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import android.annotation.SuppressLint;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.MotionEvent;
 
 
@@ -22,12 +21,16 @@ public class MoteurJeu {
 	private Carte carte;
 	private Niveau niv;
 	private Jeu jeu;
+	public boolean isRunning=false;
 	private LinkedList <int[]> buf; // la file d'attente des touches
-	private final static int PERIODE=1000/25; // pour 25 frames par secondes
+	private static final int PERIODE=1000/25; // pour 25 frames par secondes
 	public static int menhir=1;
 	public static int fleur=2;
 	public static int fleurm=3;
 	public static char vide=0;
+	public static final int UP=1,RIGHT=2,LEFT=3,DOWN=4;
+	
+	private static final int LIG=12, COL=20; // Dimensions de la grille
 	
 	/**
 	 * Laura et Mariam :
@@ -101,6 +104,7 @@ public class MoteurJeu {
 		for(int i=0; i<len; i++) {
 			carte.vaches.get(i).start();
 		}
+		isRunning=true;
 		moveHandler.sleep(PERIODE);
 	}
 	
@@ -108,12 +112,13 @@ public class MoteurJeu {
 	 * Met le jeu sur pause
 	 */
 	public void pause() {
+		isRunning=false;
+		moveHandler.removeMessages(0);
 		carte.colibri.stop();
 		int len=carte.vaches.size();
 		for(int i=0; i<len; i++) {
 			carte.vaches.get(i).stop();
 		}
-		moveHandler.removeMessages(0);
 	}
 
 	/**
@@ -126,19 +131,12 @@ public class MoteurJeu {
 			else carte.colibri.step=0; // La vitesse est mise à 0. Dans le premier cas, la vitesse est conservée.
 		}else {
 				int []dir= carte.colibri.getDirection();
-				int l= carte.colibri.getRow(); // ligne du colibri
+				int ml=dir[1] , mc=dir[0];
+				int l=carte.colibri.getRow(); // ligne du colibri
 				int c=carte.colibri.getCol(); //  colone du colibri
-				int ml=dir[1];
-				int mc=dir[0];
-				int [][] mat= niv.carte;
-				if(mat[l][c]==fleur){
-					niv.carte[l][c]=vide;
-					carte.invalidate();
-				}else if(mat[l][c]==fleurm){
-					niv.carte[l][c]=menhir;
-					carte.invalidate();
-				}
-				if(l+ml<0 || l+ml>=12 || c+mc<0 || c+mc>=20 || mat[l+ml][c+mc]==menhir){
+				ramasser(l,c); // On ramasse l'item potentiel
+				// On détecte si l'on arrive contre un obstacle
+				if(l+ml<0 || l+ml>=LIG || c+mc<0 || c+mc>=COL || niv.carte[l+ml][c+mc]==menhir){
 					carte.colibri.mx=0;
 					carte.colibri.my=0;
 					carte.colibri.setPos(c*carte.cw, l*carte.ch);
@@ -150,7 +148,7 @@ public class MoteurJeu {
 			carte.vaches.get(i).deplacer();
 			collisionVache(carte.vaches.get(i));
 		}
-		moveHandler.sleep(PERIODE);
+		if(isRunning) moveHandler.sleep(PERIODE);
 	}
 	
 	/**
@@ -164,26 +162,54 @@ public class MoteurJeu {
 		int vx=c_va[0],vy=c_va[1];
 		if(Math.abs(vx-cx)<carte.cw && Math.abs(vy-cy)<carte.ch) { // teste si colision
 			// Choisit de quel côté de la vache il faut replacer le colibri
+			int l=carte.colibri.getRow(), c=carte.colibri.getCol();
+			ramasser(l,c); // On ramasse l'item potentiel
 			if(carte.cw-Math.abs(vx-cx) < carte.ch-Math.abs(vy-cy)) { // sur l'horizontale
 				if(cx<vx) {
-					carte.colibri.setPos(vx-carte.cw, cy);
-					carte.colibri.mx=Math.min(carte.colibri.mx, 0);
+					if(c-1<0 || niv.carte[l][c-1]==menhir) cx=Math.max(vx-carte.cw,c*carte.cw); // Détecte si le colibri est bloqué par un menhir ou un bord.
+					else cx=vx-carte.cw;
+					carte.colibri.mx=Math.min(carte.colibri.mx, 0); // arrête le mouvement du colibri s'il est vers la vache
 				}
 				else {
-					carte.colibri.setPos(vx+carte.cw, cy);
+					if(c+1>=COL || niv.carte[l][c+1]==menhir) cx=Math.min(vx+carte.cw,c*carte.cw);
+					else cx=vx+carte.cw;
 					carte.colibri.mx=Math.max(carte.colibri.mx, 0);
 				}
+				carte.colibri.setPos(cx , cy);
+				if(Math.abs(vx-cx)<carte.cw/2) jeu.mort();
 			} else { // sur la verticale
 				if(cy<vy) {
-					carte.colibri.setPos(cx, vy-carte.ch);
+					if(l-1<0 || niv.carte[l-1][c]==menhir) cy=Math.max(vy-carte.ch,l*carte.ch);
+					else cy=vy-carte.ch;
 					carte.colibri.my=Math.min(carte.colibri.my, 0);
 				}
 				else {
-					carte.colibri.setPos(cx, vy+carte.ch);
+					if(l+1>=LIG || niv.carte[l+1][c]==menhir) cy=Math.min(vy+carte.ch,l*carte.ch);
+					else cy=vy+carte.ch;
 					carte.colibri.my=Math.max(carte.colibri.my, 0);
 				}
+				carte.colibri.setPos(cx , cy);
+				if(Math.abs(vy-cy)<carte.ch/2) jeu.mort();
 			}
 		}
+	}
+	
+	/**
+	 * Vérifie si un item peut être ramassé sur la case (l,c) de la carte, et le ramasse le cas échéant. (fleur, dynamite)
+	 * @param l ligne
+	 * @param c colonne
+	 */
+	private void ramasser(int l, int c) {
+		if(niv.carte[l][c]==fleur) {
+			niv.carte[l][c]=vide;
+			carte.n_fleur--;
+			carte.invalidate();
+		} else if(niv.carte[l][c]==fleurm) {
+			niv.carte[l][c]=menhir;
+			carte.n_fleur--;
+			carte.invalidate();
+		}
+		if(carte.n_fleur==0) jeu.gagne();
 	}
 	
 	/**
@@ -196,25 +222,30 @@ public class MoteurJeu {
 		int y=(int) ev.getY();
 		if (ev.getActionMasked()==MotionEvent.ACTION_DOWN) {
 			if (y*carte.ww<x*carte.wh) {
-				if (y*carte.ww<(carte.ww-x)*carte.wh) { // appui sur HAUT
-					Log.i("Appui :","HAUT");
-					buf.add(new int[]{0,-1});
-				}
-				else { // Appui sur DROITE
-					Log.i("Appui :","DROITE");
-					buf.add(new int[]{1,0});
-				}
+				if (y*carte.ww<(carte.ww-x)*carte.wh) direction(UP);
+				else direction(RIGHT);
 			}
 			else {
-				if (y*carte.ww<(carte.ww-x)*carte.wh) { // appui sur GAUCHE
-					Log.i("Appui :","GAUCHE");
-					buf.add(new int[]{-1,0});
-				}
-				else { // appui sur BAS
-					Log.i("Appui :","BAS");
-					buf.add(new int[]{0,1});
-				}
+				if (y*carte.ww<(carte.ww-x)*carte.wh) direction(LEFT);
+				else direction(DOWN);
 			}
+		}
+	}
+	
+	public void direction(int dir) {
+		switch (dir) {
+		case UP:
+			buf.add(new int[]{0,-1});
+			break;
+		case RIGHT:
+			buf.add(new int[]{1,0});
+			break;
+		case LEFT:
+			buf.add(new int[]{-1,0});
+			break;
+		case DOWN:
+			buf.add(new int[]{0,1});
+			break;
 		}
 	}
 

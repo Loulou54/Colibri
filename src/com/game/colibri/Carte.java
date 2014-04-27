@@ -22,7 +22,9 @@ public class Carte extends View {
 	 */
 	
 	public int ww,wh,cw,ch; // windowWidth/Height, caseWidth/Height en pixels
+	private static final int LIG=12, COL=20;
 	public Niveau niv=null; // Le niveau à afficher
+	public int n_fleur; // Le nombre de fleurs sur la carte
 	private Bitmap menhir,fleur,fleurm,menhir0,fleur0,fleurm0; // Les images : -0 sont les originales avant redimensionnement
 	public Animal colibri;
 	public LinkedList<Animal> vaches = new LinkedList<Animal>(); // TODO : implémentation des vaches.
@@ -74,13 +76,19 @@ public class Carte extends View {
     		vaches.clear();
     	}
     	niv=niveau;
+    	n_fleur=0;
+    	for(int l=0; l<LIG; l++) {
+    		for(int c=0; c<COL; c++) {
+    			if(niv.carte[l][c]==2 || niv.carte[l][c]==3) n_fleur++;
+    		}
+    	}
     	colibri = new Animal(this.getContext(), R.drawable.colibri_d, niv.db_c*cw, niv.db_l*ch, 5*cw/4, 5*ch/4, cw, ch, null);
+    	lay.addView(colibri);
     	// TODO : créer les vaches
     	vaches.addLast(new Animal(this.getContext(), R.drawable.vache, cw, ch, cw, ch, cw, ch, new int[][] {{1,1},{1,4},{3,4},{3,1}}));
     	vaches.addLast(new Animal(this.getContext(), R.drawable.vache, 16*cw, 11*ch, cw, ch, cw, ch, new int[][] {{11,16},{11,19},{11,13},{11,16},{5,16},{5,19},{11,19}}));
     	lay.addView(vaches.getFirst());
     	lay.addView(vaches.getLast());
-    	lay.addView(colibri);
     	this.invalidate();
     }
     
@@ -91,8 +99,8 @@ public class Carte extends View {
     @Override
     protected void onDraw(Canvas can) {
     	if (niv!=null) {
-	    	for (int l=0; l<12; l++) {
-	    		for (int c=0; c<20; c++) {
+	    	for (int l=0; l<LIG; l++) {
+	    		for (int c=0; c<COL; c++) {
 	    			if (niv.carte[l][c]==1)
 	    				can.drawBitmap(menhir, c*cw-cw/8, l*ch, null);
 	    			else if (niv.carte[l][c]==2)
@@ -116,8 +124,8 @@ public class Carte extends View {
 		ww=super.getWidth();
 		wh=super.getHeight();
 		Log.i("Dimensions écran :",ww+"*"+wh);
-		cw=ww/20;
-		ch=wh/12;
+		cw=ww/COL;
+		ch=wh/LIG;
 		menhir = Bitmap.createScaledBitmap(menhir0, 5*cw/4, 5*ch/4, true);
 		fleur = Bitmap.createScaledBitmap(fleur0, cw, ch, true);
 		fleurm = Bitmap.createScaledBitmap(fleurm0, cw, ch, true);
