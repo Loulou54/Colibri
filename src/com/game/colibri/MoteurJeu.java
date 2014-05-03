@@ -103,9 +103,11 @@ public class MoteurJeu {
 	 */
 	public void start() {
 		carte.colibri.start();
-		int len=carte.vaches.size();
-		for(int i=0; i<len; i++) {
-			carte.vaches.get(i).start();
+		for(Vache v : carte.vaches) {
+			v.start();
+		}
+		for(Chat c : carte.chats) {
+			c.start();
 		}
 		isRunning=true;
 		moveHandler.sleep(PERIODE);
@@ -118,9 +120,11 @@ public class MoteurJeu {
 		isRunning=false;
 		moveHandler.removeMessages(0);
 		carte.colibri.stop();
-		int len=carte.vaches.size();
-		for(int i=0; i<len; i++) {
-			carte.vaches.get(i).stop();
+		for(Vache v : carte.vaches) {
+			v.stop();
+		}
+		for(Chat c : carte.chats) {
+			c.stop();
 		}
 	}
 
@@ -146,10 +150,13 @@ public class MoteurJeu {
 				}
 			carte.colibri.deplacer();
 		}
-		int len=carte.vaches.size();
-		for(int i=0; i<len; i++) {
-			carte.vaches.get(i).deplacer();
-			collisionVache(carte.vaches.get(i));
+		for(Vache v : carte.vaches) {
+			v.deplacer();
+			collisionVache(v);
+		}
+		for(Chat c : carte.chats) {
+			c.deplacer();
+			collisionChat(c);
 		}
 		if(isRunning) moveHandler.sleep(PERIODE);
 	}
@@ -158,7 +165,7 @@ public class MoteurJeu {
 	 * Détecte s'il y a colision entre le colibri et une vache, et le cas échéant effectue les opérations nécessaires.
 	 * @param va la vache dont il faut tester la position par rapport au colibri
 	 */
-	private void collisionVache(Animal va) {
+	private void collisionVache(Vache va) {
 		int[] c_co = carte.colibri.getPos();
 		int cx=c_co[0],cy=c_co[1];
 		int[] c_va = va.getPos();
@@ -194,6 +201,20 @@ public class MoteurJeu {
 				carte.colibri.setPos(cx , cy);
 				if(Math.abs(vy-cy)<carte.ch/2) jeu.mort();
 			}
+		}
+	}
+	
+	/**
+	 * Détecte s'il y a colision entre le colibri et un chat, et le cas échéant effectue les opérations nécessaires.
+	 * @param va le chat dont il faut tester la position par rapport au colibri
+	 */
+	private void collisionChat(Chat va) {
+		int[] c_co = carte.colibri.getPos();
+		int cx=c_co[0],cy=c_co[1];
+		int[] c_va = va.getPos();
+		int vx=c_va[0],vy=c_va[1];
+		if(Math.abs(vx-cx)<carte.cw && Math.abs(vy-cy)<carte.ch) { // teste si colision
+			jeu.mort();
 		}
 	}
 	

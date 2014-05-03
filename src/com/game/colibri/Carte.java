@@ -27,8 +27,9 @@ public class Carte extends View {
 	public Niveau niv=null; // Le niveau à afficher
 	public int n_fleur; // Le nombre de fleurs sur la carte
 	private Bitmap menhir,fleur,fleurm,menhir0,fleur0,fleurm0; // Les images : -0 sont les originales avant redimensionnement
-	public Animal colibri;
-	public LinkedList<Animal> vaches = new LinkedList<Animal>(); // La liste des vaches du niveau
+	public Colibri colibri;
+	public LinkedList<Vache> vaches = new LinkedList<Vache>(); // La liste des vaches du niveau
+	public LinkedList<Chat> chats = new LinkedList<Chat>(); // La liste des chats du niveau
 	private Context context;
 	
     /**
@@ -72,11 +73,14 @@ public class Carte extends View {
     public void loadNiveau(int index_niv, RelativeLayout lay) {
     	if (niv!=null) { // Supprimer les "Animaux" du niveau précédent.
     		lay.removeView(colibri);
-    		int len=vaches.size();
-    		for(int i=0; i<len; i++) {
-    			lay.removeView(vaches.get(i));
+    		for(Vache v : vaches) {
+    			lay.removeView(v);
     		}
     		vaches.clear();
+    		for(Chat c : chats) {
+    			lay.removeView(c);
+    		}
+    		chats.clear();
     	}
     	try { // On ouvre le Niveau index_niv.
 			niv=new Niveau(context.getAssets().open("niveaux/niveau"+index_niv+".txt"));
@@ -89,12 +93,16 @@ public class Carte extends View {
     			if(niv.carte[l][c]==2 || niv.carte[l][c]==3) n_fleur++;
     		}
     	}
-    	colibri = new Animal(this.getContext(), R.drawable.colibri_d, niv.db_c*cw, niv.db_l*ch, 5*cw/4, 5*ch/4, cw, ch, null);
+    	colibri = new Colibri(this.getContext(), niv.db_c*cw, niv.db_l*ch, 5*cw/4, 5*ch/4);
     	lay.addView(colibri);
-    	// TODO : créer les vaches et les chats
+    	// On crée les vaches et les chats
     	for (int[][] itin : niv.vaches) {
-    		vaches.addLast(new Animal(this.getContext(), R.drawable.vache, itin[0][1]*cw, itin[0][0]*ch, cw, ch, cw, ch, itin));
+    		vaches.addLast(new Vache(this.getContext(), cw, ch, itin));
     		lay.addView(vaches.getLast());
+    	}
+    	for (int[][] itin : niv.chats) {
+    		chats.addLast(new Chat(this.getContext(), cw, ch, itin));
+    		lay.addView(chats.getLast());
     	}
     	this.invalidate();
     }
@@ -132,6 +140,8 @@ public class Carte extends View {
 		Log.i("Dimensions écran :",ww+"*"+wh);
 		cw=ww/COL;
 		ch=wh/LIG;
+		Animal.cw=cw;
+		Animal.ch=ch;
 		menhir = Bitmap.createScaledBitmap(menhir0, 5*cw/4, 5*ch/4, true);
 		fleur = Bitmap.createScaledBitmap(fleur0, cw, ch, true);
 		fleurm = Bitmap.createScaledBitmap(fleurm0, cw, ch, true);

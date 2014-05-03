@@ -6,15 +6,13 @@ import android.util.AttributeSet;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
-public class Animal extends ImageView {
+public abstract class Animal extends ImageView {
 	
-	private RelativeLayout.LayoutParams params;
-	private int cw,ch; // largeur et hauteur d'une case
+	protected RelativeLayout.LayoutParams params;
+	public static int cw,ch; // largeur et hauteur d'une case
 	public int step; // pas des mouvements en px/frame
-	private int acc; // accélération en px/frame/frame
+	protected int acc; // accélération en px/frame/frame
 	public int mx,my; // sens du mouvement de l'animal (1,-1,0)
-	private int[][] itineraire=null; // itinéraire des vaches/chats. Coordonnées de chaque point de passage. (au moins 2) Ex : {{1,1},{1,4},{3,4}}
-	private int chkpt=0; // le prochain checkpoint de l'animal dans itineraire.
 	
 	/**
 	 * Constructeur java d'un animal 
@@ -28,25 +26,14 @@ public class Animal extends ImageView {
 	 * @param cw largeur d'une case de la carte
 	 * @param ch hauteur d'une case de la carte
 	 */
-	public Animal(Context context, int id_anim, int dbx, int dby, int w, int h, int cw, int ch, int[][] itin) {
+	public Animal(Context context, int dbx, int dby, int w, int h) {
 		super(context);
 		params=new RelativeLayout.LayoutParams(w,h);
 		params.leftMargin = dbx;
 	    params.topMargin = dby;
-	    this.cw=cw;
-	    this.ch=ch;
-	    itineraire=itin;
-	    if (itin==null) { // Colibri
-	    	acc=cw/10;
-		    step=0;
-	    } else { // Vache
-	    	acc=0;
-	    	step=cw/20;
-	    }
 	    mx=0;
 	    my=0;
 	    this.setLayoutParams(params);
-	    this.setBackgroundResource(id_anim);
 	}
 	
 	
@@ -76,10 +63,10 @@ public class Animal extends ImageView {
 	}
 	
 	/**
-	 * Donne la direction de déplacement du colibri, en attribuant les valeurs mx et my.
-	 * 		@param dir un couple donnant la direction x/y de déplacement du colibri. (ex : {0,-1} = vers la gauche)
-	 * Donne la direction de déplacement du colibri, en attribuant les valeurs mx et my.
-	 * 		@param dir un couple donnant la direction x/y de déplacement du colibri. (ex : {0,-1} = vers la gauche)
+	 * Donne la direction de déplacement de l'animal, en attribuant les valeurs mx et my.
+	 * 		@param dir un couple donnant la direction x/y de déplacement de l'animal. (ex : {0,-1} = vers la gauche)
+	 * Donne la direction de déplacement de l'animal, en attribuant les valeurs mx et my.
+	 * 		@param dir un couple donnant la direction x/y de déplacement de l'animal. (ex : {0,-1} = vers la gauche)
 	 */
 	public void setDirection(int[] dir) {
 		mx=dir[0];
@@ -87,7 +74,7 @@ public class Animal extends ImageView {
 	}
 	
 	/**
-	 * Renvoi la direction de déplacement du colibri{ mx, my}.
+	 * Renvoi la direction de déplacement de l'animal { mx, my}.
 	 *
 	 */
 	public int[] getDirection() {
@@ -109,26 +96,9 @@ public class Animal extends ImageView {
 	}
 	
 	/**
-	 * Déplace l'animal selon ses paramètres de mouvement mx, my, step et acc.
+	 * Déplace l'animal selon l'implémentation voulue par la classe fille. (méthode abstraite)
 	 */
-	public void deplacer() {
-		step=Math.min(step+acc, 3*cw/4); // Vitesse plafonnée à 1 case/frame.
-		params.leftMargin += mx*step;
-	    params.topMargin += my*step;
-	    if (itineraire!=null) { // Concerne les animaux avec itineraire (vaches)
-	    	// on teste si l'on est arrivé au checkpoint :
-	    	int c=itineraire[chkpt][1];
-	    	int l=itineraire[chkpt][0];
-			if (Math.abs(c*cw-params.leftMargin)<=step && Math.abs(l*ch-params.topMargin)<=step) {
-				params.leftMargin=c*cw;
-				params.topMargin=l*ch;
-				chkpt=(chkpt+1)%itineraire.length;
-				mx=(int) Math.signum(itineraire[chkpt][1]-c);
-				my=(int) Math.signum(itineraire[chkpt][0]-l);
-			}
-		}
-		this.setLayoutParams(params);
-	}
+	public abstract void deplacer();
 	
 	/**
 	 * Retourne la positon  de l'animal
@@ -140,14 +110,14 @@ public class Animal extends ImageView {
 	}
 	
 	/**
-	 * Retourne la ligne sur laquelle se trouve le centre du colibri
+	 * Retourne la ligne sur laquelle se trouve le centre de l'animal
 	 */
 	public int getRow() {
 		return (params.topMargin+params.height/2)/ch;
 	}
 	
 	/**
-	 * Retourne la colonne sur laquelle se trouve le centre du colibri
+	 * Retourne la colonne sur laquelle se trouve le centre de l'animal
 	 */
 	public int getCol() {
 		return (params.leftMargin+params.width/2)/cw;
