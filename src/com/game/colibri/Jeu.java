@@ -19,7 +19,7 @@ public class Jeu extends Activity {
 	public RelativeLayout lay;
 	public Animal colibri;
 	private boolean brandNew=true;
-	public int n_niv=0;
+	public int n_niv=1;
 	
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -40,7 +40,7 @@ public class Jeu extends Activity {
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		if (brandNew) { // événement appelé lorsque le RelativeLayout "lay" est prêt ! C'est ici que l'on peut charger le niveau et ajouter les View "Animal".
-			carte.loadNiveau(Niveaux.getNiveau(n_niv),lay);
+			carte.loadNiveau(n_niv,lay);
 			play.init();
 			play.start();
 			brandNew=false;
@@ -91,7 +91,7 @@ public class Jeu extends Activity {
 	public void gagne() {
 		play.pause();
 		n_niv++;
-		carte.loadNiveau(Niveaux.getNiveau(n_niv),lay);
+		carte.loadNiveau(n_niv,lay);
 		play.init();
 		Log.i("C'est Gagné !","BRAVO !");
 	}

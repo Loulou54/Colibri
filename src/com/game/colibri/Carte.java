@@ -1,5 +1,6 @@
 package com.game.colibri;
 
+import java.io.IOException;
 import java.util.LinkedList;
 
 import android.content.Context;
@@ -27,7 +28,8 @@ public class Carte extends View {
 	public int n_fleur; // Le nombre de fleurs sur la carte
 	private Bitmap menhir,fleur,fleurm,menhir0,fleur0,fleurm0; // Les images : -0 sont les originales avant redimensionnement
 	public Animal colibri;
-	public LinkedList<Animal> vaches = new LinkedList<Animal>(); // TODO : implémentation des vaches.
+	public LinkedList<Animal> vaches = new LinkedList<Animal>(); // La liste des vaches du niveau
+	private Context context;
 	
     /**
      * Constructeur une carte 
@@ -55,6 +57,7 @@ public class Carte extends View {
      * 		@param context
      */
     private void loadImg(Context context) {
+    	this.context=context;
     	menhir0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.menhir)).getBitmap();
     	fleur0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.fleur)).getBitmap();
     	fleurm0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.fleurm)).getBitmap();
@@ -66,7 +69,7 @@ public class Carte extends View {
      		* @param niveau le niveau a chargé 
      		* @param lay
      */
-    public void loadNiveau(Niveau niveau, RelativeLayout lay) {
+    public void loadNiveau(int index_niv, RelativeLayout lay) {
     	if (niv!=null) { // Supprimer les "Animaux" du niveau précédent.
     		lay.removeView(colibri);
     		int len=vaches.size();
@@ -75,7 +78,11 @@ public class Carte extends View {
     		}
     		vaches.clear();
     	}
-    	niv=niveau;
+    	try { // On ouvre le Niveau index_niv.
+			niv=new Niveau(context.getAssets().open("niveaux/niveau"+index_niv+".txt"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     	n_fleur=0;
     	for(int l=0; l<LIG; l++) {
     		for(int c=0; c<COL; c++) {
@@ -84,11 +91,11 @@ public class Carte extends View {
     	}
     	colibri = new Animal(this.getContext(), R.drawable.colibri_d, niv.db_c*cw, niv.db_l*ch, 5*cw/4, 5*ch/4, cw, ch, null);
     	lay.addView(colibri);
-    	// TODO : créer les vaches
-    	vaches.addLast(new Animal(this.getContext(), R.drawable.vache, cw, ch, cw, ch, cw, ch, new int[][] {{1,1},{1,4},{3,4},{3,1}}));
-    	vaches.addLast(new Animal(this.getContext(), R.drawable.vache, 16*cw, 11*ch, cw, ch, cw, ch, new int[][] {{11,16},{11,19},{11,13},{11,16},{5,16},{5,19},{11,19}}));
-    	lay.addView(vaches.getFirst());
-    	lay.addView(vaches.getLast());
+    	// TODO : créer les vaches et les chats
+    	for (int[][] itin : niv.vaches) {
+    		vaches.addLast(new Animal(this.getContext(), R.drawable.vache, itin[0][1]*cw, itin[0][0]*ch, cw, ch, cw, ch, itin));
+    		lay.addView(vaches.getLast());
+    	}
     	this.invalidate();
     }
     
@@ -119,7 +126,6 @@ public class Carte extends View {
      */
     @Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-		// TODO Auto-generated method stub
 		super.onSizeChanged(w, h, oldw, oldh);
 		ww=super.getWidth();
 		wh=super.getHeight();

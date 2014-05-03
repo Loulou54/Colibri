@@ -24,9 +24,7 @@ public class MoteurJeu {
 	public boolean isRunning=false;
 	private LinkedList <int[]> buf; // la file d'attente des touches
 	private int[][] trace_diff; // Contient le différentiel de position lors des ACTION_MOVE.
-	//private static final int LEN=2; // Longueur de trace_diff à considérer
 	private static final int SEUIL=15; // seuil de vitesse de glissement du doigt sur l'écran.
-	//private int index=0; // Index de remplissage de trace_diff
 	private static final int PERIODE=1000/25; // pour 25 frames par secondes
 	public static int menhir=1;
 	public static int fleur=2;
@@ -90,24 +88,6 @@ public class MoteurJeu {
 		jeu=activ;
 		buf = new LinkedList<int[]>();
 		trace_diff=new int[2][2];
-		/*carte.setOnTouchListener(new OnSwipeTouchListener(activ) {
-		    public void onSwipeTop() {
-		    	direction(UP);
-		    }
-		    public void onSwipeRight() {
-		    	direction(RIGHT);
-		    }
-		    public void onSwipeLeft() {
-		    	direction(LEFT);
-		    }
-		    public void onSwipeBottom() {
-		    	direction(DOWN);
-		    }
-
-		public boolean onTouch(View v, MotionEvent event) {
-		    return gestureDetector.onTouchEvent(event);
-		}
-		});*/
 	}
 	
 	/**
@@ -253,22 +233,6 @@ public class MoteurJeu {
 			else {
 				if (y*carte.ww<(carte.ww-x)*carte.wh) direction(LEFT);
 				else direction(DOWN);
-			}
-		}*/
-		
-		// Version glissement à échantillonnage de la position
-		/*if (ev.getActionMasked()==MotionEvent.ACTION_DOWN) {
-			trace_diff[0][0]=x;
-			trace_diff[0][1]=y;
-			index=0;
-		}
-		else if (ev.getActionMasked()==MotionEvent.ACTION_MOVE) {
-			index++;
-			if (index==LEN) {
-				index=0;
-				trace_diff[1][0]=x;
-				trace_diff[1][1]=y;
-				swipe_dir();
 			}
 		}*/
 		
