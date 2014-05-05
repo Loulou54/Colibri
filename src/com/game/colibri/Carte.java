@@ -10,6 +10,8 @@ import android.graphics.drawable.BitmapDrawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 
@@ -30,6 +32,7 @@ public class Carte extends View {
 	public Colibri colibri;
 	public LinkedList<Vache> vaches = new LinkedList<Vache>(); // La liste des vaches du niveau
 	public LinkedList<Chat> chats = new LinkedList<Chat>(); // La liste des chats du niveau
+	public ImageView mort,sang;
 	private Context context;
 	
     /**
@@ -59,6 +62,10 @@ public class Carte extends View {
      */
     private void loadImg(Context context) {
     	this.context=context;
+    	mort = new ImageView(context);
+    	mort.setBackgroundResource(R.drawable.skull);
+    	sang = new ImageView(context);
+    	sang.setBackgroundResource(R.drawable.sang);
     	menhir0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.menhir)).getBitmap();
     	fleur0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.fleur)).getBitmap();
     	fleurm0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.fleurm)).getBitmap();
@@ -72,6 +79,8 @@ public class Carte extends View {
      */
     public void loadNiveau(int index_niv, RelativeLayout lay) {
     	if (niv!=null) { // Supprimer les "Animaux" du niveau précédent.
+    		lay.removeView(mort);
+    		lay.removeView(sang);
     		lay.removeView(colibri);
     		for(Vache v : vaches) {
     			lay.removeView(v);
@@ -93,18 +102,35 @@ public class Carte extends View {
     			if(niv.carte[l][c]==2 || niv.carte[l][c]==3) n_fleur++;
     		}
     	}
-    	colibri = new Colibri(this.getContext(), niv.db_c*cw, niv.db_l*ch, 5*cw/4, 5*ch/4);
+    	colibri = new Colibri(this.getContext(), niv.db_c*cw, niv.db_l*ch, cw, ch);
     	lay.addView(colibri);
+    	lay.addView(sang);
+    	sang.setVisibility(INVISIBLE);
     	// On crée les vaches et les chats
     	for (int[][] itin : niv.vaches) {
     		vaches.addLast(new Vache(this.getContext(), cw, ch, itin));
     		lay.addView(vaches.getLast());
     	}
     	for (int[][] itin : niv.chats) {
-    		chats.addLast(new Chat(this.getContext(), cw, ch, itin));
+    		chats.addLast(new Chat(this.getContext(), cw, 5*ch/4, itin));
     		lay.addView(chats.getLast());
     	}
+    	lay.addView(mort);
+    	mort.setVisibility(INVISIBLE);
     	this.invalidate();
+    }
+    
+    public void animMort() {
+    	RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(3*cw/2,3*ch/2);
+    	int[] pos = colibri.getPos();
+		params.leftMargin = pos[0]-cw/4;
+	    params.topMargin = pos[1]-ch/4;
+	    mort.setLayoutParams(params);
+	    mort.setVisibility(VISIBLE);
+	    sang.setLayoutParams(params);
+	    sang.setVisibility(VISIBLE);
+    	mort.startAnimation(AnimationUtils.loadAnimation(context, R.anim.dead_anim));
+    	sang.startAnimation(AnimationUtils.loadAnimation(context, R.anim.blood_anim));
     }
     
     // Dessin du canvas : événement déclenché par this.invalidate()

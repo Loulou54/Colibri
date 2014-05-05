@@ -8,6 +8,9 @@ import android.annotation.SuppressLint;
 import android.os.Handler;
 import android.os.Message;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
 
 
 /**
@@ -128,6 +131,24 @@ public class MoteurJeu {
 		}
 	}
 
+	private void mort() {
+		pause();
+		carte.animMort();
+		Animation a = carte.mort.getAnimation();
+    	a.setAnimationListener(new AnimationListener() {
+    		public void onAnimationStart(Animation an) {
+    			
+    		}
+    		public void onAnimationRepeat(Animation an) {
+    			
+    		}
+    		public void onAnimationEnd(Animation an) {
+    			carte.mort.setVisibility(View.INVISIBLE);
+    			jeu.mort();
+    		}
+    	});
+	}
+	
 	/**
 	 * Méthode appelée périodiquement par le handler moveHandler lorsque le jeu est en marche.
 	 * C'est ici que s'effectue les déplacements des animaux.
@@ -186,7 +207,7 @@ public class MoteurJeu {
 					carte.colibri.mx=Math.max(carte.colibri.mx, 0);
 				}
 				carte.colibri.setPos(cx , cy);
-				if(Math.abs(vx-cx)<carte.cw/2) jeu.mort();
+				if(Math.abs(vx-cx)<carte.cw/2) mort();
 			} else { // sur la verticale
 				if(cy<vy) {
 					if(l-1<0 || niv.carte[l-1][c]==menhir) cy=Math.max(vy-carte.ch,l*carte.ch);
@@ -199,7 +220,7 @@ public class MoteurJeu {
 					carte.colibri.my=Math.max(carte.colibri.my, 0);
 				}
 				carte.colibri.setPos(cx , cy);
-				if(Math.abs(vy-cy)<carte.ch/2) jeu.mort();
+				if(Math.abs(vy-cy)<carte.ch/2) mort();
 			}
 		}
 	}
@@ -213,8 +234,8 @@ public class MoteurJeu {
 		int cx=c_co[0],cy=c_co[1];
 		int[] c_va = va.getPos();
 		int vx=c_va[0],vy=c_va[1];
-		if(Math.abs(vx-cx)<carte.cw && Math.abs(vy-cy)<carte.ch) { // teste si colision
-			jeu.mort();
+		if(Math.abs(vx-cx)<3*carte.cw/4 && Math.abs(vy-cy)<3*carte.ch/4) { // teste si colision
+			mort();
 		}
 	}
 	

@@ -9,8 +9,8 @@ public class Chat extends Animal {
 	private int chkpt=0; // le prochain checkpoint de l'animal dans itineraire.
 	
 	public Chat(Context context, int w, int h, int[][] itin) {
-		super(context,cw*itin[0][1],ch*itin[0][0],w,h);
-		this.setBackgroundResource(R.drawable.vache);
+		super(context,cw*itin[0][1],ch*itin[0][0]-ch/4,w,h);
+		this.setBackgroundResource(R.drawable.chat);
 		itineraire=itin;
 		acc=cw/16;
     	step=0;
@@ -40,7 +40,7 @@ public class Chat extends Animal {
     	} else params.leftMargin += mx*step;
     	if (Math.abs(l*ch-params.topMargin)<=step) {
     		my=0;
-    		params.topMargin=l*ch;
+    		params.topMargin=l*ch-ch/4;
     	} else params.topMargin += my*step;
 		if (mx==0 && my==0) {
 			step=0;

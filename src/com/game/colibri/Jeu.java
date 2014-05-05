@@ -100,7 +100,6 @@ public class Jeu extends Activity {
 	 * Le colibri est mort : affiche l'écran associé.
 	 */
 	public void mort() {
-		play.pause();
 		Log.i("Oh non !","Vous vous êtes fait écrasé !");
 	}
 }
