@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -27,13 +28,15 @@ public class Carte extends View {
 	public int ww,wh,cw,ch; // windowWidth/Height, caseWidth/Height en pixels
 	private static final int LIG=12, COL=20;
 	public Niveau niv=null; // Le niveau à afficher
-	public int n_fleur; // Le nombre de fleurs sur la carte
-	private Bitmap menhir,fleur,fleurm,menhir0,fleur0,fleurm0; // Les images : -0 sont les originales avant redimensionnement
+	public int n_fleur,n_dyna; // Le nombre de fleurs sur la carte et le nombre de dynamites ramassées
+	private Bitmap menhir,fleur,fleurm,dyna,menhir0,fleur0,fleurm0,dyna0; // Les images : -0 sont les originales avant redimensionnement
 	public Colibri colibri;
 	public LinkedList<Vache> vaches = new LinkedList<Vache>(); // La liste des vaches du niveau
 	public LinkedList<Chat> chats = new LinkedList<Chat>(); // La liste des chats du niveau
+	public LinkedList<ImageView> explo = new LinkedList<ImageView>(); // La liste des explosions
 	public ImageView mort,sang;
 	private Context context;
+	private RelativeLayout lay;
 	
     /**
      * Constructeur une carte 
@@ -69,6 +72,7 @@ public class Carte extends View {
     	menhir0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.menhir)).getBitmap();
     	fleur0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.fleur)).getBitmap();
     	fleurm0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.fleurm)).getBitmap();
+    	dyna0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.dynamite)).getBitmap();
     }
     
     // Méthode publique pour spécifier le niveau à afficher
@@ -90,12 +94,17 @@ public class Carte extends View {
     			lay.removeView(c);
     		}
     		chats.clear();
-    	}
+    		for(ImageView e : explo) {
+    			lay.removeView(e);
+    		}
+    		explo.clear();
+    	} else this.lay=lay;
     	try { // On ouvre le Niveau index_niv.
 			niv=new Niveau(context.getAssets().open("niveaux/niveau"+index_niv+".txt"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+    	n_dyna=0;
     	n_fleur=0;
     	for(int l=0; l<LIG; l++) {
     		for(int c=0; c<COL; c++) {
@@ -120,6 +129,9 @@ public class Carte extends View {
     	this.invalidate();
     }
     
+    /**
+     * Effectue l'animation de mort du colibri. :( (flaque de sang qui se répend + tête de mort qui s'envole)
+     */
     public void animMort() {
     	RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(3*cw/2,3*ch/2);
     	int[] pos = colibri.getPos();
@@ -131,6 +143,22 @@ public class Carte extends View {
 	    sang.setVisibility(VISIBLE);
     	mort.startAnimation(AnimationUtils.loadAnimation(context, R.anim.dead_anim));
     	sang.startAnimation(AnimationUtils.loadAnimation(context, R.anim.blood_anim));
+    }
+    
+    /**
+     * Effectue l'animation d'explosion d'un menhir par une dynamite.
+     */
+    public void animBoom(int l, int c) {
+    	ImageView e = new ImageView(context);
+    	explo.addLast(e);
+    	e.setBackgroundResource(R.drawable.explosion);
+    	lay.addView(e);
+    	RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(3*cw/2,3*ch/2);
+		params.leftMargin = c*cw-cw/4;
+	    params.topMargin = l*ch;
+	    e.setLayoutParams(params);
+    	e.setVisibility(VISIBLE);
+    	((AnimationDrawable) e.getBackground()).start();
     }
     
     // Dessin du canvas : événement déclenché par this.invalidate()
@@ -148,6 +176,8 @@ public class Carte extends View {
 	    				can.drawBitmap(fleur, c*cw, l*ch, null);
 	    			else if (niv.carte[l][c]==3)
 	    				can.drawBitmap(fleurm, c*cw, l*ch, null);
+	    			else if (niv.carte[l][c]==4)
+	    				can.drawBitmap(dyna, c*cw, l*ch, null);
 	    		}
 	    	}
 	    Log.i("onDraw","Rafraichissement !");
@@ -171,6 +201,7 @@ public class Carte extends View {
 		menhir = Bitmap.createScaledBitmap(menhir0, 5*cw/4, 5*ch/4, true);
 		fleur = Bitmap.createScaledBitmap(fleur0, cw, ch, true);
 		fleurm = Bitmap.createScaledBitmap(fleurm0, cw, ch, true);
+		dyna = Bitmap.createScaledBitmap(dyna0, cw, ch, true);
 		this.invalidate();
 	}
 }

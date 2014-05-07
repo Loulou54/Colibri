@@ -3,12 +3,27 @@
     android:id="@+id/lay"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/herbe"
     tools:context=".Jeu" >
 
   <com.game.colibri.Carte
     android:id="@+id/carte"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" />
+    android:layout_height="match_parent"
+    android:background="@drawable/herbe" />
+  
+  <Button
+        android:id="@+id/bout_dyna"
+        android:layout_width="75dp"
+        android:layout_height="30dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="80dp"
+        android:layout_marginTop="0dp"
+        android:background="@drawable/bouton_dyna"
+        android:alpha="0.8"
+        android:gravity="center_vertical"
+        android:paddingLeft="48dp"
+        android:onClick="exploser"
+        android:textSize="16sp" />
   
 </RelativeLayout>

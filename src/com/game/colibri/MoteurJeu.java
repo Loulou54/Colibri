@@ -26,12 +26,14 @@ public class MoteurJeu {
 	private Jeu jeu;
 	public boolean isRunning=false;
 	private LinkedList <int[]> buf; // la file d'attente des touches
+	private int[] lastMove;
 	private int[][] trace_diff; // Contient le différentiel de position lors des ACTION_MOVE.
 	private static final int SEUIL=15; // seuil de vitesse de glissement du doigt sur l'écran.
 	private static final int PERIODE=1000/25; // pour 25 frames par secondes
 	public static int menhir=1;
 	public static int fleur=2;
 	public static int fleurm=3;
+	public static int dyna=4;
 	public static char vide=0;
 	public static final int UP=1,RIGHT=2,LEFT=3,DOWN=4;
 	
@@ -73,7 +75,9 @@ public class MoteurJeu {
 	class RefreshHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
-			MoteurJeu.this.move();
+			if(msg.what==jeu.n_niv) { // Fin de l'animation de l'explosion. (on utilise le handler pour contourner l'abscence de listener pour AnimationDrawable)
+				MoteurJeu.this.finExplosion(msg.arg1,msg.arg2);
+			} else MoteurJeu.this.move();
 		}
 		public void sleep(long delayMillis) {
 			this.removeMessages(0);
@@ -155,7 +159,14 @@ public class MoteurJeu {
 	 */
 	private void move() {
 		if (carte.colibri.mx==0 & carte.colibri.my==0) {
-			if (buf.size()>0)carte.colibri.setDirection(buf.poll());
+			if (buf.size()>0) {
+				int[] mov=buf.poll();
+				carte.colibri.setDirection(mov);
+				if(mov[0]==mov[1]) { // <=> mov=={0,0} : pose une dynamite.
+					exploseMenhir();
+				}
+				lastMove=mov;
+			}
 			else carte.colibri.step=0; // La vitesse est mise à 0. Dans le premier cas, la vitesse est conservée.
 		}else {
 				int []dir= carte.colibri.getDirection();
@@ -253,8 +264,43 @@ public class MoteurJeu {
 			niv.carte[l][c]=menhir;
 			carte.n_fleur--;
 			carte.invalidate();
+		} else if(niv.carte[l][c]==dyna) {
+			niv.carte[l][c]=vide;
+			carte.n_dyna++;
+			jeu.bout_dyna.setText(Integer.toString(carte.n_dyna));
+			if(carte.n_dyna==1) jeu.showDyna();
+			carte.invalidate();
 		}
 		if(carte.n_fleur==0) jeu.gagne();
+	}
+	
+	/**
+	 * S'il existe, explose le menhir en face du colibri.
+	 */
+	private void exploseMenhir() {
+		int l=carte.colibri.getRow();
+		int c=carte.colibri.getCol();
+		int ml=lastMove[1], mc=lastMove[0];
+		if(l+ml>=0 && l+ml<LIG && c+mc>=0 && c+mc<COL && niv.carte[l+ml][c+mc]==menhir && ml+mc!=0) {
+			carte.n_dyna--;
+			carte.animBoom(l+ml,c+mc); // Gère l'animation de l'explosion.
+			jeu.bout_dyna.setText(Integer.toString(carte.n_dyna));
+			jeu.lay.removeView(jeu.bout_dyna);
+			jeu.lay.addView(jeu.bout_dyna); // On remet le bouton au premier plan, sinon l'explosion se fera par dessus le bouton...
+			if(carte.n_dyna==0) jeu.hideDyna();
+			Message msg = moveHandler.obtainMessage(jeu.n_niv);
+			msg.arg1=l+ml;
+			msg.arg2=c+mc;
+			moveHandler.sendMessageDelayed(msg,800);
+		}
+	}
+	
+	/**
+	 * Appelé à la fin de l'explosion d'un menhir. Enlève le menhir de la carte et la View explo.
+	 */
+	private void finExplosion(int l, int c) {
+		niv.carte[l][c]=vide;
+		carte.invalidate();
 	}
 	
 	/**
@@ -292,6 +338,9 @@ public class MoteurJeu {
 		}
 	}
 	
+	/**
+	 * Gère la commande du colibri par swipe sur l'écran tactile.
+	 */
 	private void swipe_dir() {
 		int mx=trace_diff[1][0]-trace_diff[0][0] , my=trace_diff[1][1]-trace_diff[0][1];
 		if(mx*mx+my*my>SEUIL*SEUIL) {
@@ -305,6 +354,10 @@ public class MoteurJeu {
 		}
 	}
 	
+	/**
+	 * Ajoute à la file la prochaine direction du colibri.
+	 * @param dir
+	 */
 	public void direction(int dir) {
 		int[] mvt;
 		if(buf.size()==0) mvt=new int[2];
@@ -324,5 +377,12 @@ public class MoteurJeu {
 			break;
 		}
 	}
-
+	
+	/**
+	 * Ajoute à la file l'action de poser une dynamite.
+	 */
+	public void dynamite() {
+		buf.add(new int[]{0,0});
+	}
+	
 }
