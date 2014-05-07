@@ -57,14 +57,15 @@ public final class R {
         public static final int herbe=0x7f020019;
         public static final int ic_launcher=0x7f02001a;
         public static final int menhir=0x7f02001b;
-        public static final int menu=0x7f02001c;
-        public static final int rainbow=0x7f02001d;
-        public static final int sang=0x7f02001e;
-        public static final int skull=0x7f02001f;
-        public static final int vache=0x7f020020;
-        public static final int vache_0=0x7f020021;
-        public static final int vache_rd=0x7f020022;
-        public static final int vache_rg=0x7f020023;
+        public static final int menhir_rouge=0x7f02001c;
+        public static final int menu=0x7f02001d;
+        public static final int rainbow=0x7f02001e;
+        public static final int sang=0x7f02001f;
+        public static final int skull=0x7f020020;
+        public static final int vache=0x7f020021;
+        public static final int vache_0=0x7f020022;
+        public static final int vache_rd=0x7f020023;
+        public static final int vache_rg=0x7f020024;
     }
     public static final class id {
         public static final int bout1=0x7f090004;

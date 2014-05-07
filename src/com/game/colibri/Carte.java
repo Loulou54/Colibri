@@ -29,7 +29,7 @@ public class Carte extends View {
 	private static final int LIG=12, COL=20;
 	public Niveau niv=null; // Le niveau à afficher
 	public int n_fleur,n_dyna; // Le nombre de fleurs sur la carte et le nombre de dynamites ramassées
-	private Bitmap menhir,fleur,fleurm,dyna,menhir0,fleur0,fleurm0,dyna0; // Les images : -0 sont les originales avant redimensionnement
+	private Bitmap menhir,fleur,fleurm,dyna,menhir_rouge,menhir0,fleur0,fleurm0,dyna0,menhir_rouge0; // Les images : -0 sont les originales avant redimensionnement
 	public Colibri colibri;
 	public LinkedList<Vache> vaches = new LinkedList<Vache>(); // La liste des vaches du niveau
 	public LinkedList<Chat> chats = new LinkedList<Chat>(); // La liste des chats du niveau
@@ -73,6 +73,7 @@ public class Carte extends View {
     	fleur0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.fleur)).getBitmap();
     	fleurm0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.fleurm)).getBitmap();
     	dyna0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.dynamite)).getBitmap();
+    	menhir_rouge0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.menhir_rouge)).getBitmap();
     }
     
     // Méthode publique pour spécifier le niveau à afficher
@@ -178,6 +179,8 @@ public class Carte extends View {
 	    				can.drawBitmap(fleurm, c*cw, l*ch, null);
 	    			else if (niv.carte[l][c]==4)
 	    				can.drawBitmap(dyna, c*cw, l*ch, null);
+	    			else if (niv.carte[l][c]==5)
+	    				can.drawBitmap(menhir_rouge, c*cw-cw/8, l*ch, null);
 	    		}
 	    	}
 	    Log.i("onDraw","Rafraichissement !");
@@ -202,6 +205,7 @@ public class Carte extends View {
 		fleur = Bitmap.createScaledBitmap(fleur0, cw, ch, true);
 		fleurm = Bitmap.createScaledBitmap(fleurm0, cw, ch, true);
 		dyna = Bitmap.createScaledBitmap(dyna0, cw, ch, true);
+		menhir_rouge = Bitmap.createScaledBitmap(menhir_rouge0, 5*cw/4, 5*ch/4, true);
 		this.invalidate();
 	}
 }

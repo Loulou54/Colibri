@@ -26,7 +26,7 @@ public class MoteurJeu {
 	private Jeu jeu;
 	public boolean isRunning=false;
 	private LinkedList <int[]> buf; // la file d'attente des touches
-	private int[] lastMove;
+	private int[] lastMove=new int[] {0,0};
 	private int[][] trace_diff; // Contient le différentiel de position lors des ACTION_MOVE.
 	private static final int SEUIL=15; // seuil de vitesse de glissement du doigt sur l'écran.
 	private static final int PERIODE=1000/25; // pour 25 frames par secondes
@@ -34,6 +34,7 @@ public class MoteurJeu {
 	public static int fleur=2;
 	public static int fleurm=3;
 	public static int dyna=4;
+	public static int menhir_rouge=5; // Menhir sur lequel on déposerait une dynamite.
 	public static char vide=0;
 	public static final int UP=1,RIGHT=2,LEFT=3,DOWN=4;
 	
@@ -162,6 +163,7 @@ public class MoteurJeu {
 			if (buf.size()>0) {
 				int[] mov=buf.poll();
 				carte.colibri.setDirection(mov);
+				removeMenhirRouge(mov); // On enlève si nécessaire le menhir rouge de sélection
 				if(mov[0]==mov[1]) { // <=> mov=={0,0} : pose une dynamite.
 					exploseMenhir();
 				}
@@ -175,10 +177,15 @@ public class MoteurJeu {
 				int c=carte.colibri.getCol(); //  colone du colibri
 				ramasser(l,c); // On ramasse l'item potentiel
 				// On détecte si l'on arrive contre un obstacle
-				if(l+ml<0 || l+ml>=LIG || c+mc<0 || c+mc>=COL || niv.carte[l+ml][c+mc]==menhir){
+				boolean outOfMap=l+ml<0 || l+ml>=LIG || c+mc<0 || c+mc>=COL;
+				if(outOfMap || niv.carte[l+ml][c+mc]==menhir){
 					carte.colibri.mx=0;
 					carte.colibri.my=0;
 					carte.colibri.setPos(c*carte.cw, l*carte.ch);
+					if(!outOfMap && carte.n_dyna>0) {
+						niv.carte[l+ml][c+mc]=menhir_rouge;
+						carte.invalidate();
+					}
 				}
 			carte.colibri.deplacer();
 		}
@@ -272,6 +279,19 @@ public class MoteurJeu {
 			carte.invalidate();
 		}
 		if(carte.n_fleur==0) jeu.gagne();
+	}
+	
+	/**
+	 * Enlève le menhir rouge de sélection si besoin.
+	 */
+	private void removeMenhirRouge(int[] mov) {
+		int l=carte.colibri.getRow();
+		int c=carte.colibri.getCol();
+		int ml=lastMove[1], mc=lastMove[0];
+		if(l+ml>=0 && l+ml<LIG && c+mc>=0 && c+mc<COL && niv.carte[l+ml][c+mc]==menhir_rouge) {
+			niv.carte[l+ml][c+mc]=menhir;
+			if(ml!=mov[1] || mc!=mov[0]) carte.invalidate();
+		}
 	}
 	
 	/**
