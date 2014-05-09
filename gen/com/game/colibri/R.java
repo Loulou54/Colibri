@@ -23,23 +23,28 @@ public final class R {
         public static final int btns_width=0x7f050002;
     }
     public static final class drawable {
-        public static final int bouton_enabled=0x7f020000;
-        public static final int bouton_normal=0x7f020001;
-        public static final int bouton_pressed=0x7f020002;
-        public static final int boutons=0x7f020003;
-        public static final int colibri_d=0x7f020004;
-        public static final int colibri_d1=0x7f020005;
-        public static final int colibri_d2=0x7f020006;
-        public static final int fleur=0x7f020007;
-        public static final int fleurm=0x7f020008;
-        public static final int herbe=0x7f020009;
-        public static final int ic_launcher=0x7f02000a;
-        public static final int menhir=0x7f02000b;
-        public static final int menu=0x7f02000c;
-        public static final int vache=0x7f02000d;
-        public static final int vache_0=0x7f02000e;
-        public static final int vache_rd=0x7f02000f;
-        public static final int vache_rg=0x7f020010;
+        public static final int arrier=0x7f020000;
+        public static final int bouton_enabled=0x7f020001;
+        public static final int bouton_normal=0x7f020002;
+        public static final int bouton_pressed=0x7f020003;
+        public static final int boutons=0x7f020004;
+        public static final int button=0x7f020005;
+        public static final int button_enable=0x7f020006;
+        public static final int button_normal=0x7f020007;
+        public static final int button_pressed=0x7f020008;
+        public static final int colibri_d=0x7f020009;
+        public static final int colibri_d1=0x7f02000a;
+        public static final int colibri_d2=0x7f02000b;
+        public static final int fleur=0x7f02000c;
+        public static final int fleurm=0x7f02000d;
+        public static final int herbe=0x7f02000e;
+        public static final int ic_launcher=0x7f02000f;
+        public static final int menhir=0x7f020010;
+        public static final int menu=0x7f020011;
+        public static final int vache=0x7f020012;
+        public static final int vache_0=0x7f020013;
+        public static final int vache_rd=0x7f020014;
+        public static final int vache_rg=0x7f020015;
     }
     public static final class id {
         public static final int bout1=0x7f080003;
@@ -47,6 +52,10 @@ public final class R {
         public static final int bout3=0x7f080005;
         public static final int bout4=0x7f080006;
         public static final int bout5=0x7f080007;
+        public static final int but1=0x7f080008;
+        public static final int but2=0x7f080009;
+        public static final int but3=0x7f08000a;
+        public static final int but4=0x7f08000b;
         public static final int carte=0x7f080001;
         public static final int lay=0x7f080000;
         public static final int root=0x7f080002;
@@ -54,6 +63,7 @@ public final class R {
     public static final class layout {
         public static final int activity_jeu=0x7f030000;
         public static final int activity_menu_princ=0x7f030001;
+        public static final int activity_pause=0x7f030002;
     }
     public static final class raw {
         public static final int niveaux=0x7f040000;
@@ -66,6 +76,9 @@ public final class R {
         public static final int instructions=0x7f060005;
         public static final int jouer=0x7f060001;
         public static final int multi=0x7f060004;
+        public static final int recommencer=0x7f060008;
+        public static final int reprendre=0x7f060007;
+        public static final int sortir=0x7f060009;
     }
     public static final class style {
         /** 
