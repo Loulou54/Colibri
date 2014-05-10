@@ -163,7 +163,7 @@ public class MoteurJeu {
 			if (buf.size()>0) {
 				int[] mov=buf.poll();
 				carte.colibri.setDirection(mov);
-				removeMenhirRouge(mov); // On enlève si nécessaire le menhir rouge de sélection
+				if(carte.n_dyna>0) removeMenhirRouge(mov); // On enlève si nécessaire le menhir rouge de sélection
 				if(mov[0]==mov[1]) { // <=> mov=={0,0} : pose une dynamite.
 					exploseMenhir();
 				}
@@ -213,6 +213,7 @@ public class MoteurJeu {
 			// Choisit de quel côté de la vache il faut replacer le colibri
 			int l=carte.colibri.getRow(), c=carte.colibri.getCol();
 			ramasser(l,c); // On ramasse l'item potentiel
+			if(carte.n_dyna>0) removeMenhirRouge(lastMove); // On enlève le menhir rouge mais on ne rafraîchit pas.
 			if(carte.cw-Math.abs(vx-cx) < carte.ch-Math.abs(vy-cy)) { // sur l'horizontale
 				if(cx<vx) {
 					if(c-1<0 || niv.carte[l][c-1]==menhir) cx=Math.max(vx-carte.cw,c*carte.cw); // Détecte si le colibri est bloqué par un menhir ou un bord.
@@ -239,6 +240,15 @@ public class MoteurJeu {
 				}
 				carte.colibri.setPos(cx , cy);
 				if(Math.abs(vy-cy)<carte.ch/2) mort();
+			}
+			int nl=carte.colibri.getRow(), nc=carte.colibri.getCol();
+			// Si le colibri a été poussé sur une autre case, il faut changer le menhir rouge de sélection !
+			if(carte.n_dyna>0 && (nl!=l || nc!=c)) {
+				int ml=lastMove[1], mc=lastMove[0];
+				if(nl+ml>=0 && nl+ml<LIG && nc+mc>=0 && nc+mc<COL && niv.carte[nl+ml][nc+mc]==menhir) {
+					niv.carte[nl+ml][nc+mc]=menhir_rouge;
+				}
+				carte.invalidate();
 			}
 		}
 	}
@@ -305,8 +315,6 @@ public class MoteurJeu {
 			carte.n_dyna--;
 			carte.animBoom(l+ml,c+mc); // Gère l'animation de l'explosion.
 			jeu.bout_dyna.setText(Integer.toString(carte.n_dyna));
-			jeu.lay.removeView(jeu.bout_dyna);
-			jeu.lay.addView(jeu.bout_dyna); // On remet le bouton au premier plan, sinon l'explosion se fera par dessus le bouton...
 			if(carte.n_dyna==0) jeu.hideDyna();
 			Message msg = moveHandler.obtainMessage(jeu.n_niv);
 			msg.arg1=l+ml;
