@@ -20,6 +20,7 @@ public class Jeu extends Activity {
 	public Carte carte;
 	public MoteurJeu play;
 	public RelativeLayout lay;
+	public RelativeLayout pause;
 	public Button bout_dyna;
 	private boolean brandNew=true;
 	public int n_niv=1;
@@ -35,6 +36,30 @@ public class Jeu extends Activity {
 		lay = (RelativeLayout) findViewById(R.id.lay);
 		bout_dyna = (Button) findViewById(R.id.bout_dyna);
 		bout_dyna.setVisibility(View.INVISIBLE);
+		pause= (RelativeLayout) findViewById(R.id.pause);
+		pause.setVisibility(View.INVISIBLE);
+		final Button reprendre = (Button) findViewById(R.id.but1);
+        reprendre.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+            	pause.setVisibility(View.INVISIBLE);
+                play.start();            }
+        });
+        final Button recommencer= (Button) findViewById(R.id.but2);
+        recommencer.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+            	pause.setVisibility(View.INVISIBLE);
+            	carte.loadNiveau(n_niv,lay);
+                play.init(); 
+                play.start(); 
+                }
+        });
+        final Button menuprinc= (Button) findViewById(R.id.but3);
+        menuprinc.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+            	pause.setVisibility(View.INVISIBLE);
+            	setContentView(R.layout.activity_menu_princ);
+                }
+        });
 		play = new MoteurJeu(this,carte);
 		Log.i("onCreate","FINI");
 	}
@@ -68,7 +93,8 @@ public class Jeu extends Activity {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
 			play.pause();
-			this.finish();
+			pause.setVisibility(View.VISIBLE);
+			
 		}
 		if(play.isRunning) { // Commande en cours de jeu
 			if(keyCode == KeyEvent.KEYCODE_DPAD_UP) {
@@ -137,4 +163,9 @@ public class Jeu extends Activity {
 		bout_dyna.startAnimation(AnimationUtils.loadAnimation(this, R.anim.bouton_dyna_up));
 		bout_dyna.setVisibility(View.INVISIBLE);
 	}
+	
+	
+	public void menuprinc(View v) {
+		play.start();
+	    }
 }

@@ -26,4 +26,71 @@
         android:onClick="exploser"
         android:textSize="16sp" />
   
+<RelativeLayout 
+    android:id="@+id/pause"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/arrier">
+    
+     <Button
+        android:id="@+id/but1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="120dp"
+        android:background="@drawable/button"
+        android:gravity="center"
+        android:text="@string/reprendre"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+    
+    <Button
+        android:id="@+id/but2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/but1"
+        android:layout_below="@+id/but1"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/button"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:text="@string/recommencer"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+    
+    <Button
+        android:id="@+id/but3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/but2"
+        android:layout_below="@+id/but2"
+        android:layout_gravity="center"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/button"
+        android:gravity="center"
+        android:text="@string/sortir"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+    
+    <Button
+        android:id="@+id/but4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/but3"
+        android:layout_below="@+id/but3"
+        android:layout_gravity="center"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/button"
+        android:gravity="center"
+        android:text="@string/multi"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+
+   
 </RelativeLayout>
+  
+  
+  
+</RelativeLayout>
+
