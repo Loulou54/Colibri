@@ -10,6 +10,7 @@ import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
@@ -30,11 +31,12 @@ public class Carte extends View {
 	public Niveau niv=null; // Le niveau à afficher
 	public int n_fleur,n_dyna; // Le nombre de fleurs sur la carte et le nombre de dynamites ramassées.
 	private int index_dyna; // L'index de l'animation courante d'explosion.
-	private Bitmap menhir,fleur,fleurm,dyna,menhir_rouge,menhir0,fleur0,fleurm0,dyna0,menhir_rouge0; // Les images : -0 sont les originales avant redimensionnement
+	private Bitmap menhir,fleur,fleurm,dyna,menhir_rouge,rainbow,menhir0,fleur0,fleurm0,dyna0,menhir_rouge0,rainbow0; // Les images : -0 sont les originales avant redimensionnement
 	public Colibri colibri;
 	public LinkedList<Vache> vaches = new LinkedList<Vache>(); // La liste des vaches du niveau
 	public LinkedList<Chat> chats = new LinkedList<Chat>(); // La liste des chats du niveau
 	public LinkedList<ImageView> explo = new LinkedList<ImageView>(); // La liste des explosions
+	public SparseArray<int[]> rainbows = new SparseArray<int[]>();
 	public ImageView mort,sang;
 	private Context context;
 	
@@ -74,6 +76,7 @@ public class Carte extends View {
     	fleurm0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.fleurm)).getBitmap();
     	dyna0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.dynamite)).getBitmap();
     	menhir_rouge0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.menhir_rouge)).getBitmap();
+    	rainbow0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.rainbow)).getBitmap();
     }
     
     // Méthode publique pour spécifier le niveau à afficher
@@ -99,6 +102,7 @@ public class Carte extends View {
     			lay.removeView(e);
     		}
     		explo.clear();
+    		rainbows.clear();
     	}
     	try { // On ouvre le Niveau index_niv.
 			niv=new Niveau(context.getAssets().open("niveaux/niveau"+index_niv+".txt"));
@@ -119,6 +123,14 @@ public class Carte extends View {
     		    	e.setBackgroundResource(R.drawable.explosion);
     		    	lay.addView(e);
     		    	e.setVisibility(INVISIBLE);
+    			} else if(niv.carte[l][c]>=10) {
+    				int[] autre = rainbows.get(niv.carte[l][c]);
+    				if(autre!=null) { // On ajoute la case correspondante à celle déjà enregistrée.
+    					autre[2]=l;
+    					autre[3]=c;
+    				} else {
+    					rainbows.put(niv.carte[l][c] , new int[] {l,c,0,0});
+    				}
     			}
     		}
     	}
@@ -190,6 +202,8 @@ public class Carte extends View {
 	    				can.drawBitmap(dyna, c*cw, l*ch, null);
 	    			else if (niv.carte[l][c]==5)
 	    				can.drawBitmap(menhir_rouge, c*cw-cw/8, l*ch, null);
+	    			else if (niv.carte[l][c]>=10)
+	    				can.drawBitmap(rainbow, c*cw-cw/4, l*ch, null);
 	    		}
 	    	}
 	    Log.i("onDraw","Rafraichissement !");
@@ -215,6 +229,7 @@ public class Carte extends View {
 		fleurm = Bitmap.createScaledBitmap(fleurm0, cw, ch, true);
 		dyna = Bitmap.createScaledBitmap(dyna0, cw, ch, true);
 		menhir_rouge = Bitmap.createScaledBitmap(menhir_rouge0, 5*cw/4, 5*ch/4, true);
+		rainbow = Bitmap.createScaledBitmap(rainbow0, 3*cw/2, ch, true);
 		this.invalidate();
 	}
 }

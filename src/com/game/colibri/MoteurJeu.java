@@ -25,6 +25,7 @@ public class MoteurJeu {
 	private Niveau niv;
 	private Jeu jeu;
 	public boolean isRunning=false;
+	private int dejaPasse=0;
 	private LinkedList <int[]> buf; // la file d'attente des touches
 	private int[] lastMove=new int[] {0,0};
 	private int[][] trace_diff; // Contient le différentiel de position lors des ACTION_MOVE.
@@ -159,34 +160,34 @@ public class MoteurJeu {
 	 * C'est ici que s'effectue les déplacements des animaux.
 	 */
 	private void move() {
-		if (carte.colibri.mx==0 & carte.colibri.my==0) {
+		if (carte.colibri.mx==0 & carte.colibri.my==0) { // Le colibri est à l'arrêt
 			if (buf.size()>0) {
 				int[] mov=buf.poll();
-				carte.colibri.setDirection(mov);
-				if(carte.n_dyna>0) removeMenhirRouge(mov); // On enlève si nécessaire le menhir rouge de sélection
+				carte.colibri.setDirection(mov); // On effectue le prochain mouvement de la file.
+				if(carte.n_dyna>0) removeMenhirRouge(mov); // On enlève si nécessaire le menhir rouge de sélection.
 				if(mov[0]==mov[1]) { // <=> mov=={0,0} : pose une dynamite.
 					exploseMenhir();
 				}
 				lastMove=mov;
 			}
 			else carte.colibri.step=0; // La vitesse est mise à 0. Dans le premier cas, la vitesse est conservée.
-		}else {
-				int []dir= carte.colibri.getDirection();
-				int ml=dir[1] , mc=dir[0];
-				int l=carte.colibri.getRow(); // ligne du colibri
-				int c=carte.colibri.getCol(); //  colone du colibri
-				ramasser(l,c); // On ramasse l'item potentiel
-				// On détecte si l'on arrive contre un obstacle
-				boolean outOfMap=l+ml<0 || l+ml>=LIG || c+mc<0 || c+mc>=COL;
-				if(outOfMap || niv.carte[l+ml][c+mc]==menhir){
-					carte.colibri.mx=0;
-					carte.colibri.my=0;
-					carte.colibri.setPos(c*carte.cw, l*carte.ch);
-					if(!outOfMap && carte.n_dyna>0) {
-						niv.carte[l+ml][c+mc]=menhir_rouge;
-						carte.invalidate();
-					}
+		} else { // Le colibri est en mouvement
+			ramasser(); // On ramasse l'item potentiel
+			int[] dir= carte.colibri.getDirection();
+			int ml=dir[1] , mc=dir[0];
+			int l=carte.colibri.getRow(); // ligne du colibri
+			int c=carte.colibri.getCol(); //  colone du colibri
+			// On détecte si l'on arrive contre un obstacle
+			boolean outOfMap=l+ml<0 || l+ml>=LIG || c+mc<0 || c+mc>=COL;
+			if(outOfMap || niv.carte[l+ml][c+mc]==menhir){
+				carte.colibri.mx=0;
+				carte.colibri.my=0;
+				carte.colibri.setPos(c*carte.cw, l*carte.ch);
+				if(!outOfMap && carte.n_dyna>0) {
+					niv.carte[l+ml][c+mc]=menhir_rouge;
+					carte.invalidate();
 				}
+			}
 			carte.colibri.deplacer();
 		}
 		for(Vache v : carte.vaches) {
@@ -212,7 +213,6 @@ public class MoteurJeu {
 		if(Math.abs(vx-cx)<carte.cw && Math.abs(vy-cy)<carte.ch) { // teste si colision
 			// Choisit de quel côté de la vache il faut replacer le colibri
 			int l=carte.colibri.getRow(), c=carte.colibri.getCol();
-			ramasser(l,c); // On ramasse l'item potentiel
 			if(carte.n_dyna>0) removeMenhirRouge(lastMove); // On enlève le menhir rouge mais on ne rafraîchit pas.
 			if(carte.cw-Math.abs(vx-cx) < carte.ch-Math.abs(vy-cy)) { // sur l'horizontale
 				if(cx<vx) {
@@ -241,6 +241,7 @@ public class MoteurJeu {
 				carte.colibri.setPos(cx , cy);
 				if(Math.abs(vy-cy)<carte.ch/2) mort();
 			}
+			ramasser(); // On ramasse l'item potentiel
 			int nl=carte.colibri.getRow(), nc=carte.colibri.getCol();
 			// Si le colibri a été poussé sur une autre case, il faut changer le menhir rouge de sélection !
 			if(carte.n_dyna>0 && (nl!=l || nc!=c)) {
@@ -272,7 +273,8 @@ public class MoteurJeu {
 	 * @param l ligne
 	 * @param c colonne
 	 */
-	private void ramasser(int l, int c) {
+	private void ramasser() {
+		int l=carte.colibri.getRow(), c=carte.colibri.getCol();
 		if(niv.carte[l][c]==fleur) {
 			niv.carte[l][c]=vide;
 			carte.n_fleur--;
@@ -287,7 +289,18 @@ public class MoteurJeu {
 			jeu.bout_dyna.setText(Integer.toString(carte.n_dyna));
 			if(carte.n_dyna==1) jeu.showDyna();
 			carte.invalidate();
-		}
+		} else if(niv.carte[l][c]>=10) { // Passage dans un arc-en-ciel.
+			if(dejaPasse!=niv.carte[l][c]) { // Pour éviter de se téléporter dans l'autre sens.
+				int[] dest = carte.rainbows.get(niv.carte[l][c]);
+				int step = carte.colibri.step;
+				if(dest[0]==l && dest[1]==c)
+					carte.colibri.setPos(dest[3]*carte.cw-carte.colibri.mx*step, dest[2]*carte.ch-carte.colibri.my*step);
+				else
+					carte.colibri.setPos(dest[1]*carte.cw-carte.colibri.mx*step, dest[0]*carte.ch-carte.colibri.my*step);
+			}
+			dejaPasse=niv.carte[l][c];
+		} else
+			dejaPasse=0;
 		if(carte.n_fleur==0) jeu.gagne();
 	}
 	

@@ -57,7 +57,7 @@ public class Jeu extends Activity {
         menuprinc.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
             	pause.setVisibility(View.INVISIBLE);
-            	setContentView(R.layout.activity_menu_princ);
+            	Jeu.this.finish();
                 }
         });
 		play = new MoteurJeu(this,carte);
