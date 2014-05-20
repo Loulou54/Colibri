@@ -43,6 +43,7 @@
         android:gravity="center"
         android:text="@string/aleat"
         android:textColor="@android:color/white"
+        android:onClick="aleatoire"
         android:textSize="16sp" />
     
     <Button

@@ -1,6 +1,5 @@
 package com.game.colibri;
 
-import java.io.IOException;
 import java.util.LinkedList;
 
 import android.content.Context;
@@ -85,7 +84,7 @@ public class Carte extends View {
      		* @param niveau le niveau a chargé 
      		* @param lay
      */
-    public void loadNiveau(int index_niv, RelativeLayout lay) {
+    public void loadNiveau(Niveau niveau, RelativeLayout lay) {
     	if (niv!=null) { // Supprimer les "Animaux" du niveau précédent.
     		lay.removeView(mort);
     		lay.removeView(sang);
@@ -104,11 +103,7 @@ public class Carte extends View {
     		explo.clear();
     		rainbows.clear();
     	}
-    	try { // On ouvre le Niveau index_niv.
-			niv=new Niveau(context.getAssets().open("niveaux/niveau"+index_niv+".txt"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+    	niv=niveau;
     	n_dyna=0;
     	n_fleur=0;
     	index_dyna=0;

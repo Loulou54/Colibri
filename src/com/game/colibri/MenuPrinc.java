@@ -44,9 +44,18 @@ public class MenuPrinc extends Activity {
 	
 	/**
 	 * Fonctions appelées par le "onClick" des boutons définis dans activity_menu.xml
-	 * 		@param v
+	 * 		@param v le bouton appuyé.
 	 */
 	public void continuer(View v) {
+		Jeu.opt = new Bundle(); // On doit contourner le fait que startActivity(Intent i, Bundle b) ne soit pas supporté sur API < 16
+		Jeu.opt.putBoolean("isRandom", false);
+		jeu = new Intent(this, Jeu.class);
+		startActivity(jeu);
+	}
+	
+	public void aleatoire(View v) {
+		Jeu.opt = new Bundle();
+		Jeu.opt.putBoolean("isRandom", true);
 		jeu = new Intent(this, Jeu.class);
 		startActivity(jeu);
 	}

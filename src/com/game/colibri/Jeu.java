@@ -1,5 +1,7 @@
 package com.game.colibri;
 
+import java.io.IOException;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,7 +18,8 @@ import android.widget.RelativeLayout;
 public class Jeu extends Activity {
 	
 	
-	
+	public static Bundle opt;
+	public Niveau niv;
 	public Carte carte;
 	public MoteurJeu play;
 	public RelativeLayout lay;
@@ -48,9 +51,8 @@ public class Jeu extends Activity {
         recommencer.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
             	pause.setVisibility(View.INVISIBLE);
-            	carte.loadNiveau(n_niv,lay);
-                play.init(); 
-                play.start(); 
+            	if(carte.n_dyna>0) hideDyna();
+            	launch_niv();
                 }
         });
         final Button menuprinc= (Button) findViewById(R.id.but3);
@@ -70,11 +72,7 @@ public class Jeu extends Activity {
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		if (brandNew) { // événement appelé lorsque le RelativeLayout "lay" est prêt ! C'est ici que l'on peut charger le niveau et ajouter les View "Animal".
-			carte.loadNiveau(n_niv,lay);
-			lay.removeView(bout_dyna);
-			lay.addView(bout_dyna); // Astuce pour mettre le bouton au premier plan
-			play.init();
-			play.start();
+			launch_niv();
 			brandNew=false;
 		}
 	}
@@ -125,10 +123,7 @@ public class Jeu extends Activity {
 		play.pause();
 		if(carte.n_dyna>0) hideDyna();
 		n_niv++;
-		carte.loadNiveau(n_niv,lay);
-		lay.removeView(bout_dyna);
-		lay.addView(bout_dyna); // Astuce pour mettre le bouton au premier plan
-		play.init();
+		launch_niv();
 		Log.i("C'est Gagné !","BRAVO !");
 	}
 	
@@ -164,8 +159,27 @@ public class Jeu extends Activity {
 		bout_dyna.setVisibility(View.INVISIBLE);
 	}
 	
+	/**
+	 * S'occupe de charger un niveau dans la "carte" et de lancer le moteur de jeu "play".
+	 */
+	private void launch_niv() {
+		if(opt.getBoolean("isRandom")) {
+			niv = new Niveau(10,30);
+		} else {
+			try { // On ouvre le Niveau index_niv.
+				niv = new Niveau(this.getAssets().open("niveaux/niveau"+n_niv+".txt"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		carte.loadNiveau(niv,lay);
+		lay.removeView(bout_dyna);
+		lay.addView(bout_dyna); // Astuce pour mettre le bouton au premier plan
+		play.init();
+		play.start();
+	}
 	
 	public void menuprinc(View v) {
 		play.start();
-	    }
+	}
 }

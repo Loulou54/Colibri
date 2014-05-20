@@ -19,6 +19,11 @@ import android.util.Log;
 public class Niveau {
 
 	/*
+	 * Définit s'il s'agit d'un niveau aléatoire ou non.
+	 */
+	public boolean isRandom;
+	
+	/*
 	 * Carte contenant les informations statiques du niveau en
 	 * question c'est-à-dire les menhirs, les fleurs ainsi
 	 * que les fleurs magiques et les dynamites
@@ -66,18 +71,31 @@ public class Niveau {
 	private int[][] chemin;
 	
 	/**
-	 * Consructeur de niveau 
+	 * Consructeur de niveau de campagne
 	 * 		@param niveau 
 	 * 			nombre du niveau à charger
 	 */
 	public Niveau(InputStream file) {
+		isRandom=false;
 		carte= new int[12][20];
-		chemin= new int[12][20];
 		vaches = new LinkedList<int[][]>();
 		chats = new LinkedList<int[][]>();
 		lireNiveau(file);
 	}
 	
+	/**
+	 * Constructeur d'un niveau aléatoire de paramètres donnés.
+	 * @param lon la longueur minimale du niveau
+	 * @param var la variation aléatoire supplémentaire de longueur
+	 */
+	public Niveau(int lon, int var) {
+		isRandom=true;
+		carte= new int[12][20];
+		chemin= new int[12][20];
+		vaches = new LinkedList<int[][]>();
+		chats = new LinkedList<int[][]>();
+		this.geneNivRand(lon, var);
+	}
 	
 	/**
 	 * Permet de modifier les différents éléments du niveau gràce au
@@ -281,21 +299,7 @@ public class Niveau {
 	}
 
 	// NIVEAU ALEATOIRE 
-	/**
-	 * Initialisation de la matrice de la bonne taille (12*20) et avec des
-	 * 0 de partout
-	 * 
-	 * @param matrice
-	 * 		matrice qu'il faut initialiser
-	 */
-	public void initMatrice(int[][] matrice){
-		for(int i=0;i<12;i++){
-			for(int j=0;j<20;j++){
-				matrice[i][j]=0;
 
-			}
-		}
-	}
 	/**
 	 * @param carte la carte 
 	 * @param rd  la ligne de depart 
@@ -350,7 +354,7 @@ public class Niveau {
 	 * @param n_fleur
 	 * @param mvt
 	 */
-	public void geneChemin(int n,int r,int c, int n_fleur, LinkedList<int[]> mvt){
+	public void geneChemin(int n,int r,int c, int n_fleur){
 		int rd=r;
 		int cd=c;
 		Random random = new Random();
@@ -360,7 +364,7 @@ public class Niveau {
 		int s;
 		int rf;
 		int cf;
-		for (int k =1; k<n+1;k++) {  
+		for (int k=0; k<n;k++) {  
 			direc=random.nextInt(2); // Choisit si le prochain deplacement se fera selon une ligne ou une colonne.
 			if (direc==0) { // SELON LA COLONNE
 				bord=random.nextInt(10); // Il y a une probabilité de 1/5 d'aller jusqu'à la cloture du niveau. Cela permet de ne pas trop confiner le chemin au milieu de la carte, et de donner davantage de possibilités de résolution au joueur...
@@ -377,9 +381,10 @@ public class Niveau {
 				}
 				rf=valideCheminC(r,c,ran,c,s, n_fleur); // On obtient la destination prévue "ran" sauf si un menhir se trouvait sur le chemin entre (r,c) et (ran,c) : dans ce cas, on obtient la ligne avant le menhir qui nous bloque.
 				if (rf==r) { // si finalement on a pas bougé, on refait un tour de boucle en plus.
-					n+=1;
+					k--;
 				} else { // sinon, on a donc un mouvement valide de prévu, la nouvelle position du colibri est donc (rf,c)
-					mvt.add(new int[]{s,0}); // on ajoute le mouvement dans la liste solution du niveau généré.
+					solution[k][0]=s;
+					solution[k][1]=0;
 					r=rf;
 				}
 				if (r==ran && ran!=0 && ran!=11) {
@@ -402,9 +407,10 @@ public class Niveau {
 				}
 				cf=valideCheminR(r,c,r,ran,s,n_fleur);
 				if (cf==c) {
-						n+=1;
+						k--;
 				} else {
-					mvt.add(new int[]{0,s});
+					solution[k][0]=0;
+					solution[k][1]=s;
 					c=cf;
 				}
 				if (c==ran && ran!=0 && ran!=19){
@@ -416,30 +422,24 @@ public class Niveau {
 	}
 	
 	/**
-	 * 
+	 * Génère un niveau aléatoire ! La longueur de la solution du niveau sera : lon+rand[0:var].
+	 *  @param lon longueur minimale de la solution générée
+	 *  @param var intervalle de variation aléaoire de la longueur du chemin
 	 */
-	public void geneNivRand(){
+	public void geneNivRand(int lon, int var){
 		Random r = new Random();
-		initMatrice(carte); //Carte vide qui sera remplie par "geneChemin"
-		initMatrice(this.chemin);// Contient le nombre de passage du Colibri sur chaque case
+		//initMatrice(carte); //Carte vide qui sera remplie par "geneChemin"
+		//initMatrice(this.chemin);// Contient le nombre de passage du Colibri sur chaque case
 		int n_fleur=0 ;// Compteur de fleurs posées
-		LinkedList<int[]> mvt= new LinkedList<int[]>(); //Liste des mouvements à effectuer pour résoudre le niveau
-		int rd = r.nextInt(12);
-		int cd = r.nextInt(20); // on tire un emplacement départ
-		chemin[rd][cd]=1;
-		geneChemin(10+r.nextInt(30),rd,cd, n_fleur, mvt); // on génère la carte pour une solution en 10 à 40 coups !
+		int longueur = lon+r.nextInt(var);
+		solution = new int[longueur][2]; //Liste des mouvements à effectuer pour résoudre le niveau
+		db_l = r.nextInt(12);
+		db_c = r.nextInt(20); // on tire un emplacement départ
+		chemin[db_l][db_c]=1;
+		geneChemin(longueur,db_l,db_c, n_fleur); // on génère la carte pour une solution en 10 à 40 coups !
 		//carte_cour=[carte,rd,cd,mvt] // "carte_cour" est la carte qui sera chargée et jouée
 	}
 
-	/**
-	 * @param mode
-	 */
-	public void niveaux_random(int mode) {
-			geneNivRand(); //on génère une carte et sa solution
-			mode=1; //définit le mode aléatoire
-			//MoteurJeu.start();  //on lance le jeu !
-
-	}
 }
 
 

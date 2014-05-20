@@ -164,6 +164,7 @@ public class MoteurJeu {
 			if (buf.size()>0) {
 				int[] mov=buf.poll();
 				carte.colibri.setDirection(mov); // On effectue le prochain mouvement de la file.
+				carte.colibri.setSpriteDirection(); // On choisit la direction de l'image.
 				if(carte.n_dyna>0) removeMenhirRouge(mov); // On enlève si nécessaire le menhir rouge de sélection.
 				if(mov[0]==mov[1]) { // <=> mov=={0,0} : pose une dynamite.
 					exploseMenhir();
