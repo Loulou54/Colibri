@@ -7,9 +7,12 @@
     <string name="aleat">Carte Aléatoire</string>
     <string name="multi">Défi Multijoueur</string>
     <string name="instructions">Instructions</string>
+    <string name="fac">Débutant</string>
+    <string name="moy">Intermédiaire</string>
+    <string name="dif">Expert</string>
     <string name="content1">Colibri</string>
-    <string name="reprendre">réprendre</string>
-    <string name="recommencer">récommencer</string>
+    <string name="reprendre">Reprendre</string>
+    <string name="recommencer">Recommencer</string>
     <string name="sortir">Menu principal</string>
 
 </resources>
