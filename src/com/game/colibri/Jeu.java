@@ -164,7 +164,7 @@ public class Jeu extends Activity {
 	 */
 	private void launch_niv() {
 		if(opt.getBoolean("isRandom")) {
-			niv = new Niveau(10,30);
+			niv = new Niveau(opt.getInt("long"),opt.getInt("vari"));
 		} else {
 			try { // On ouvre le Niveau index_niv.
 				niv = new Niveau(this.getAssets().open("niveaux/niveau"+n_niv+".txt"));

@@ -56,6 +56,34 @@ public class MenuPrinc extends Activity {
 				this.finish(); // On quitte le jeu !
 			} else {
 				// Animation pour rétablir le menu.
+				Animation a2 = AnimationUtils.loadAnimation(MenuPrinc.this, R.anim.menu_right);
+    			opt_aleat.startAnimation(a2);
+				Button btn_aleat = (Button)findViewById(R.id.bout3);
+				btn_aleat.startAnimation(AnimationUtils.loadAnimation(this, R.anim.bouton_aleat_down));
+				for(int i=0; i<opt_aleat.getChildCount(); i++) {
+    				((Button) opt_aleat.getChildAt(i)).setClickable(false);
+				}
+    			a2.setAnimationListener(new AnimationListener() {
+    	    		public void onAnimationStart(Animation an) {
+    	    			
+    	    		}
+    	    		public void onAnimationRepeat(Animation an) {
+    	    			
+    	    		}
+    	    		public void onAnimationEnd(Animation an) { // On réaffiche le menu principal une fois que les déplacements sont finis
+						opt_aleat.setVisibility(View.INVISIBLE);
+						Animation a = AnimationUtils.loadAnimation(MenuPrinc.this, R.anim.aleat_opt_anim);
+						((Button)findViewById(R.id.bout1)).startAnimation(a);
+						((Button)findViewById(R.id.bout2)).startAnimation(a);
+						((Button)findViewById(R.id.bout4)).startAnimation(a);
+						((Button)findViewById(R.id.bout5)).startAnimation(a);
+						((Button)findViewById(R.id.bout1)).setClickable(true);
+						((Button)findViewById(R.id.bout2)).setClickable(true);
+						((Button)findViewById(R.id.bout3)).setClickable(true);
+						((Button)findViewById(R.id.bout4)).setClickable(true);
+						((Button)findViewById(R.id.bout5)).setClickable(true);
+    	    		}
+    	    	});
 			}
 		}
 		return true;
@@ -100,34 +128,34 @@ public class MenuPrinc extends Activity {
     			p.height=3*h;
     			p.leftMargin=w/8;
     			opt_aleat.setLayoutParams(p);
-    			//Button b;
     			Animation a2 = AnimationUtils.loadAnimation(MenuPrinc.this, R.anim.aleat_opt_anim);
     			opt_aleat.startAnimation(a2);
-    			/*for(int i=0; i<opt_aleat.getChildCount(); i++) {
-    				b=(Button) opt_aleat.getChildAt(i);
-    				b.startAnimation(a2);
-    			}*/
+				for(int i=0; i<opt_aleat.getChildCount(); i++) {
+    				((Button) opt_aleat.getChildAt(i)).setClickable(true);
+				}
     			opt_aleat.setVisibility(View.VISIBLE);
     		}
     	});
-		
-		/*
-		Jeu.opt = new Bundle();
-		Jeu.opt.putBoolean("isRandom", true);
-		jeu = new Intent(this, Jeu.class);
-		startActivity(jeu);
-		*/
 	}
 	
 	public void facile(View v) {
-		
+		launchAleat(8,14);
 	}
 	
 	public void moyen(View v) {
-		
+		launchAleat(18,25);
 	}
 
 	public void difficile(View v) {
-		
+		launchAleat(30,40);
+	}
+	
+	private void launchAleat(int lon, int var) {
+		Jeu.opt = new Bundle();
+		Jeu.opt.putBoolean("isRandom", true);
+		Jeu.opt.putInt("long", lon);
+		Jeu.opt.putInt("vari", var);
+		jeu = new Intent(this, Jeu.class);
+		startActivity(jeu);
 	}
 }
