@@ -33,4 +33,11 @@ public class Colibri extends Animal {
 	    this.setLayoutParams(params);
 	}
 	
+	public void setSpriteDirection() {
+		if(mx==1)
+			this.setBackgroundResource(R.drawable.colibri_d);
+		else if(mx==-1)
+			this.setBackgroundResource(R.drawable.colibri_g);
+		this.start();
+	}
 }

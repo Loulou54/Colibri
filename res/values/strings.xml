@@ -7,9 +7,17 @@
     <string name="aleat">Carte Aléatoire</string>
     <string name="multi">Défi Multijoueur</string>
     <string name="instructions">Instructions</string>
+    <string name="fac">Débutant</string>
+    <string name="moy">Intermédiaire</string>
+    <string name="dif">Expert</string>
     <string name="content1">Colibri</string>
+<<<<<<< HEAD
     <string name="reprendre">Réprendre</string>
     <string name="recommencer">Récommencer</string>
+=======
+    <string name="reprendre">Reprendre</string>
+    <string name="recommencer">Recommencer</string>
+>>>>>>> FETCH_HEAD
     <string name="sortir">Menu principal</string>
 
 </resources>

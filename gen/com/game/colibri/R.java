@@ -9,10 +9,14 @@ package com.game.colibri;
 
 public final class R {
     public static final class anim {
-        public static final int blood_anim=0x7f040000;
-        public static final int bouton_dyna_down=0x7f040001;
-        public static final int bouton_dyna_up=0x7f040002;
-        public static final int dead_anim=0x7f040003;
+        public static final int aleat_opt_anim=0x7f040000;
+        public static final int blood_anim=0x7f040001;
+        public static final int bouton_aleat_down=0x7f040002;
+        public static final int bouton_aleat_up=0x7f040003;
+        public static final int bouton_dyna_down=0x7f040004;
+        public static final int bouton_dyna_up=0x7f040005;
+        public static final int dead_anim=0x7f040006;
+        public static final int menu_right=0x7f040007;
     }
     public static final class attr {
     }
@@ -37,6 +41,7 @@ public final class R {
         public static final int bouton_normal=0x7f020005;
         public static final int bouton_pressed=0x7f020006;
         public static final int boutons=0x7f020007;
+<<<<<<< HEAD
         public static final int button=0x7f020008;
         public static final int button_enable=0x7f020009;
         public static final int button_normal=0x7f02000a;
@@ -52,6 +57,23 @@ public final class R {
         public static final int continuer_enabled=0x7f020014;
         public static final int continuer_normal=0x7f020015;
         public static final int continuer_pressed=0x7f020016;
+=======
+        public static final int boutons2=0x7f020008;
+        public static final int button=0x7f020009;
+        public static final int button_enable=0x7f02000a;
+        public static final int button_normal=0x7f02000b;
+        public static final int button_pressed=0x7f02000c;
+        public static final int chat=0x7f02000d;
+        public static final int chat_0=0x7f02000e;
+        public static final int chat_rd=0x7f02000f;
+        public static final int chat_rg=0x7f020010;
+        public static final int colibri_d=0x7f020011;
+        public static final int colibri_d1=0x7f020012;
+        public static final int colibri_d2=0x7f020013;
+        public static final int colibri_g=0x7f020014;
+        public static final int colibri_g1=0x7f020015;
+        public static final int colibri_g2=0x7f020016;
+>>>>>>> FETCH_HEAD
         public static final int dynamite=0x7f020017;
         public static final int dynamite_allumee=0x7f020018;
         public static final int explo0=0x7f020019;
@@ -69,6 +91,7 @@ public final class R {
         public static final int menhir_rouge=0x7f020025;
         public static final int menu=0x7f020026;
         public static final int rainbow=0x7f020027;
+<<<<<<< HEAD
         public static final int replay=0x7f020028;
         public static final int replay_enabled=0x7f020029;
         public static final int replay_normal=0x7f02002a;
@@ -86,18 +109,41 @@ public final class R {
         public static final int bout3=0x7f090013;
         public static final int bout4=0x7f090014;
         public static final int bout5=0x7f090015;
+=======
+        public static final int sang=0x7f020028;
+        public static final int skull=0x7f020029;
+        public static final int vache=0x7f02002a;
+        public static final int vache_0=0x7f02002b;
+        public static final int vache_rd=0x7f02002c;
+        public static final int vache_rg=0x7f02002d;
+    }
+    public static final class id {
+        public static final int bout1=0x7f090009;
+        public static final int bout2=0x7f09000a;
+        public static final int bout3=0x7f09000b;
+        public static final int bout4=0x7f090010;
+        public static final int bout5=0x7f090011;
+>>>>>>> FETCH_HEAD
         public static final int bout_dyna=0x7f090002;
         public static final int but1=0x7f090004;
         public static final int but2=0x7f090005;
         public static final int but3=0x7f090006;
         public static final int but4=0x7f090007;
         public static final int carte=0x7f090001;
+<<<<<<< HEAD
         public static final int continuer=0x7f090009;
         public static final int defi=0x7f09000b;
         public static final int exit=0x7f09000a;
         public static final int gagner=0x7f090008;
         public static final int lay=0x7f090000;
         public static final int mode=0x7f09000f;
+=======
+        public static final int difficile=0x7f09000f;
+        public static final int facile=0x7f09000d;
+        public static final int lay=0x7f090000;
+        public static final int moyen=0x7f09000e;
+        public static final int opt_aleat=0x7f09000c;
+>>>>>>> FETCH_HEAD
         public static final int pause=0x7f090003;
         public static final int perdu=0x7f09000c;
         public static final int replay=0x7f09000d;
@@ -115,13 +161,16 @@ public final class R {
         public static final int aleat=0x7f070003;
         public static final int app_name=0x7f070000;
         public static final int campagne=0x7f070002;
-        public static final int content1=0x7f070006;
+        public static final int content1=0x7f070009;
+        public static final int dif=0x7f070008;
+        public static final int fac=0x7f070006;
         public static final int instructions=0x7f070005;
         public static final int jouer=0x7f070001;
+        public static final int moy=0x7f070007;
         public static final int multi=0x7f070004;
-        public static final int recommencer=0x7f070008;
-        public static final int reprendre=0x7f070007;
-        public static final int sortir=0x7f070009;
+        public static final int recommencer=0x7f07000b;
+        public static final int reprendre=0x7f07000a;
+        public static final int sortir=0x7f07000c;
     }
     public static final class style {
         /** 
