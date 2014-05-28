@@ -135,23 +135,21 @@ public class Jeu extends Activity {
 		gagne.setVisibility(View.VISIBLE);
 		
 		if(carte.n_dyna>0) hideDyna();
-<<<<<<< HEAD
+
 		 final Button continuer= (Button) findViewById(R.id.continuer);
 	       continuer.setOnClickListener(new View.OnClickListener() {
 	            public void onClick(View v) {
 	            	gagne.setVisibility(View.INVISIBLE);
 	            	n_niv++;
-	        		carte.loadNiveau(n_niv,lay);
-	        		lay.removeView(bout_dyna);
+	        		launch_niv();
+	        		
+	        		
 	        		lay.addView(bout_dyna); // Astuce pour mettre le bouton au premier plan
 	        		play.init();
 	                }
 	        });
 		
-=======
-		n_niv++;
-		launch_niv();
->>>>>>> FETCH_HEAD
+
 		Log.i("C'est Gagné !","BRAVO !");
 	}
 	
