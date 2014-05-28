@@ -21,6 +21,7 @@
         android:layout_marginTop="0dp"
         android:background="@drawable/bouton_dyna"
         android:alpha="0.8"
+        android:visibility="invisible"
         android:gravity="center_vertical"
         android:paddingLeft="48dp"
         android:onClick="exploser"
@@ -30,7 +31,8 @@
     android:id="@+id/pause"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/menu">
+    android:background="@drawable/menu"
+    android:visibility="invisible" >
     
      <Button
         android:id="@+id/but1"
@@ -43,7 +45,8 @@
         android:gravity="center"
         android:text="@string/reprendre"
         android:textColor="@android:color/white"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:onClick="reprendre" />
     
     <Button
         android:id="@+id/but2"
@@ -57,7 +60,8 @@
         android:layout_gravity="center"
         android:text="@string/recommencer"
         android:textColor="@android:color/white"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:onClick="recommencer" />
     
     <Button
         android:id="@+id/but3"
@@ -71,7 +75,8 @@
         android:gravity="center"
         android:text="@string/sortir"
         android:textColor="@android:color/white"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:onClick="quitter" />
     
     <Button
         android:id="@+id/but4"
@@ -87,7 +92,6 @@
         android:textColor="@android:color/white"
         android:textSize="16sp" />
 
-   
 </RelativeLayout>
 
 <RelativeLayout 
@@ -96,7 +100,8 @@
     android:layout_height="match_parent"
     android:layout_alignParentLeft="true"
     android:layout_alignParentTop="true"
-    android:background="@drawable/arrier" >
+    android:background="@drawable/arrier"
+    android:visibility="invisible" >
 
     <Button
         android:id="@+id/continuer"
@@ -108,7 +113,8 @@
         android:background="@drawable/continuer"
         android:gravity="center"
         android:textColor="@android:color/white"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:onClick="suivant" />
 
     <Button
         android:id="@+id/exit"
@@ -122,21 +128,8 @@
         android:gravity="center"
         android:text="@string/sortir"
         android:textColor="@android:color/white"
-        android:textSize="16sp" />
-
-    <Button
-        android:id="@+id/defi"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/exit"
-        android:layout_below="@+id/exit"
-        android:layout_marginTop="28dp"
-        android:background="@drawable/button"
-        android:gravity="center"
-        android:text="@string/multi"
-        android:textColor="@android:color/white"
-        android:textSize="16sp" />
-    
+        android:textSize="16sp"
+        android:onClick="quitter" />
     
     </RelativeLayout>
 
@@ -146,7 +139,8 @@
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:background="@drawable/arrier" >
+        android:background="@drawable/arrier"
+        android:visibility="invisible" >
 
         <Button
             android:id="@+id/replay"
@@ -158,7 +152,8 @@
             android:background="@drawable/replay"
             android:gravity="center"
             android:textColor="@android:color/white"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:onClick="recommencer" />
 
         <Button
             android:id="@+id/sortie"
@@ -172,25 +167,10 @@
             android:gravity="center"
             android:text="@string/sortir"
             android:textColor="@android:color/white"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:onClick="quitter" />
 
-        <Button
-            android:id="@+id/mode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/sortie"
-            android:layout_below="@+id/sortie"
-            android:layout_marginTop="28dp"
-            android:background="@drawable/button"
-            android:gravity="center"
-            android:text="@string/multi"
-            android:textColor="@android:color/white"
-            android:textSize="16sp" />
     </RelativeLayout>
-   
 
-  
-  
-  
 </RelativeLayout>
 

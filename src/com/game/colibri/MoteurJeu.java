@@ -42,29 +42,6 @@ public class MoteurJeu {
 	private static final int LIG=12, COL=20; // Dimensions de la grille
 	
 	/**
-	 * Laura et Mariam :
-	 *   Voici la classe dans laquelle vous devez gérer les déplacements et leurs commandes (cf : onTouch, lisez la doc du MotionEvent si vous voulez gérer les "glisser" plus tard.)
-	 * Idéalement, pensez déjà au système de buffer pour les commandes ! Laura tu vois de quoi je parle. :)
-	 * Il s'agit d'enregistrer chaque commande (monter/descendre/droite/gauche) dans une file d'attente
-	 * dans laquelle vous puisez dès que vous pouvez effectuer une nouvelle action.
-	 * 
-	 * La "carte" contient tout le niveau et gère son affichage.
-	 * - carte.colibri est l'objet graphique "Animal" représentant le colibri.
-	 * Son animation est gèrée dans la classe Animal. S'y référer pour les commandes de position.
-	 * - carte.vaches sera la liste des vaches de type "Animal". On ne s'y intéresse pas tout de suite ! ;)
-	 * - carte.loadNiveau permet de charger un nouveau niveau : vous ne devez pas l'utiliser ici.
-	 * - carte.invalidate() : permet de redessiner la carte. Il ne faut l'appeler que lorsqu'un objet statique
-	 * a bougé ou a disparu. Typiquement lorsque l'on mange une fleur ! (miam) Le déplacement des animaux ne
-	 * nécessite pas de redessiner la carte. (car ce sont des View à eux seuls)
-	 * 
-	 * Le Jeu "jeu" permet de faire référence à l'activité appelante. C'est à elle notamment qu'il
-	 * faudra signaler lorsque le joueur a fini le niveau par un appel : jeu.gagne() pour pouvoir passer au suivant !
-	 * 
-	 * Bon courage ! Vous pouvez bien sûr modifier des trucs dans les autres classes mais presque tout
-	 * votre travail devrait se faire là normalement ! ;)
-	 */
-	
-	/**
 	 * Handler de rafraîchissement
 	 * Il appelle la méthode void move() qui elle même appelle moveHandler.sleep(PERIODE) pour boucler.
 	 * Utiliser moveHandler.sleep(PERIODE) pour appeler le handler après PERIODE ms.

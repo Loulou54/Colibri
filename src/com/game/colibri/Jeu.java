@@ -40,39 +40,9 @@ public class Jeu extends Activity {
 		carte = (Carte) findViewById(R.id.carte);
 		lay = (RelativeLayout) findViewById(R.id.lay);
 		bout_dyna = (Button) findViewById(R.id.bout_dyna);
-		bout_dyna.setVisibility(View.INVISIBLE);
 		pause= (RelativeLayout) findViewById(R.id.pause);
-		pause.setVisibility(View.INVISIBLE);
-		
-		final Button reprendre = (Button) findViewById(R.id.but1);
-        reprendre.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-            	pause.setVisibility(View.INVISIBLE);
-                play.start();            }
-        });
-        final Button recommencer= (Button) findViewById(R.id.but2);
-        recommencer.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-            	pause.setVisibility(View.INVISIBLE);
-            	if(carte.n_dyna>0) hideDyna();
-            	launch_niv();
-                }
-        });
-        final Button menuprinc= (Button) findViewById(R.id.but3);
-        menuprinc.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-            	pause.setVisibility(View.INVISIBLE);
-            	Jeu.this.finish();
-                }
-        });
-        
         perdu= (RelativeLayout) findViewById(R.id.perdu);
-		perdu.setVisibility(View.INVISIBLE);
-		
 		gagne= (RelativeLayout) findViewById(R.id.gagner);
-		gagne.setVisibility(View.INVISIBLE);
-		
-		
 		play = new MoteurJeu(this,carte);
 		Log.i("onCreate","FINI");
 	}
@@ -103,7 +73,6 @@ public class Jeu extends Activity {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
 			play.pause();
 			pause.setVisibility(View.VISIBLE);
-			
 		}
 		if(play.isRunning) { // Commande en cours de jeu
 			if(keyCode == KeyEvent.KEYCODE_DPAD_UP) {
@@ -133,23 +102,7 @@ public class Jeu extends Activity {
 	public void gagne() {
 		play.pause();
 		gagne.setVisibility(View.VISIBLE);
-		
 		if(carte.n_dyna>0) hideDyna();
-
-		 final Button continuer= (Button) findViewById(R.id.continuer);
-	       continuer.setOnClickListener(new View.OnClickListener() {
-	            public void onClick(View v) {
-	            	gagne.setVisibility(View.INVISIBLE);
-	            	n_niv++;
-	        		launch_niv();
-	        		
-	        		
-	        		lay.addView(bout_dyna); // Astuce pour mettre le bouton au premier plan
-	        		play.init();
-	                }
-	        });
-		
-
 		Log.i("C'est Gagné !","BRAVO !");
 	}
 	
@@ -206,7 +159,30 @@ public class Jeu extends Activity {
 		play.start();
 	}
 	
-	public void menuprinc(View v) {
-		play.start();
+	/**
+	 * Les fonctions suivantes sont déclenchées par les appuis sur les boutons des menus Pause, Gagné et Mort.
+	 */
+	
+	public void reprendre(View v) {
+		pause.setVisibility(View.INVISIBLE);
+        play.start(); 
 	}
+	
+	public void recommencer(View v) {
+		pause.setVisibility(View.INVISIBLE);
+		perdu.setVisibility(View.INVISIBLE);
+    	if(carte.n_dyna>0) hideDyna();
+    	launch_niv();
+	}
+	
+	public void quitter(View v) {
+    	Jeu.this.finish();
+	}
+	
+	public void suivant(View v) {
+		gagne.setVisibility(View.INVISIBLE);
+		n_niv++;
+		launch_niv();
+	}
+	
 }

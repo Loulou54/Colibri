@@ -9,6 +9,7 @@ import android.view.animation.Animation.AnimationListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ViewFlipper;
 import android.app.Activity;
 import android.content.Intent;
 
@@ -21,10 +22,9 @@ public class MenuPrinc extends Activity {
 	
 	public int ww,wh;
 	private Intent jeu;
-	LinearLayout opt_aleat;
-	LinearLayout opt_reglages;
-	RelativeLayout info;
-	RelativeLayout instru;
+	private ViewFlipper vf; // ViewFlipper permettant de passer de l'écran de menu principal à celui des instrus ou infos
+	private LinearLayout opt_aleat;
+	private LinearLayout opt_reglages;
 	
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -33,6 +33,7 @@ public class MenuPrinc extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_menu_princ);
+		vf = (ViewFlipper) findViewById(R.id.flip);
 		opt_aleat = (LinearLayout) findViewById(R.id.opt_aleat);
 		opt_reglages = (LinearLayout) findViewById(R.id.opt_reglages);
 	}
@@ -46,6 +47,13 @@ public class MenuPrinc extends Activity {
 		RelativeLayout root = (RelativeLayout) findViewById(R.id.root);
 		ww = root.getWidth();
 		wh = root.getHeight();
+		placeButton();
+	}
+	
+	/**
+	 * Place le premier bouton à la position voulue. Les autres sont placés par rapport à lui.
+	 */
+	private void placeButton() {
 		Button btn_lay = (Button)findViewById(R.id.bout1);
 		RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) btn_lay.getLayoutParams();
 		layoutParams.leftMargin = ww*4/9;
@@ -179,14 +187,14 @@ public class MenuPrinc extends Activity {
 	}
 	
 	public void retour(View v) {
-		setContentView(R.layout.activity_menu_princ);
+		vf.setDisplayedChild(0);
 	}
 	
 	public void info(View v) {
-		setContentView(R.layout.activity_info);
+		vf.setDisplayedChild(1);
 	}
 	
 	public void instru(View v) {
-		setContentView(R.layout.activity_instru);
+		vf.setDisplayedChild(2);
 	}
 }

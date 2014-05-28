@@ -1,10 +1,28 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ViewFlipper xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/flip"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+<RelativeLayout
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/menu"
     tools:context=".MenuPrinc" >
+    
+    <Button
+        android:id="@+id/bout1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/boutons"
+        android:gravity="center"
+        android:text="@string/jouer"
+        android:textColor="@android:color/white"
+        android:onClick="continuer"
+        android:textSize="16sp" />
     
     <Button
         android:id="@+id/bout2"
@@ -91,6 +109,19 @@
         android:text="@string/multi"
         android:textColor="@android:color/white"
         android:textSize="16sp" />
+	
+    <Button
+        android:id="@+id/bout5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/bout4"
+        android:layout_below="@+id/bout4"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/boutons"
+        android:gravity="center"
+        android:text="@string/instructions"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
     
     <LinearLayout
         android:id="@+id/opt_reglages"
@@ -126,31 +157,11 @@
 	        android:textSize="14sp" />
 
 	</LinearLayout>
-    
-    <Button
-        android:id="@+id/bout5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/bout4"
-        android:layout_below="@+id/bout4"
-        android:layout_marginTop="4dp"
-        android:background="@drawable/boutons"
-        android:gravity="center"
-        android:text="@string/instructions"
-        android:textColor="@android:color/white"
-        android:textSize="16sp" />
-
-    <Button
-        android:id="@+id/bout1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:background="@drawable/boutons"
-        android:gravity="center"
-        android:onClick="continuer"
-        android:text="@string/jouer"
-        android:textColor="@android:color/white"
-        android:textSize="16sp" />
 
 </RelativeLayout>
+
+<include layout="@layout/activity_info" />
+
+<include layout="@layout/activity_instru" />
+
+</ViewFlipper>

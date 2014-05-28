@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/info"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/instru"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    tools:context=".MenuPrinc" >
     
     <Button
         android:id="@+id/bouton1"
@@ -16,7 +18,7 @@
         android:gravity="center"
         android:text="@string/sortir"
         android:textColor="@android:color/white"
-        android:onClick="continuer"
+        android:onClick="retour"
         android:textSize="16sp" />
     
     <Button
