@@ -105,6 +105,41 @@
         android:textColor="@android:color/white"
         android:textSize="16sp" />
     
+    <LinearLayout
+        android:id="@+id/opt_reglages"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/bout5"
+        android:layout_above="@+id/bout5"
+        android:orientation="vertical"
+         >
+
+	    <Button
+	        android:id="@+id/info"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:layout_marginTop="1dp"
+	        android:background="@drawable/bouton_enable"
+	        android:gravity="center"
+	        android:onClick="info"
+	        android:text="@string/info"
+	        android:textColor="@android:color/white"
+	        android:textSize="14sp" />
+
+	    <Button
+	        android:id="@+id/instru"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:layout_marginTop="1dp"
+	        android:background="@drawable/bouton_enable"
+	        android:gravity="center"
+	        android:onClick="instru"
+	        android:text="@string/instru"
+	        android:textColor="@android:color/white"
+	        android:textSize="14sp" />
+
+	</LinearLayout>
+    
     <Button
         android:id="@+id/bout5"
         android:layout_width="wrap_content"

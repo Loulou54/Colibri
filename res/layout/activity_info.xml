@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/info"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/information"
+    android:orientation="vertical"
+    tools:context=".MenuPrinc" >
+    
+    <Button
+        android:id="@+id/bouton1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/bouton_enabled"
+        android:gravity="center"
+        android:text="@string/sortir"
+        android:textColor="@android:color/white"
+        android:onClick="retour"
+        android:textSize="16sp" />
+    
+    <Button
+        android:id="@+id/bouton2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/bouton1"
+        android:layout_below="@+id/bouton1"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/bouton_enabled"
+        android:gravity="center"
+        android:text="@string/param"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+
+</RelativeLayout>

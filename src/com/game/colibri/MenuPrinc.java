@@ -22,6 +22,9 @@ public class MenuPrinc extends Activity {
 	public int ww,wh;
 	private Intent jeu;
 	LinearLayout opt_aleat;
+	LinearLayout opt_reglages;
+	RelativeLayout info;
+	RelativeLayout instru;
 	
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -31,6 +34,7 @@ public class MenuPrinc extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_menu_princ);
 		opt_aleat = (LinearLayout) findViewById(R.id.opt_aleat);
+		opt_reglages = (LinearLayout) findViewById(R.id.opt_reglages);
 	}
 
 	// Le placement des boutons est calculé ici en fonction des dimensions de l'écran. (Astuce pour contourner le temps d'établissement de l'affichage empêchant ces opérations dans le onCreate)
@@ -157,5 +161,32 @@ public class MenuPrinc extends Activity {
 		Jeu.opt.putInt("vari", var);
 		jeu = new Intent(this, Jeu.class);
 		startActivity(jeu);
+	}
+	
+	public void reglages(View v) {
+		((Button)findViewById(R.id.bout1)).setClickable(false);
+		((Button)findViewById(R.id.bout2)).setClickable(false);
+		((Button)findViewById(R.id.bout3)).setClickable(false);
+		((Button)findViewById(R.id.bout4)).setClickable(false);
+		Button bout1 = (Button)findViewById(R.id.bout1);
+		int w=bout1.getWidth(), h=bout1.getHeight();
+		RelativeLayout.LayoutParams p = (RelativeLayout.LayoutParams) opt_reglages.getLayoutParams();
+		p.width=3*w/4;
+		p.height=h;
+		p.rightMargin=0;
+		opt_reglages.setLayoutParams(p);
+		opt_reglages.setVisibility(View.VISIBLE);
+	}
+	
+	public void retour(View v) {
+		setContentView(R.layout.activity_menu_princ);
+	}
+	
+	public void info(View v) {
+		setContentView(R.layout.activity_info);
+	}
+	
+	public void instru(View v) {
+		setContentView(R.layout.activity_instru);
 	}
 }

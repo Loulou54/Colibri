@@ -14,5 +14,8 @@
     <string name="reprendre">Reprendre</string>
     <string name="recommencer">Recommencer</string>
     <string name="sortir">Menu principal</string>
+    <string name="info">Informations</string>
+	<string name="instru">Instructions</string>
+	<string name="param">Paramètres</string>
 
 </resources>
