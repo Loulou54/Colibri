@@ -21,6 +21,8 @@ public class Jeu extends Activity {
 	public MoteurJeu play;
 	public RelativeLayout lay;
 	public RelativeLayout pause;
+	public RelativeLayout perdu; 
+	public RelativeLayout gagne; 
 	public Button bout_dyna;
 	private boolean brandNew=true;
 	public int n_niv=1;
@@ -38,6 +40,7 @@ public class Jeu extends Activity {
 		bout_dyna.setVisibility(View.INVISIBLE);
 		pause= (RelativeLayout) findViewById(R.id.pause);
 		pause.setVisibility(View.INVISIBLE);
+		
 		final Button reprendre = (Button) findViewById(R.id.but1);
         reprendre.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -60,6 +63,14 @@ public class Jeu extends Activity {
             	setContentView(R.layout.activity_menu_princ);
                 }
         });
+        
+        perdu= (RelativeLayout) findViewById(R.id.perdu);
+		perdu.setVisibility(View.INVISIBLE);
+		
+		gagne= (RelativeLayout) findViewById(R.id.gagner);
+		gagne.setVisibility(View.INVISIBLE);
+		
+		
 		play = new MoteurJeu(this,carte);
 		Log.i("onCreate","FINI");
 	}
@@ -123,12 +134,21 @@ public class Jeu extends Activity {
 	 */
 	public void gagne() {
 		play.pause();
+		gagne.setVisibility(View.VISIBLE);
+		
 		if(carte.n_dyna>0) hideDyna();
-		n_niv++;
-		carte.loadNiveau(n_niv,lay);
-		lay.removeView(bout_dyna);
-		lay.addView(bout_dyna); // Astuce pour mettre le bouton au premier plan
-		play.init();
+		 final Button continuer= (Button) findViewById(R.id.continuer);
+	       continuer.setOnClickListener(new View.OnClickListener() {
+	            public void onClick(View v) {
+	            	gagne.setVisibility(View.INVISIBLE);
+	            	n_niv++;
+	        		carte.loadNiveau(n_niv,lay);
+	        		lay.removeView(bout_dyna);
+	        		lay.addView(bout_dyna); // Astuce pour mettre le bouton au premier plan
+	        		play.init();
+	                }
+	        });
+		
 		Log.i("C'est Gagné !","BRAVO !");
 	}
 	
@@ -136,6 +156,7 @@ public class Jeu extends Activity {
 	 * Le colibri est mort : affiche l'écran associé.
 	 */
 	public void mort() {
+		perdu.setVisibility(View.VISIBLE);
 		Log.i("Oh non !","Vous vous êtes fait écraser !");
 	}
 	
