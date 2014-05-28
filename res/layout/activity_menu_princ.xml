@@ -5,19 +5,6 @@
     android:layout_height="match_parent"
     android:background="@drawable/menu"
     tools:context=".MenuPrinc" >
-
-    <Button
-        android:id="@+id/bout1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:background="@drawable/boutons"
-        android:gravity="center"
-        android:text="@string/jouer"
-        android:textColor="@android:color/white"
-        android:onClick="continuer"
-        android:textSize="16sp" />
     
     <Button
         android:id="@+id/bout2"
@@ -150,6 +137,19 @@
         android:background="@drawable/boutons"
         android:gravity="center"
         android:text="@string/instructions"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/bout1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:background="@drawable/boutons"
+        android:gravity="center"
+        android:onClick="continuer"
+        android:text="@string/jouer"
         android:textColor="@android:color/white"
         android:textSize="16sp" />
 

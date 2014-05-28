@@ -30,7 +30,7 @@
     android:id="@+id/pause"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/arrier">
+    android:background="@drawable/menu">
     
      <Button
         android:id="@+id/but1"
@@ -89,6 +89,106 @@
 
    
 </RelativeLayout>
+
+<RelativeLayout 
+    android:id="@+id/gagner"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentTop="true"
+    android:background="@drawable/arrier" >
+
+    <Button
+        android:id="@+id/continuer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="102dp"
+        android:background="@drawable/continuer"
+        android:gravity="center"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/exit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/continuer"
+        android:layout_marginRight="38dp"
+        android:layout_marginTop="29dp"
+        android:background="@drawable/button"
+        android:gravity="center"
+        android:text="@string/sortir"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/defi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/exit"
+        android:layout_below="@+id/exit"
+        android:layout_marginTop="28dp"
+        android:background="@drawable/button"
+        android:gravity="center"
+        android:text="@string/multi"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+    
+    
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/perdu"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/arrier" >
+
+        <Button
+            android:id="@+id/replay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="102dp"
+            android:background="@drawable/replay"
+            android:gravity="center"
+            android:textColor="@android:color/white"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/sortie"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/replay"
+            android:layout_marginRight="38dp"
+            android:layout_marginTop="29dp"
+            android:background="@drawable/button"
+            android:gravity="center"
+            android:text="@string/sortir"
+            android:textColor="@android:color/white"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/sortie"
+            android:layout_below="@+id/sortie"
+            android:layout_marginTop="28dp"
+            android:background="@drawable/button"
+            android:gravity="center"
+            android:text="@string/multi"
+            android:textColor="@android:color/white"
+            android:textSize="16sp" />
+    </RelativeLayout>
+   
+
   
   
   
