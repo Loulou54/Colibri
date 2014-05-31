@@ -73,10 +73,6 @@ public class Jeu extends Activity {
 	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if (keyCode == KeyEvent.KEYCODE_BACK) {
-			play.pause();
-			pause.setVisibility(View.VISIBLE);
-		}
 		if(play.isRunning) { // Commande en cours de jeu
 			if(keyCode == KeyEvent.KEYCODE_DPAD_UP) {
 				play.direction(MoteurJeu.UP);
@@ -86,12 +82,18 @@ public class Jeu extends Activity {
 				play.direction(MoteurJeu.LEFT);
 			} else if(keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
 				play.direction(MoteurJeu.DOWN);
-			} else if(keyCode == KeyEvent.KEYCODE_MENU || keyCode == KeyEvent.KEYCODE_ESCAPE) {
+			} else if((keyCode == KeyEvent.KEYCODE_MENU || keyCode == KeyEvent.KEYCODE_ESCAPE) && niv.solution!=null) { // Solution !
+				if(carte.n_dyna>0) hideDyna();
+		    	launch_niv(true);
+		    	play.solution();
+			} else if(keyCode == KeyEvent.KEYCODE_BACK) {
 				play.pause();
+				pause.setVisibility(View.VISIBLE);
 			}
 		} else { // Jeu en pause
-			if(keyCode == KeyEvent.KEYCODE_MENU || keyCode == KeyEvent.KEYCODE_ESCAPE) {
-				play.start();
+			if(keyCode == KeyEvent.KEYCODE_BACK) {
+				pause.setVisibility(View.INVISIBLE);
+		        play.start(); 
 			}
 		}
 	return true;

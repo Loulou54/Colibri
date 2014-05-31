@@ -1,5 +1,6 @@
 package com.game.colibri;
 
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -32,6 +33,7 @@ public class MenuPrinc extends Activity {
 	private ViewFlipper vf; // ViewFlipper permettant de passer de l'écran de menu principal à celui des instrus ou infos
 	private LinearLayout opt_aleat;
 	private LinearLayout opt_reglages;
+	private MediaPlayer intro=null,boucle=null;
 	
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -48,6 +50,19 @@ public class MenuPrinc extends Activity {
 		Jeu.opt = new Bundle(); // On va contourner le fait que startActivity(Intent i, Bundle b) ne soit pas supporté sur API < 16, en utilisant un Bundle de classe.
 		Jeu.menu=this;
 		loadData();
+		intro = MediaPlayer.create(this, R.raw.intro);
+		intro.setLooping(false);
+		boucle = MediaPlayer.create(this, R.raw.boucle);
+		boucle.setLooping(true);
+		intro.start();
+		intro.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+			@Override
+			public void onCompletion(MediaPlayer mp) {
+				intro.release();
+			    intro = null;
+				boucle.start();
+			}
+		});
 	}
 
 	// Le placement des boutons est calculé ici en fonction des dimensions de l'écran. (Astuce pour contourner le temps d'établissement de l'affichage empêchant ces opérations dans le onCreate)
@@ -77,6 +92,14 @@ public class MenuPrinc extends Activity {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if(keyCode == KeyEvent.KEYCODE_BACK) {
 			if(opt_aleat.getVisibility()==View.INVISIBLE) {
+				if (intro!=null) {
+				    intro.release();
+				    intro = null;
+				}
+				if (boucle!=null) {
+				    boucle.release();
+				    boucle = null;
+				}
 				this.finish(); // On quitte le jeu !
 			} else {
 				// Animation pour rétablir le menu.

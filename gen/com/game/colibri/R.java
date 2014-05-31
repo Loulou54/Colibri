@@ -27,10 +27,10 @@ public final class R {
          screen margins) for sw720dp devices (e.g. 10" tablets) in landscape here.
     
          */
-        public static final int activity_horizontal_margin=0x7f050000;
-        public static final int activity_vertical_margin=0x7f050001;
-        public static final int btns_height=0x7f050003;
-        public static final int btns_width=0x7f050002;
+        public static final int activity_horizontal_margin=0x7f060000;
+        public static final int activity_vertical_margin=0x7f060001;
+        public static final int btns_height=0x7f060003;
+        public static final int btns_width=0x7f060002;
     }
     public static final class drawable {
         public static final int arrier=0x7f020000;
@@ -93,36 +93,36 @@ public final class R {
         public static final int vache_rg=0x7f020039;
     }
     public static final class id {
-        public static final int bout1=0x7f080013;
-        public static final int bout2=0x7f080014;
-        public static final int bout3=0x7f080015;
-        public static final int bout4=0x7f08001a;
-        public static final int bout5=0x7f08001b;
-        public static final int bout_dyna=0x7f080005;
-        public static final int bouton1=0x7f080001;
-        public static final int bouton2=0x7f080002;
-        public static final int but1=0x7f080007;
-        public static final int but2=0x7f080008;
-        public static final int but3=0x7f080009;
-        public static final int but4=0x7f08000a;
-        public static final int carte=0x7f080004;
-        public static final int continuer=0x7f08000c;
-        public static final int difficile=0x7f080019;
-        public static final int exit=0x7f08000d;
-        public static final int facile=0x7f080017;
-        public static final int flip=0x7f080011;
-        public static final int gagner=0x7f08000b;
-        public static final int info=0x7f080000;
-        public static final int instru=0x7f08001d;
-        public static final int lay=0x7f080003;
-        public static final int moyen=0x7f080018;
-        public static final int opt_aleat=0x7f080016;
-        public static final int opt_reglages=0x7f08001c;
-        public static final int pause=0x7f080006;
-        public static final int perdu=0x7f08000e;
-        public static final int replay=0x7f08000f;
-        public static final int root=0x7f080012;
-        public static final int sortie=0x7f080010;
+        public static final int bout1=0x7f090013;
+        public static final int bout2=0x7f090014;
+        public static final int bout3=0x7f090015;
+        public static final int bout4=0x7f09001a;
+        public static final int bout5=0x7f09001b;
+        public static final int bout_dyna=0x7f090005;
+        public static final int bouton1=0x7f090001;
+        public static final int bouton2=0x7f090002;
+        public static final int but1=0x7f090007;
+        public static final int but2=0x7f090008;
+        public static final int but3=0x7f090009;
+        public static final int but4=0x7f09000a;
+        public static final int carte=0x7f090004;
+        public static final int continuer=0x7f09000c;
+        public static final int difficile=0x7f090019;
+        public static final int exit=0x7f09000d;
+        public static final int facile=0x7f090017;
+        public static final int flip=0x7f090011;
+        public static final int gagner=0x7f09000b;
+        public static final int info=0x7f090000;
+        public static final int instru=0x7f09001d;
+        public static final int lay=0x7f090003;
+        public static final int moyen=0x7f090018;
+        public static final int opt_aleat=0x7f090016;
+        public static final int opt_reglages=0x7f09001c;
+        public static final int pause=0x7f090006;
+        public static final int perdu=0x7f09000e;
+        public static final int replay=0x7f09000f;
+        public static final int root=0x7f090012;
+        public static final int sortie=0x7f090010;
     }
     public static final class layout {
         public static final int activity_info=0x7f030000;
@@ -130,23 +130,27 @@ public final class R {
         public static final int activity_jeu=0x7f030002;
         public static final int activity_menu_princ=0x7f030003;
     }
+    public static final class raw {
+        public static final int boucle=0x7f050000;
+        public static final int intro=0x7f050001;
+    }
     public static final class string {
-        public static final int aleat=0x7f060003;
-        public static final int app_name=0x7f060000;
-        public static final int campagne=0x7f060002;
-        public static final int content1=0x7f060009;
-        public static final int dif=0x7f060008;
-        public static final int fac=0x7f060006;
-        public static final int info=0x7f06000d;
-        public static final int instru=0x7f06000e;
-        public static final int instructions=0x7f060005;
-        public static final int jouer=0x7f060001;
-        public static final int moy=0x7f060007;
-        public static final int multi=0x7f060004;
-        public static final int param=0x7f06000f;
-        public static final int recommencer=0x7f06000b;
-        public static final int reprendre=0x7f06000a;
-        public static final int sortir=0x7f06000c;
+        public static final int aleat=0x7f070003;
+        public static final int app_name=0x7f070000;
+        public static final int campagne=0x7f070002;
+        public static final int content1=0x7f070009;
+        public static final int dif=0x7f070008;
+        public static final int fac=0x7f070006;
+        public static final int info=0x7f07000d;
+        public static final int instru=0x7f07000e;
+        public static final int instructions=0x7f070005;
+        public static final int jouer=0x7f070001;
+        public static final int moy=0x7f070007;
+        public static final int multi=0x7f070004;
+        public static final int param=0x7f07000f;
+        public static final int recommencer=0x7f07000b;
+        public static final int reprendre=0x7f07000a;
+        public static final int sortir=0x7f07000c;
     }
     public static final class style {
         /** 
@@ -170,10 +174,10 @@ public final class R {
     
  API 14 theme customizations can go here. 
          */
-        public static final int AppBaseTheme=0x7f070000;
+        public static final int AppBaseTheme=0x7f080000;
         /**  Application theme. 
  All customizations that are NOT specific to a particular API-level can go here. 
          */
-        public static final int AppTheme=0x7f070001;
+        public static final int AppTheme=0x7f080001;
     }
 }

@@ -133,6 +133,15 @@ public class MoteurJeu {
 	}
 	
 	/**
+	 * Place dans le buffer les déplacements de solution du niveau. 
+	 */
+	public void solution() {
+		for(int[] m : niv.solution) {
+    		buf.addLast(m);
+    	}
+	}
+	
+	/**
 	 * Méthode appelée périodiquement par le handler moveHandler lorsque le jeu est en marche.
 	 * C'est ici que s'effectue les déplacements des animaux.
 	 */

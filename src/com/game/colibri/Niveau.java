@@ -52,7 +52,7 @@ public class Niveau {
 	 * Optionnel pour chaque niveau, la solution afin de résoudre
 	 * celui-ci si l'utilisateur est trop bloqué
 	 */
-	public int[][] solution;
+	public int[][] solution=null;
 	
 	/*
 	 * Liste des déplacements des différentes vaches. Pour chaque
@@ -211,6 +211,7 @@ public class Niveau {
 				/*
 				 *  Si la ligne décrit la solution et est donc sous la forme 
 				 *  "solution=" suivi d'une succession de nombres et de virgules
+				 *  ATTENTION : la solution dans les fochiers est décrite selon (lig,col) alors que dans notre jeu c'est (x,y) !!
 				 */
 				if (list[i].startsWith("solution",0)) {
 					String line = list[i].substring(9, list[i].length());
@@ -218,8 +219,8 @@ public class Niveau {
 					int nombre_deplacements = (elements.length)/2;
 					solution = new int[nombre_deplacements][2];
 					for (int j = 0; j < nombre_deplacements; j ++) {
-						solution[j][0] = Integer.valueOf(elements[2*j]);
-						solution[j][1] = Integer.valueOf(elements[2*j+1]);
+						solution[j][1] = Integer.valueOf(elements[2*j]);
+						solution[j][0] = Integer.valueOf(elements[2*j+1]);
 					}
 				}
 			}
@@ -402,8 +403,8 @@ public class Niveau {
 				if (rf==r) { // si finalement on a pas bougé, on refait un tour de boucle en plus.
 					k--;
 				} else { // sinon, on a donc un mouvement valide de prévu, la nouvelle position du colibri est donc (rf,c)
-					solution[k][0]=s;
-					solution[k][1]=0;
+					solution[k][0]=0;
+					solution[k][1]=s;
 					r=rf;
 				}
 				if (r==ran && ran!=0 && ran!=11) {
@@ -428,8 +429,8 @@ public class Niveau {
 				if (cf==c) {
 						k--;
 				} else {
-					solution[k][0]=0;
-					solution[k][1]=s;
+					solution[k][0]=s;
+					solution[k][1]=0;
 					c=cf;
 				}
 				if (c==ran && ran!=0 && ran!=19){
