@@ -1,6 +1,8 @@
 package com.game.colibri;
 
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.Animation;
@@ -12,6 +14,7 @@ import android.widget.RelativeLayout;
 import android.widget.ViewFlipper;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 
 /**
  * Menu principal : activité lancée au démarage.
@@ -21,6 +24,10 @@ public class MenuPrinc extends Activity {
 	
 	
 	public int ww,wh;
+	public int avancement; // Progression du joueur dans les niveaux campagne.
+	public int experience; // L'expérience du joueur.
+	private SharedPreferences pref;
+	private SharedPreferences.Editor editor;
 	private Intent jeu;
 	private ViewFlipper vf; // ViewFlipper permettant de passer de l'écran de menu principal à celui des instrus ou infos
 	private LinearLayout opt_aleat;
@@ -36,6 +43,11 @@ public class MenuPrinc extends Activity {
 		vf = (ViewFlipper) findViewById(R.id.flip);
 		opt_aleat = (LinearLayout) findViewById(R.id.opt_aleat);
 		opt_reglages = (LinearLayout) findViewById(R.id.opt_reglages);
+		pref = PreferenceManager.getDefaultSharedPreferences(this);
+		editor = pref.edit();
+		Jeu.opt = new Bundle(); // On va contourner le fait que startActivity(Intent i, Bundle b) ne soit pas supporté sur API < 16, en utilisant un Bundle de classe.
+		Jeu.menu=this;
+		loadData();
 	}
 
 	// Le placement des boutons est calculé ici en fonction des dimensions de l'écran. (Astuce pour contourner le temps d'établissement de l'affichage empêchant ces opérations dans le onCreate)
@@ -102,12 +114,32 @@ public class MenuPrinc extends Activity {
 	}
 	
 	/**
+	 * On récupère les préférences et l'avancement de l'utilisateur.
+	 */
+	private void loadData() {
+		avancement=pref.getInt("niveau", 1);
+		experience=pref.getInt("exp", 0);
+		avancement=(avancement-1)%6+1;
+		Log.i("Avancement :","Niv "+avancement);
+		Log.i("Experience :","Score :"+experience);
+	}
+	
+	/**
+	 * On sauve les préférences et l'avancement de l'utilisateur.
+	 */
+	public void saveData() {
+		editor.putInt("niveau", avancement);
+		editor.putInt("exp", experience);
+		editor.commit();
+	}
+	
+	/**
 	 * Fonctions appelées par le "onClick" des boutons définis dans activity_menu.xml
 	 * 		@param v le bouton appuyé.
 	 */
 	public void continuer(View v) {
-		Jeu.opt = new Bundle(); // On doit contourner le fait que startActivity(Intent i, Bundle b) ne soit pas supporté sur API < 16
 		Jeu.opt.putBoolean("isRandom", false);
+		Jeu.opt.putInt("n_niv", avancement);
 		jeu = new Intent(this, Jeu.class);
 		startActivity(jeu);
 	}
@@ -151,15 +183,15 @@ public class MenuPrinc extends Activity {
 	}
 	
 	public void facile(View v) {
-		launchAleat(8,14);
+		launchAleat(8,7);
 	}
 	
 	public void moyen(View v) {
-		launchAleat(18,25);
+		launchAleat(18,8);
 	}
 
 	public void difficile(View v) {
-		launchAleat(30,40);
+		launchAleat(30,11);
 	}
 	
 	private void launchAleat(int lon, int var) {

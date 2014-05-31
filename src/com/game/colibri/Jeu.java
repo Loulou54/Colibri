@@ -19,6 +19,8 @@ public class Jeu extends Activity {
 	
 	
 	public static Bundle opt;
+	public static MenuPrinc menu;
+	
 	public Niveau niv;
 	public Carte carte;
 	public MoteurJeu play;
@@ -28,7 +30,7 @@ public class Jeu extends Activity {
 	public RelativeLayout gagne; 
 	public Button bout_dyna;
 	private boolean brandNew=true;
-	public int n_niv=1;
+	public int n_niv;
 	
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -37,6 +39,7 @@ public class Jeu extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_jeu);
+		n_niv=opt.getInt("n_niv", 1);
 		carte = (Carte) findViewById(R.id.carte);
 		lay = (RelativeLayout) findViewById(R.id.lay);
 		bout_dyna = (Button) findViewById(R.id.bout_dyna);
@@ -53,7 +56,7 @@ public class Jeu extends Activity {
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		if (brandNew) { // événement appelé lorsque le RelativeLayout "lay" est prêt ! C'est ici que l'on peut charger le niveau et ajouter les View "Animal".
-			launch_niv();
+			launch_niv(false);
 			brandNew=false;
 		}
 	}
@@ -103,6 +106,16 @@ public class Jeu extends Activity {
 		play.pause();
 		gagne.setVisibility(View.VISIBLE);
 		if(carte.n_dyna>0) hideDyna();
+		if(opt.getBoolean("isRandom")) {
+			menu.experience+=100+play.niv.solution.length*10;
+		} else {
+			if(n_niv==menu.avancement)
+				menu.experience+=100+n_niv*50;
+			else
+				menu.experience+=100+n_niv*10;
+		}
+		if(n_niv==menu.avancement) menu.avancement++;
+		menu.saveData(); // On sauvegarde la progression.
 		Log.i("C'est Gagné !","BRAVO !");
 	}
 	
@@ -142,14 +155,18 @@ public class Jeu extends Activity {
 	/**
 	 * S'occupe de charger un niveau dans la "carte" et de lancer le moteur de jeu "play".
 	 */
-	private void launch_niv() {
-		if(opt.getBoolean("isRandom")) {
-			niv = new Niveau(opt.getInt("long"),opt.getInt("vari"));
+	private void launch_niv(boolean replay) {
+		if(replay) {
+			niv.replay();
 		} else {
-			try { // On ouvre le Niveau index_niv.
-				niv = new Niveau(this.getAssets().open("niveaux/niveau"+n_niv+".txt"));
-			} catch (IOException e) {
-				e.printStackTrace();
+			if(opt.getBoolean("isRandom")) {
+				niv = new Niveau(opt.getInt("long"),opt.getInt("vari"));
+			} else {
+				try { // On ouvre le Niveau index_niv.
+					niv = new Niveau(this.getAssets().open("niveaux/niveau"+n_niv+".txt"));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		carte.loadNiveau(niv,lay);
@@ -172,7 +189,7 @@ public class Jeu extends Activity {
 		pause.setVisibility(View.INVISIBLE);
 		perdu.setVisibility(View.INVISIBLE);
     	if(carte.n_dyna>0) hideDyna();
-    	launch_niv();
+    	launch_niv(true);
 	}
 	
 	public void quitter(View v) {
@@ -182,7 +199,7 @@ public class Jeu extends Activity {
 	public void suivant(View v) {
 		gagne.setVisibility(View.INVISIBLE);
 		n_niv++;
-		launch_niv();
+		launch_niv(false);
 	}
 	
 }

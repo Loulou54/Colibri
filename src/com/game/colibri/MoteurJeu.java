@@ -22,7 +22,7 @@ public class MoteurJeu {
 	
 	
 	private Carte carte;
-	private Niveau niv;
+	public Niveau niv;
 	private Jeu jeu;
 	public boolean isRunning=false;
 	private int dejaPasse=0;

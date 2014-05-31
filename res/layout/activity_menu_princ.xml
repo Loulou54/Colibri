@@ -130,7 +130,7 @@
         android:layout_alignRight="@+id/bout5"
         android:layout_above="@+id/bout5"
         android:orientation="vertical"
-         >
+        android:visibility="invisible" >
 
 	    <Button
 	        android:id="@+id/info"

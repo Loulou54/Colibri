@@ -26,9 +26,15 @@ public class Niveau {
 	/*
 	 * Carte contenant les informations statiques du niveau en
 	 * question c'est-à-dire les menhirs, les fleurs ainsi
-	 * que les fleurs magiques et les dynamites
+	 * que les fleurs magiques et les dynamites.
+	 * Elle est modifiée pendant le jeu.
 	 */
 	public int[][] carte;
+	
+	/*
+	 * Carte du niveau qui ne sera pas modifiée durant le jeu. Permet de rétablir la carte si on recommence le niveau.
+	 */
+	private int[][] carteOrigin;
 	
 	/*
 	 * Position initiale du Colibri (la ligne de départ) au 
@@ -77,10 +83,12 @@ public class Niveau {
 	 */
 	public Niveau(InputStream file) {
 		isRandom=false;
-		carte= new int[12][20];
+		carteOrigin= new int[12][20];
+		carte=new int[12][];
 		vaches = new LinkedList<int[][]>();
 		chats = new LinkedList<int[][]>();
 		lireNiveau(file);
+		replay();
 	}
 	
 	/**
@@ -90,11 +98,22 @@ public class Niveau {
 	 */
 	public Niveau(int lon, int var) {
 		isRandom=true;
-		carte= new int[12][20];
+		carteOrigin= new int[12][20];
+		carte=new int[12][];
 		chemin= new int[12][20];
 		vaches = new LinkedList<int[][]>();
 		chats = new LinkedList<int[][]>();
 		this.geneNivRand(lon, var);
+		replay();
+	}
+	
+	/**
+	 * Permet de recommencer le niveau : on rétablit la carte d'origine en copiant "carteOrigin"
+	 */
+	public void replay() {
+		for(int i=0; i<carteOrigin.length; i++) {
+			carte[i]=carteOrigin[i].clone();
+		}
 	}
 	
 	/**
@@ -141,7 +160,7 @@ public class Niveau {
 			 */
 			for(int i=0;i<12;i++){
 				for(int j=0;j<20;j++){
-					carte[i][j]=Integer.valueOf(matrice[i][j]);
+					carteOrigin[i][j]=Integer.valueOf(matrice[i][j]);
 				}
 			}
 			// La ligne 13 possède les informations de départ du colibri
@@ -222,7 +241,7 @@ public class Niveau {
 			PrintWriter ecri = new PrintWriter(new FileWriter(filename));
 			for(int i=0;i<12;i++){
 				for(int j=0;j<20;j++){
-					ecri.print(carte[i][j]);
+					ecri.print(carteOrigin[i][j]);
 					if(j<19){
 						ecri.print(",");
 					}
@@ -265,7 +284,7 @@ public class Niveau {
 	
 	
 	public int[][] getCarte() {
-		return carte;
+		return carteOrigin;
 	}
 
 
@@ -312,10 +331,10 @@ public class Niveau {
 	public int valideCheminR(int rd, int cd, int rf,int cf, int s,int n_fleur ){
 		Random r = new Random();
 		int i =cd+s; 
-		while(i!=cf+s && carte[rd][i]%2==0){
+		while(i!=cf+s && carteOrigin[rd][i]%2==0){
 			chemin[rd][i]+=1;
 			if( r.nextInt(4)==0){
-				carte[rd][i]=2;
+				carteOrigin[rd][i]=2;
 				n_fleur+=1;
 			}
 			i+=s;	
@@ -335,10 +354,10 @@ public class Niveau {
 	public  int valideCheminC(int rd, int cd, int rf,int cf, int s,int n_fleur ){
 		Random r = new Random();
 		int i =rd+s; 
-		while(i!=rf+s && carte[i][cd]%2==0){
+		while(i!=rf+s && carteOrigin[i][cd]%2==0){
 			chemin[i][cd]+=1;
 			if( r.nextInt(5)==0){
-				carte[i][cd]=2;
+				carteOrigin[i][cd]=2;
 				n_fleur+=1;
 			}
 			i+=s;	
@@ -388,7 +407,7 @@ public class Niveau {
 					r=rf;
 				}
 				if (r==ran && ran!=0 && ran!=11) {
-					carte[ran+s][c]=1+2*chemin[ran+s][c]; // On ajoute le menhir d'arrêt, ou bien la fleur magique d'arrêt. (NB : menhirs codés par "1" dans la carte, fleurs par "2", fleurs magiques par "3")
+					carteOrigin[ran+s][c]=1+2*chemin[ran+s][c]; // On ajoute le menhir d'arrêt, ou bien la fleur magique d'arrêt. (NB : menhirs codés par "1" dans la carte, fleurs par "2", fleurs magiques par "3")
 					n_fleur+=chemin[ran+s][c]; // On ajoute 1 au compteur de fleur si on a posé une fleur magique d'arrêt.
 			
 				}
@@ -414,7 +433,7 @@ public class Niveau {
 					c=cf;
 				}
 				if (c==ran && ran!=0 && ran!=19){
-					carte[r][ran+s]=1+2*chemin[r][ran+s];
+					carteOrigin[r][ran+s]=1+2*chemin[r][ran+s];
 					n_fleur+=chemin[r][ran+s];
 				}
 			}
