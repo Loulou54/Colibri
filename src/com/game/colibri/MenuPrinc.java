@@ -31,6 +31,7 @@ public class MenuPrinc extends Activity {
 	
 	public int ww,wh;
 	public int avancement; // Progression du joueur dans les niveaux campagne.
+	private int n_niv; // Niveau sélectionné dans Campagne
 	public int experience; // L'expérience du joueur.
 	public SharedPreferences pref;
 	public SharedPreferences.Editor editor;
@@ -52,8 +53,8 @@ public class MenuPrinc extends Activity {
 		setContentView(R.layout.activity_menu_princ);
 		vf = (ViewFlipper) findViewById(R.id.flip);
 		MenuSel = (ViewFlipper) findViewById(R.id.flipper);
-        MenuSel.setInAnimation(this, android.R.anim.slide_in_left);
-        MenuSel.setOutAnimation(this, android.R.anim.slide_out_right);
+        MenuSel.setInAnimation(this, android.R.anim.fade_in);
+        MenuSel.setOutAnimation(this, android.R.anim.fade_out);
 		opt_aleat = (LinearLayout) findViewById(R.id.opt_aleat);
 		opt_reglages = (LinearLayout) findViewById(R.id.opt_reglages);
 		pref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -150,8 +151,9 @@ public class MenuPrinc extends Activity {
     	    		}
     	    	});
 			}
-		}
-		return true;
+			return true;
+		} else
+			return false;
 	}
 	
 	/**
@@ -171,7 +173,7 @@ public class MenuPrinc extends Activity {
                 if (MenuSel.getDisplayedChild() == 2)
                     break;
                MenuSel.showNext();
-            } else if (initialX-finalX < 10) {
+            } else if (initialX-finalX < -10) {
                 if (MenuSel.getDisplayedChild() == 0)
                     break;
                 MenuSel.showPrevious();
@@ -188,7 +190,8 @@ public class MenuPrinc extends Activity {
 	private void loadData() {
 		avancement=pref.getInt("niveau", 1);
 		experience=pref.getInt("exp", 0);
-		avancement=22;
+		avancement=23;
+		n_niv=avancement;
 		Log.i("Avancement :","Niv "+avancement);
 		Log.i("Experience :","Score :"+experience);
 	}
@@ -234,21 +237,23 @@ public class MenuPrinc extends Activity {
 				lay_ap = (RelativeLayout) findViewById(R.id.lay_apercu3);
 				carte = (Carte) findViewById(R.id.apercu3);
 			}
-			//lay_sel.removeAllViews();
+			lay_sel.removeAllViews();
+			lay_sel.addView(lay_ap);
 			if(ecran==(avancement-1)/12) {
 				MenuSel.setDisplayedChild(ecran);
 				Niveau niv;
 				try {
 					niv = new Niveau(MenuPrinc.this.getAssets().open("niveaux/niveau"+avancement+".txt"));
 					carte.loadNiveau(niv, lay_ap);
+					n_niv=avancement;
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ww/2,wh/2);
-			params.leftMargin = (int) (ww/3);
-		    params.topMargin = (int) (wh/8);
+			params.leftMargin = (int) (ww/4);
+		    params.topMargin = (int) (wh/12);
 		    lay_ap.setLayoutParams(params);
 			ImageView img;
 			for(int i=0; i<points1.length; i++) {
@@ -267,15 +272,28 @@ public class MenuPrinc extends Activity {
 				params.leftMargin = (int) (ww*points1[i][0]-d/2);
 			    params.topMargin = (int) (wh*points1[i][1]-d/2);
 			    img.setLayoutParams(params);
-			    img.setId(i+1);
+			    img.setId(ecran*12+i+1);
 			    img.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						RelativeLayout lay_ap = (RelativeLayout) findViewById(R.id.lay_apercu1);
-						Carte carte = (Carte) findViewById(R.id.apercu1);
+						if(v.getId()>avancement) return;
+						n_niv=v.getId();
+						int l, a;
+						if((n_niv-1)/12==0) {
+							l=R.id.lay_apercu1;
+							a=R.id.apercu1;
+						} else if((n_niv-1)/12==1) {
+							l=R.id.lay_apercu2;
+							a=R.id.apercu2;
+						} else {
+							l=R.id.lay_apercu3;
+							a=R.id.apercu3;
+						}
+						RelativeLayout lay_ap = (RelativeLayout) findViewById(l);
+						Carte carte = (Carte) findViewById(a);
 						Niveau niv;
 						try {
-							niv = new Niveau(MenuPrinc.this.getAssets().open("niveaux/niveau"+v.getId()+".txt"));
+							niv = new Niveau(MenuPrinc.this.getAssets().open("niveaux/niveau"+n_niv+".txt"));
 							carte.loadNiveau(niv, lay_ap);
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
@@ -324,6 +342,13 @@ public class MenuPrinc extends Activity {
     			opt_aleat.setVisibility(View.VISIBLE);
     		}
     	});
+	}
+	
+	public void launchNiv(View v) {
+		Jeu.opt.putBoolean("isRandom", false);
+		Jeu.opt.putInt("n_niv", n_niv);
+		jeu = new Intent(this, Jeu.class);
+		startActivity(jeu);
 	}
 	
 	public void facile(View v) {

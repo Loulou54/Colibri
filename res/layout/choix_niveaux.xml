@@ -17,7 +17,8 @@
 	    <RelativeLayout
         android:id="@+id/lay_apercu1"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent"
+        android:onClick="launchNiv" >
 	    <com.game.colibri.Carte
 		    android:id="@+id/apercu1"
 		    android:layout_width="match_parent"
@@ -38,7 +39,8 @@
         <RelativeLayout
         android:id="@+id/lay_apercu2"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent"
+        android:onClick="launchNiv" >
 	    <com.game.colibri.Carte
 		    android:id="@+id/apercu2"
 		    android:layout_width="match_parent"
@@ -58,7 +60,8 @@
         <RelativeLayout
         android:id="@+id/lay_apercu3"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent"
+        android:onClick="launchNiv" >
 	    <com.game.colibri.Carte
 		    android:id="@+id/apercu3"
 		    android:layout_width="match_parent"
