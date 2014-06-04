@@ -12,8 +12,19 @@
         android:id="@+id/menu_selection_1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/fond_niveaux_1" >
+        android:background="@drawable/menu_selection_1" >
         
+	    <RelativeLayout
+        android:id="@+id/lay_apercu1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+	    <com.game.colibri.Carte
+		    android:id="@+id/apercu1"
+		    android:layout_width="match_parent"
+		    android:layout_height="match_parent"
+		    android:background="@drawable/herbe" />
+	    </RelativeLayout>
+	    
 	</RelativeLayout>
 
      <!-- View #2 -->
@@ -22,8 +33,18 @@
         android:id="@+id/menu_selection_2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/menu_sel_2" >
+        android:background="@drawable/menu_selection_2" >
         
+        <RelativeLayout
+        android:id="@+id/lay_apercu2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+	    <com.game.colibri.Carte
+		    android:id="@+id/apercu2"
+		    android:layout_width="match_parent"
+		    android:layout_height="match_parent"
+		    android:background="@drawable/herbe" />
+	    </RelativeLayout>
     </RelativeLayout>
     
      <!-- View #3 -->
@@ -32,7 +53,18 @@
         android:id="@+id/menu_selection_3"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/menu_sel_3" >
+        android:background="@drawable/menu_selection_3" >
+        
+        <RelativeLayout
+        android:id="@+id/lay_apercu3"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+	    <com.game.colibri.Carte
+		    android:id="@+id/apercu3"
+		    android:layout_width="match_parent"
+		    android:layout_height="match_parent"
+		    android:background="@drawable/herbe" />
+	    </RelativeLayout>
         
     </RelativeLayout>
 

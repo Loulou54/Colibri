@@ -329,14 +329,13 @@ public class Niveau {
 	 * @param s sens deplacement selon la ligne 
 	 * @return un  chemin
 	 */
-	public int valideCheminR(int rd, int cd, int rf,int cf, int s,int n_fleur ){
+	public int valideCheminR(int rd, int cd, int rf,int cf, int s){
 		Random r = new Random();
 		int i =cd+s; 
 		while(i!=cf+s && carteOrigin[rd][i]%2==0){
 			chemin[rd][i]+=1;
 			if( r.nextInt(4)==0){
 				carteOrigin[rd][i]=2;
-				n_fleur+=1;
 			}
 			i+=s;	
 		}
@@ -352,14 +351,13 @@ public class Niveau {
 	 * @param s sens deplacement selon la ligne 
 	 * @return un  chemin
 	 */
-	public  int valideCheminC(int rd, int cd, int rf,int cf, int s,int n_fleur ){
+	public  int valideCheminC(int rd, int cd, int rf,int cf, int s){
 		Random r = new Random();
 		int i =rd+s; 
 		while(i!=rf+s && carteOrigin[i][cd]%2==0){
 			chemin[i][cd]+=1;
 			if( r.nextInt(5)==0){
 				carteOrigin[i][cd]=2;
-				n_fleur+=1;
 			}
 			i+=s;	
 		}
@@ -374,7 +372,7 @@ public class Niveau {
 	 * @param n_fleur
 	 * @param mvt
 	 */
-	public void geneChemin(int n,int r,int c, int n_fleur){
+	public void geneChemin(int n,int r,int c){
 		int rd=r;
 		int cd=c;
 		Random random = new Random();
@@ -399,7 +397,7 @@ public class Niveau {
 						s=Integer.signum(ran-r);
 					}
 				}
-				rf=valideCheminC(r,c,ran,c,s, n_fleur); // On obtient la destination prévue "ran" sauf si un menhir se trouvait sur le chemin entre (r,c) et (ran,c) : dans ce cas, on obtient la ligne avant le menhir qui nous bloque.
+				rf=valideCheminC(r,c,ran,c,s); // On obtient la destination prévue "ran" sauf si un menhir se trouvait sur le chemin entre (r,c) et (ran,c) : dans ce cas, on obtient la ligne avant le menhir qui nous bloque.
 				if (rf==r) { // si finalement on a pas bougé, on refait un tour de boucle en plus.
 					k--;
 				} else { // sinon, on a donc un mouvement valide de prévu, la nouvelle position du colibri est donc (rf,c)
@@ -408,9 +406,7 @@ public class Niveau {
 					r=rf;
 				}
 				if (r==ran && ran!=0 && ran!=11) {
-					carteOrigin[ran+s][c]=1+2*chemin[ran+s][c]; // On ajoute le menhir d'arrêt, ou bien la fleur magique d'arrêt. (NB : menhirs codés par "1" dans la carte, fleurs par "2", fleurs magiques par "3")
-					n_fleur+=chemin[ran+s][c]; // On ajoute 1 au compteur de fleur si on a posé une fleur magique d'arrêt.
-			
+					carteOrigin[ran+s][c]=1+2*chemin[ran+s][c]; // On ajoute le menhir d'arrêt, ou bien la fleur magique d'arrêt. (NB : menhirs codés par "1" dans la carte, fleurs par "2", fleurs magiques par "3")		
 				}
 			} else {// SELON LA LIGNE  (il s'agit de la même chose mais le déplacement se fait sur la ligne)
 				bord=random.nextInt(10);
@@ -425,7 +421,7 @@ public class Niveau {
 						s=Integer.signum(ran-c);
 					}
 				}
-				cf=valideCheminR(r,c,r,ran,s,n_fleur);
+				cf=valideCheminR(r,c,r,ran,s);
 				if (cf==c) {
 						k--;
 				} else {
@@ -435,7 +431,6 @@ public class Niveau {
 				}
 				if (c==ran && ran!=0 && ran!=19){
 					carteOrigin[r][ran+s]=1+2*chemin[r][ran+s];
-					n_fleur+=chemin[r][ran+s];
 				}
 			}
 		}
@@ -450,13 +445,12 @@ public class Niveau {
 		Random r = new Random();
 		//initMatrice(carte); //Carte vide qui sera remplie par "geneChemin"
 		//initMatrice(this.chemin);// Contient le nombre de passage du Colibri sur chaque case
-		int n_fleur=0 ;// Compteur de fleurs posées
 		int longueur = lon+r.nextInt(var);
 		solution = new int[longueur][2]; //Liste des mouvements à effectuer pour résoudre le niveau
 		db_l = r.nextInt(12);
 		db_c = r.nextInt(20); // on tire un emplacement départ
 		chemin[db_l][db_c]=1;
-		geneChemin(longueur,db_l,db_c, n_fleur); // on génère la carte pour une solution en 10 à 40 coups !
+		geneChemin(longueur,db_l,db_c); // on génère la carte pour une solution en 10 à 40 coups !
 		//carte_cour=[carte,rd,cd,mvt] // "carte_cour" est la carte qui sera chargée et jouée
 	}
 

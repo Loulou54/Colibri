@@ -1,5 +1,7 @@
 package com.game.colibri;
 
+import java.io.IOException;
+
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -7,6 +9,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Animation.AnimationListener;
@@ -14,7 +17,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.ToggleButton;
 import android.widget.ViewFlipper;
 import android.app.Activity;
 import android.content.Intent;
@@ -50,8 +52,8 @@ public class MenuPrinc extends Activity {
 		setContentView(R.layout.activity_menu_princ);
 		vf = (ViewFlipper) findViewById(R.id.flip);
 		MenuSel = (ViewFlipper) findViewById(R.id.flipper);
-        MenuSel.setInAnimation(this, android.R.anim.fade_in);
-        MenuSel.setOutAnimation(this, android.R.anim.fade_out);
+        MenuSel.setInAnimation(this, android.R.anim.slide_in_left);
+        MenuSel.setOutAnimation(this, android.R.anim.slide_out_right);
 		opt_aleat = (LinearLayout) findViewById(R.id.opt_aleat);
 		opt_reglages = (LinearLayout) findViewById(R.id.opt_reglages);
 		pref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -165,11 +167,11 @@ public class MenuPrinc extends Activity {
             break;
         case MotionEvent.ACTION_UP:
             float finalX = touchevent.getX();
-            if (initialX > finalX) {
+            if (initialX-finalX > 10) {
                 if (MenuSel.getDisplayedChild() == 2)
                     break;
                MenuSel.showNext();
-            } else {
+            } else if (initialX-finalX < 10) {
                 if (MenuSel.getDisplayedChild() == 0)
                     break;
                 MenuSel.showPrevious();
@@ -186,7 +188,7 @@ public class MenuPrinc extends Activity {
 	private void loadData() {
 		avancement=pref.getInt("niveau", 1);
 		experience=pref.getInt("exp", 0);
-		avancement=(avancement-1)%6+1;
+		avancement=22;
 		Log.i("Avancement :","Niv "+avancement);
 		Log.i("Experience :","Score :"+experience);
 	}
@@ -215,25 +217,73 @@ public class MenuPrinc extends Activity {
 	public void campagne(View v) {
 		opt_reglages.setVisibility(View.INVISIBLE);
 		vf.setDisplayedChild(1);
-		RelativeLayout lay1 = (RelativeLayout) findViewById(R.id.menu_selection_1);
-		lay1.removeAllViews();
-		ImageView img;
-		for(int i=0; i<points1.length; i++) {
-			img = new ImageView(this);
-			if(i+1>=avancement)
-				img.setBackgroundResource(R.drawable.fleur);
-			else if(Math.random()<0.5)
-				img.setBackgroundResource(R.drawable.emplacement1);
-			else
-				img.setBackgroundResource(R.drawable.emplacement2);
-			lay1.addView(img);
-			int d;
-			if(i<4 || i>9) d=ww/22;
-			else d=ww/20;
-			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(d,d);
-			params.leftMargin = (int) (ww*points1[i][0]-d/2);
-		    params.topMargin = (int) (wh*points1[i][1]-d/2);
-		    img.setLayoutParams(params);
+		RelativeLayout lay_sel;
+		RelativeLayout lay_ap;
+		Carte carte;
+		for(int ecran=0; ecran<3; ecran++) {
+			if(ecran==0) {
+				lay_sel = (RelativeLayout) findViewById(R.id.menu_selection_1);
+				lay_ap = (RelativeLayout) findViewById(R.id.lay_apercu1);
+				carte = (Carte) findViewById(R.id.apercu1);
+			} else if(ecran==1) {
+				lay_sel = (RelativeLayout) findViewById(R.id.menu_selection_2);
+				lay_ap = (RelativeLayout) findViewById(R.id.lay_apercu2);
+				carte = (Carte) findViewById(R.id.apercu2);
+			} else {
+				lay_sel = (RelativeLayout) findViewById(R.id.menu_selection_3);
+				lay_ap = (RelativeLayout) findViewById(R.id.lay_apercu3);
+				carte = (Carte) findViewById(R.id.apercu3);
+			}
+			//lay_sel.removeAllViews();
+			if(ecran==(avancement-1)/12) {
+				MenuSel.setDisplayedChild(ecran);
+				Niveau niv;
+				try {
+					niv = new Niveau(MenuPrinc.this.getAssets().open("niveaux/niveau"+avancement+".txt"));
+					carte.loadNiveau(niv, lay_ap);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ww/2,wh/2);
+			params.leftMargin = (int) (ww/3);
+		    params.topMargin = (int) (wh/8);
+		    lay_ap.setLayoutParams(params);
+			ImageView img;
+			for(int i=0; i<points1.length; i++) {
+				img = new ImageView(this);
+				if(ecran*12+i+1>=avancement)
+					img.setBackgroundResource(R.drawable.fleur);
+				else if(Math.random()<0.5)
+					img.setBackgroundResource(R.drawable.emplacement1);
+				else
+					img.setBackgroundResource(R.drawable.emplacement2);
+				lay_sel.addView(img);
+				int d;
+				if(i<4 || i>9) d=ww/24;
+				else d=ww/20;
+				params = new RelativeLayout.LayoutParams(d,d);
+				params.leftMargin = (int) (ww*points1[i][0]-d/2);
+			    params.topMargin = (int) (wh*points1[i][1]-d/2);
+			    img.setLayoutParams(params);
+			    img.setId(i+1);
+			    img.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						RelativeLayout lay_ap = (RelativeLayout) findViewById(R.id.lay_apercu1);
+						Carte carte = (Carte) findViewById(R.id.apercu1);
+						Niveau niv;
+						try {
+							niv = new Niveau(MenuPrinc.this.getAssets().open("niveaux/niveau"+v.getId()+".txt"));
+							carte.loadNiveau(niv, lay_ap);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+			    });
+			}
 		}
 	}
 	
@@ -323,14 +373,28 @@ public class MenuPrinc extends Activity {
 	}
 	
 	public void musique(View v) {
-		ToggleButton but = (ToggleButton) v; 
-		if (but.isChecked()) {
-			if(intro==null) boucle.start();
-			else intro.start();
+		Button son_off = (Button)findViewById(R.id.boutmusique);
+		Button son_on = (Button) findViewById(R.id.boutmusique2);
+		opt_reglages.setVisibility(View.INVISIBLE);
+		if (son_on.getVisibility()==View.INVISIBLE) {
+			son_on.setVisibility(View.VISIBLE);
+			son_off.setVisibility(View.INVISIBLE);
+			son_off.setClickable(false);
+			son_on.setClickable(true);
+			if(intro==null)
+				boucle.start();
+			else
+				intro.start();
 		}
 		else {
-			if(intro==null) boucle.pause();
-			else intro.pause();
+			son_off.setVisibility(View.VISIBLE);
+			son_on.setVisibility(View.INVISIBLE);
+			son_on.setClickable(false);
+			son_off.setClickable(true);
+			if(intro==null)
+				boucle.pause();
+			else
+				intro.pause();
 		}
 	}
 }

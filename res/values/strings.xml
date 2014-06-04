@@ -2,23 +2,25 @@
 <resources>
 
     <string name="app_name">Colibri</string>
-    <string name="jouer">Continuer</string>
-    <string name="campagne">Campagne</string>
-    <string name="aleat">Carte Aléatoire</string>
-    <string name="multi">Défi Multijoueur</string>
+    <string name="jouer">Continue</string>
+    <string name="campagne">Campaign</string>
+    <string name="aleat">Random Map</string>
+    <string name="multi">Multiplayer Challenge</string>
     <string name="instructions">Instructions</string>
-    <string name="fac">Débutant</string>
-    <string name="moy">Intermédiaire</string>
+    <string name="fac">Beginner</string>
+    <string name="moy">Intermediate</string>
     <string name="dif">Expert</string>
     <string name="content1">Colibri</string>
-    <string name="reprendre">Reprendre</string>
-    <string name="recommencer">Recommencer</string>
-    <string name="sortir">Menu principal</string>
+    <string name="reprendre">Resume</string>
+    <string name="recommencer">Start over</string>
+    <string name="sortir">Main Menu</string>
     <string name="info">Informations</string>
 	<string name="instru">Instructions</string>
-	<string name="param">Paramètres</string>
-	<string name="nouveau_defi">Nouveau Défi</string>
+	<string name="param">Parameters</string>
+	<string name="nouveau_defi">New Challenge</string>
 	<string name="score">Score :</string>
-	<string name="info_text">Bla bla bla blabalbla bla\n kikooo \n Blurp.</string>
-
+	<string name="info_text">Application developed during the developping project in Telecom Bretagne by the following students :\n Durand Louis, Guyard Valentin, Jacquemod Laura and Thiam Mariam\n </string>
+	<string name="info_text2">We wanted to thank our tutor, Gwenaël Brunet, informatic and network technician at the departement Image and Treatement of Information </string>
+	<string name="instru_text">You are a small hummingbird in a field full of menhirs in Brittany and you have to taste all the flowers covering the meadow.\n\n You can only fly straight and change direction when you are in front of an obstacle (menhir or fence). \n \n BEWARE the magical flowers which, once fecundated by the pollen your beak carries, transforms into a menhir !</string>
+	
 </resources>

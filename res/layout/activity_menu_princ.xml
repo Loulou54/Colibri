@@ -158,15 +158,28 @@
 
 	</LinearLayout>
 	
-    <ToggleButton
-        android:id="@+id/toggleButton1"
+    <Button
+        android:id="@+id/boutmusique"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
-        android:background="@drawable/dynamite"
+        android:background="@drawable/son1"
         android:layout_marginLeft="6dp"
-        android:layout_marginTop="6dp"
+        android:layout_marginBottom="6dp"
+        android:onClick="musique" 
+        android:visibility="invisible"
+        android:clickable="false"/>
+
+    <Button
+        android:id="@+id/boutmusique2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/son2"
+        android:layout_marginLeft="6dp"
+        android:layout_marginBottom="6dp"
         android:onClick="musique" />
 
 </RelativeLayout>

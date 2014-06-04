@@ -15,12 +15,40 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
         android:layout_marginRight="15dp"
-        android:layout_marginBottom="30dp"
+        android:layout_marginBottom="15dp"
         android:background="@drawable/boutons2"
         android:gravity="center"
         android:text="@string/sortir"
         android:textColor="@android:color/white"
         android:onClick="retour"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/textInstru1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
+        android:text="@string/instru"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@color/noir"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:typeface="monospace" />
+       
+     <TextView
+        android:id="@+id/textInstru2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignRight="@+id/bouton1"
+        android:layout_below="@+id/textInstru1"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:text="@string/instru_text"
+        android:textColor="@android:color/white"
         android:textSize="16sp" />
 
 </RelativeLayout>
