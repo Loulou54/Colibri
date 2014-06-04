@@ -29,7 +29,7 @@ public class Jeu extends Activity {
 	public RelativeLayout perdu; 
 	public RelativeLayout gagne; 
 	public Button bout_dyna;
-	private boolean brandNew=true;
+	private boolean brandNew=true, solUsed=false;
 	public int n_niv;
 	
 	/* (non-Javadoc)
@@ -85,6 +85,7 @@ public class Jeu extends Activity {
 			} else if((keyCode == KeyEvent.KEYCODE_MENU || keyCode == KeyEvent.KEYCODE_ESCAPE) && niv.solution!=null) { // Solution !
 				if(carte.n_dyna>0) hideDyna();
 		    	launch_niv(true);
+				solUsed=true;
 		    	play.solution();
 			} else if(keyCode == KeyEvent.KEYCODE_BACK) {
 				play.pause();
@@ -108,13 +109,15 @@ public class Jeu extends Activity {
 		play.pause();
 		gagne.setVisibility(View.VISIBLE);
 		if(carte.n_dyna>0) hideDyna();
-		if(opt.getBoolean("isRandom")) {
-			menu.experience+=100+play.niv.solution.length*10;
-		} else {
-			if(n_niv==menu.avancement)
-				menu.experience+=100+n_niv*50;
-			else
-				menu.experience+=100+n_niv*10;
+		if(!solUsed) {
+			if(opt.getBoolean("isRandom")) {
+				menu.experience+=100+play.niv.solution.length*10;
+			} else {
+				if(n_niv==menu.avancement)
+					menu.experience+=100+n_niv*50;
+				else
+					menu.experience+=100+n_niv*10;
+			}
 		}
 		if(n_niv==menu.avancement) menu.avancement++;
 		menu.saveData(); // On sauvegarde la progression.
@@ -171,6 +174,7 @@ public class Jeu extends Activity {
 				}
 			}
 		}
+		solUsed=false;
 		carte.loadNiveau(niv,lay);
 		lay.removeView(bout_dyna);
 		lay.addView(bout_dyna); // Astuce pour mettre le bouton au premier plan
@@ -200,7 +204,7 @@ public class Jeu extends Activity {
 	
 	public void suivant(View v) {
 		gagne.setVisibility(View.INVISIBLE);
-		n_niv++;
+		if(!opt.getBoolean("isRandom")) n_niv++;
 		launch_niv(false);
 	}
 	

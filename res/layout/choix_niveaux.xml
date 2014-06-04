@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ViewFlipper xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/flipper"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center"
+    android:visibility="invisible" >
+
+    <!-- View #1 -->
+
+	<RelativeLayout
+        android:id="@+id/menu_selection_1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/fond_niveaux_1" >
+        
+	</RelativeLayout>
+
+     <!-- View #2 -->
+
+    <RelativeLayout
+        android:id="@+id/menu_selection_2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/menu_sel_2" >
+        
+    </RelativeLayout>
+    
+     <!-- View #3 -->
+
+    <RelativeLayout
+        android:id="@+id/menu_selection_3"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/menu_sel_3" >
+        
+    </RelativeLayout>
+
+</ViewFlipper>

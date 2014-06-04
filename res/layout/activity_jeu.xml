@@ -78,20 +78,6 @@
         android:textSize="16sp"
         android:onClick="quitter" />
     
-    <Button
-        android:id="@+id/but4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/but3"
-        android:layout_below="@+id/but3"
-        android:layout_gravity="center"
-        android:layout_marginTop="4dp"
-        android:background="@drawable/button"
-        android:gravity="center"
-        android:text="@string/multi"
-        android:textColor="@android:color/white"
-        android:textSize="16sp" />
-
 </RelativeLayout>
 
 <RelativeLayout 

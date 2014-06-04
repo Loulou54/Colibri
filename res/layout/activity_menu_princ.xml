@@ -35,6 +35,7 @@
         android:gravity="center"
         android:text="@string/campagne"
         android:textColor="@android:color/white"
+        android:onClick="campagne"
         android:textSize="16sp" />
     
     <Button
@@ -108,20 +109,19 @@
         android:gravity="center"
         android:text="@string/multi"
         android:textColor="@android:color/white"
+        android:onClick="multijoueur"
         android:textSize="16sp" />
 	
     <Button
         android:id="@+id/bout5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/bout4"
-        android:layout_below="@+id/bout4"
-        android:layout_marginTop="4dp"
-        android:background="@drawable/boutons"
-        android:gravity="center"
-        android:text="@string/instructions"
-        android:textColor="@android:color/white"
-        android:textSize="16sp" />
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom = "4dp"
+        android:onClick="reglages"
+        android:background="@drawable/reglages" />
     
     <LinearLayout
         android:id="@+id/opt_reglages"
@@ -157,8 +157,21 @@
 	        android:textSize="14sp" />
 
 	</LinearLayout>
+	
+    <ToggleButton
+        android:id="@+id/toggleButton1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/dynamite"
+        android:layout_marginLeft="6dp"
+        android:layout_marginTop="6dp"
+        android:onClick="musique" />
 
 </RelativeLayout>
+
+<include layout="@layout/choix_niveaux" />
 
 <include layout="@layout/activity_info" />
 

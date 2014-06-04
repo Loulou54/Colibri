@@ -12,26 +12,15 @@
         android:id="@+id/bouton1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:background="@drawable/bouton_enabled"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="15dp"
+        android:layout_marginBottom="30dp"
+        android:background="@drawable/boutons2"
         android:gravity="center"
         android:text="@string/sortir"
         android:textColor="@android:color/white"
         android:onClick="retour"
-        android:textSize="16sp" />
-    
-    <Button
-        android:id="@+id/bouton2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/bouton1"
-        android:layout_below="@+id/bouton1"
-        android:layout_marginTop="4dp"
-        android:background="@drawable/bouton_enabled"
-        android:gravity="center"
-        android:text="@string/param"
-        android:textColor="@android:color/white"
         android:textSize="16sp" />
 
 </RelativeLayout>

@@ -17,5 +17,8 @@
     <string name="info">Informations</string>
 	<string name="instru">Instructions</string>
 	<string name="param">Paramètres</string>
+	<string name="nouveau_defi">Nouveau Défi</string>
+	<string name="score">Score :</string>
+	<string name="info_text">Bla bla bla blabalbla bla\n kikooo \n Blurp.</string>
 
 </resources>

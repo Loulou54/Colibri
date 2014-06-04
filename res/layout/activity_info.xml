@@ -12,26 +12,35 @@
         android:id="@+id/bouton1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:background="@drawable/bouton_enabled"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="15dp"
+        android:layout_marginBottom="30dp"
+        android:background="@drawable/boutons2"
         android:gravity="center"
         android:text="@string/sortir"
         android:textColor="@android:color/white"
         android:onClick="retour"
         android:textSize="16sp" />
-    
-    <Button
-        android:id="@+id/bouton2"
+
+    <TextView
+        android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/bouton1"
-        android:layout_below="@+id/bouton1"
-        android:layout_marginTop="4dp"
-        android:background="@drawable/bouton_enabled"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:text="@string/info"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
         android:gravity="center"
-        android:text="@string/param"
-        android:textColor="@android:color/white"
-        android:textSize="16sp" />
+        android:text="@string/info_text"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </RelativeLayout>
