@@ -114,9 +114,7 @@ public final class R {
         public static final int vache_rg=0x7f020042;
     }
     public static final class id {
-        public static final int apercu1=0x7f0a002d;
-        public static final int apercu2=0x7f0a0030;
-        public static final int apercu3=0x7f0a0033;
+        public static final int apercu=0x7f0a002e;
         public static final int avatar=0x7f0a0024;
         public static final int bout1=0x7f0a0016;
         public static final int bout2=0x7f0a0017;
@@ -144,13 +142,10 @@ public final class R {
         public static final int info=0x7f0a0000;
         public static final int instru=0x7f0a0020;
         public static final int lay=0x7f0a0007;
-        public static final int lay_apercu1=0x7f0a002c;
-        public static final int lay_apercu2=0x7f0a002f;
-        public static final int lay_apercu3=0x7f0a0032;
         public static final int listView1=0x7f0a0023;
         public static final int menu_selection_1=0x7f0a002b;
-        public static final int menu_selection_2=0x7f0a002e;
-        public static final int menu_selection_3=0x7f0a0031;
+        public static final int menu_selection_2=0x7f0a002c;
+        public static final int menu_selection_3=0x7f0a002d;
         public static final int moyen=0x7f0a001b;
         public static final int name=0x7f0a0025;
         public static final int opt_aleat=0x7f0a0019;

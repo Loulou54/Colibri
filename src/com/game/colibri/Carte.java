@@ -12,17 +12,18 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 
-public class Carte extends View {
+public class Carte extends RelativeLayout {
 	
 	/**
-	 * View contenant un Canvas sur lequel les graphismes statiques sont dessinés (menhirs, fleurs, dynamite)
+	 * RelativeLayout gérant l'affichage complet d'un niveau.
+	 * Le layout contient un fond sur lequel est dessiné la carte (statique) que l'on rafraîchit
+	 * seulement lorsque nécessaire avec fond.invalidate() (commandé par le moteur de jeu avec "fond.invalidate()").
+	 * Il contient aussi les éléments mobiles sous forme de View. (Animal)
 	 * On spécifie le niveau à afficher par la méthode publique loadNiveau.
-	 * La méthode invalidate() permet de lancer onDraw.
-	 * Nécessité de rafraîchir à chaque élément ramassé.
+	 * Nécessité de rafraîchir fond à chaque élément ramassé.
 	 */
 	
 	public int ww,wh,cw,ch; // windowWidth/Height, caseWidth/Height en pixels
@@ -34,10 +35,9 @@ public class Carte extends View {
 	public Colibri colibri;
 	public LinkedList<Vache> vaches = new LinkedList<Vache>(); // La liste des vaches du niveau
 	public LinkedList<Chat> chats = new LinkedList<Chat>(); // La liste des chats du niveau
-	public LinkedList<ImageView> explo = new LinkedList<ImageView>(); // La liste des explosions
+	public LinkedList<View> explo = new LinkedList<View>(); // La liste des explosions
 	public SparseArray<int[]> rainbows = new SparseArray<int[]>();
-	public ImageView mort,sang;
-	private Context context;
+	public View mort,sang,fond;
 	
     /**
      * Constructeur une carte 
@@ -61,14 +61,13 @@ public class Carte extends View {
     }
     
     /**
-     * Charge des images sur la carte 
+     * Chargement des images de la carte.
      * 		@param context
      */
     private void loadImg(Context context) {
-    	this.context=context;
-    	mort = new ImageView(context);
+    	mort = new View(context);
     	mort.setBackgroundResource(R.drawable.skull);
-    	sang = new ImageView(context);
+    	sang = new View(context);
     	sang.setBackgroundResource(R.drawable.sang);
     	menhir0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.menhir)).getBitmap();
     	fleur0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.fleur)).getBitmap();
@@ -76,34 +75,54 @@ public class Carte extends View {
     	dyna0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.dynamite)).getBitmap();
     	menhir_rouge0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.menhir_rouge)).getBitmap();
     	rainbow0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.rainbow)).getBitmap();
+    	// Définition du fond qui comporte la carte statique.
+    			fond=new View(this.getContext()) {
+    	    		// Dessin du canvas : événement déclenché par fond.invalidate()
+    	    	    @Override
+    	    	    protected void onDraw(Canvas can) {
+    	    	    	if (niv!=null) {
+    	    		    	for (int l=0; l<LIG; l++) {
+    	    		    		for (int c=0; c<COL; c++) {
+    	    		    			if (niv.carte[l][c]==1)
+    	    		    				can.drawBitmap(menhir, c*cw-cw/8, l*ch, null);
+    	    		    			else if (niv.carte[l][c]==2)
+    	    		    				can.drawBitmap(fleur, c*cw, l*ch, null);
+    	    		    			else if (niv.carte[l][c]==3)
+    	    		    				can.drawBitmap(fleurm, c*cw, l*ch, null);
+    	    		    			else if (niv.carte[l][c]==4)
+    	    		    				can.drawBitmap(dyna, c*cw, l*ch, null);
+    	    		    			else if (niv.carte[l][c]==5)
+    	    		    				can.drawBitmap(menhir_rouge, c*cw-cw/8, l*ch, null);
+    	    		    			else if (niv.carte[l][c]>=10)
+    	    		    				can.drawBitmap(rainbow, c*cw-cw/4, l*ch, null);
+    	    		    		}
+    	    		    	}
+    	    		    Log.i("onDraw","Rafraichissement !");
+    	    	    	}
+    	    	    }
+    	    	};
     }
     
     // Méthode publique pour spécifier le niveau à afficher
     /**
-     * Charge un  niveau sur la carte 
-     		* @param niveau le niveau a chargé 
-     		* @param lay
+     * Charge un niveau sur la carte
+     * @param niveau le niveau à charger
      */
-    public void loadNiveau(Niveau niveau, RelativeLayout lay) {
-    	if (niv!=null) { // Supprimer les "Animaux" du niveau précédent.
-    		lay.removeView(mort);
-    		lay.removeView(sang);
-    		lay.removeView(colibri);
-    		for(Vache v : vaches) {
-    			lay.removeView(v);
-    		}
-    		vaches.clear();
-    		for(Chat c : chats) {
-    			lay.removeView(c);
-    		}
-    		chats.clear();
-    		for(ImageView e : explo) {
-    			lay.removeView(e);
-    		}
-    		explo.clear();
-    		rainbows.clear();
-    	}
-    	niv=niveau;
+    public void loadNiveau(Niveau niveau) {
+    	// Supprimer les "Animaux" du niveau précédent.
+		removeAllViews();
+		vaches.clear();
+		chats.clear();
+		explo.clear();
+		rainbows.clear();
+    	
+		Animal.cw=cw;
+		Animal.ch=ch;
+		niv=niveau;
+		addView(fond);
+		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ww,wh);
+	    fond.setLayoutParams(params);
+	    
     	n_dyna=0;
     	n_fleur=0;
     	index_dyna=0;
@@ -113,10 +132,10 @@ public class Carte extends View {
     				n_fleur++;
     			else if(niv.carte[l][c]==4) {
     				index_dyna++;
-    				ImageView e = new ImageView(context);
+    				View e = new View(this.getContext());
     		    	explo.addLast(e);
     		    	e.setBackgroundResource(R.drawable.explosion);
-    		    	lay.addView(e);
+    		    	addView(e);
     		    	e.setVisibility(INVISIBLE);
     			} else if(niv.carte[l][c]>=10) {
     				int[] autre = rainbows.get(niv.carte[l][c]);
@@ -130,19 +149,19 @@ public class Carte extends View {
     		}
     	}
     	colibri = new Colibri(this.getContext(), niv.db_c*cw, niv.db_l*ch, cw, ch);
-    	lay.addView(colibri);
-    	lay.addView(sang);
+    	addView(colibri);
+    	addView(sang);
     	sang.setVisibility(INVISIBLE);
     	// On crée les vaches et les chats
     	for (int[][] itin : niv.vaches) {
     		vaches.addLast(new Vache(this.getContext(), cw, ch, itin));
-    		lay.addView(vaches.getLast());
+    		addView(vaches.getLast());
     	}
     	for (int[][] itin : niv.chats) {
     		chats.addLast(new Chat(this.getContext(), cw, 5*ch/4, itin));
-    		lay.addView(chats.getLast());
+    		addView(chats.getLast());
     	}
-    	lay.addView(mort);
+    	addView(mort);
     	mort.setVisibility(INVISIBLE);
     	this.invalidate();
     }
@@ -159,8 +178,8 @@ public class Carte extends View {
 	    mort.setVisibility(VISIBLE);
 	    sang.setLayoutParams(params);
 	    sang.setVisibility(VISIBLE);
-    	mort.startAnimation(AnimationUtils.loadAnimation(context, R.anim.dead_anim));
-    	sang.startAnimation(AnimationUtils.loadAnimation(context, R.anim.blood_anim));
+    	mort.startAnimation(AnimationUtils.loadAnimation(this.getContext(), R.anim.dead_anim));
+    	sang.startAnimation(AnimationUtils.loadAnimation(this.getContext(), R.anim.blood_anim));
     }
     
     /**
@@ -168,7 +187,7 @@ public class Carte extends View {
      */
     public void animBoom(int l, int c) {
     	index_dyna--;
-    	ImageView e = explo.get(index_dyna);
+    	View e = explo.get(index_dyna);
     	RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(3*cw/2,3*ch/2);
 		params.leftMargin = c*cw-cw/4;
 	    params.topMargin = l*ch;
@@ -178,32 +197,7 @@ public class Carte extends View {
     	((AnimationDrawable) e.getBackground()).start();
     }
     
-    // Dessin du canvas : événement déclenché par this.invalidate()
-    /* (non-Javadoc)
-     * @see android.view.View#onDraw(android.graphics.Canvas)
-     */
-    @Override
-    protected void onDraw(Canvas can) {
-    	if (niv!=null) {
-	    	for (int l=0; l<LIG; l++) {
-	    		for (int c=0; c<COL; c++) {
-	    			if (niv.carte[l][c]==1)
-	    				can.drawBitmap(menhir, c*cw-cw/8, l*ch, null);
-	    			else if (niv.carte[l][c]==2)
-	    				can.drawBitmap(fleur, c*cw, l*ch, null);
-	    			else if (niv.carte[l][c]==3)
-	    				can.drawBitmap(fleurm, c*cw, l*ch, null);
-	    			else if (niv.carte[l][c]==4)
-	    				can.drawBitmap(dyna, c*cw, l*ch, null);
-	    			else if (niv.carte[l][c]==5)
-	    				can.drawBitmap(menhir_rouge, c*cw-cw/8, l*ch, null);
-	    			else if (niv.carte[l][c]>=10)
-	    				can.drawBitmap(rainbow, c*cw-cw/4, l*ch, null);
-	    		}
-	    	}
-	    Log.i("onDraw","Rafraichissement !");
-    	}
-    }
+    
     
     // Événement utilisé pour récupérer les dimensions de la View.
     /* (non-Javadoc)
@@ -217,14 +211,12 @@ public class Carte extends View {
 		Log.i("Dimensions écran :",ww+"*"+wh);
 		cw=ww/COL;
 		ch=wh/LIG;
-		Animal.cw=cw;
-		Animal.ch=ch;
 		menhir = Bitmap.createScaledBitmap(menhir0, 5*cw/4, 5*ch/4, true);
 		fleur = Bitmap.createScaledBitmap(fleur0, cw, ch, true);
 		fleurm = Bitmap.createScaledBitmap(fleurm0, cw, ch, true);
 		dyna = Bitmap.createScaledBitmap(dyna0, cw, ch, true);
 		menhir_rouge = Bitmap.createScaledBitmap(menhir_rouge0, 5*cw/4, 5*ch/4, true);
 		rainbow = Bitmap.createScaledBitmap(rainbow0, 3*cw/2, ch, true);
-		this.invalidate();
+    	this.invalidate();
 	}
 }

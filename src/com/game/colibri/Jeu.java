@@ -24,7 +24,6 @@ public class Jeu extends Activity {
 	public Niveau niv;
 	public Carte carte;
 	public MoteurJeu play;
-	public RelativeLayout lay;
 	public RelativeLayout pause;
 	public RelativeLayout perdu; 
 	public RelativeLayout gagne; 
@@ -41,7 +40,6 @@ public class Jeu extends Activity {
 		setContentView(R.layout.activity_jeu);
 		n_niv=opt.getInt("n_niv", 1);
 		carte = (Carte) findViewById(R.id.carte);
-		lay = (RelativeLayout) findViewById(R.id.lay);
 		bout_dyna = (Button) findViewById(R.id.bout_dyna);
 		pause= (RelativeLayout) findViewById(R.id.pause);
         perdu= (RelativeLayout) findViewById(R.id.perdu);
@@ -175,9 +173,7 @@ public class Jeu extends Activity {
 			}
 		}
 		solUsed=false;
-		carte.loadNiveau(niv,lay);
-		lay.removeView(bout_dyna);
-		lay.addView(bout_dyna); // Astuce pour mettre le bouton au premier plan
+		carte.loadNiveau(niv);
 		play.init();
 		play.start();
 	}

@@ -14,7 +14,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Animation.AnimationListener;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ViewFlipper;
@@ -33,16 +32,18 @@ public class MenuPrinc extends Activity {
 	public int avancement; // Progression du joueur dans les niveaux campagne.
 	private int n_niv; // Niveau sélectionné dans Campagne
 	public int experience; // L'expérience du joueur.
+	private boolean brandNew=true;
 	public SharedPreferences pref;
 	public SharedPreferences.Editor editor;
 	private Intent jeu,multi;
 	private ViewFlipper MenuSel;
 	private ViewFlipper vf; // ViewFlipper permettant de passer de l'écran de menu principal à celui des instrus ou infos
+	private Carte carte; // L'instance de carte permettant de faire un apercu dans le menu de sélection de niveaux.
 	private LinearLayout opt_aleat;
 	private LinearLayout opt_reglages;
 	private MediaPlayer intro=null,boucle=null;
 	private float initialX;
-	private double[][] points1 = new double[][] {{0.07625, 0.8145833333333333}, {0.18875, 0.7645833333333333}, {0.31625, 0.7354166666666667}, {0.24875, 0.8208333333333333}, {0.1125, 0.94375}, {0.25, 0.9458333333333333}, {0.405, 0.9208333333333333}, {0.52, 0.9416666666666667}, {0.6275, 0.9333333333333333}, {0.765, 0.9354166666666667}, {0.765, 0.8166666666666667}, {0.83, 0.74375}};
+	private double[][] points = new double[][] {{0.07625, 0.8145833333333333}, {0.18875, 0.7645833333333333}, {0.31625, 0.7354166666666667}, {0.24875, 0.8208333333333333}, {0.1125, 0.94375}, {0.25, 0.9458333333333333}, {0.405, 0.9208333333333333}, {0.52, 0.9416666666666667}, {0.6275, 0.9333333333333333}, {0.765, 0.9354166666666667}, {0.765, 0.8166666666666667}, {0.83, 0.74375}};
 	
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -55,6 +56,7 @@ public class MenuPrinc extends Activity {
 		MenuSel = (ViewFlipper) findViewById(R.id.flipper);
         MenuSel.setInAnimation(this, android.R.anim.fade_in);
         MenuSel.setOutAnimation(this, android.R.anim.fade_out);
+        carte = (Carte) findViewById(R.id.apercu);
 		opt_aleat = (LinearLayout) findViewById(R.id.opt_aleat);
 		opt_reglages = (LinearLayout) findViewById(R.id.opt_reglages);
 		pref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -87,18 +89,24 @@ public class MenuPrinc extends Activity {
 		RelativeLayout root = (RelativeLayout) findViewById(R.id.root);
 		ww = root.getWidth();
 		wh = root.getHeight();
-		placeButton();
+		if(brandNew) placeButton();
+		if(vf.getDisplayedChild()==1) campagne(carte); // Permet de rafraîchir la progression lorsque l'on quitte le jeu et revient au menu de sélection.
 	}
 	
 	/**
 	 * Place le premier bouton à la position voulue. Les autres sont placés par rapport à lui.
 	 */
 	private void placeButton() {
+		brandNew=false;
 		Button btn_lay = (Button)findViewById(R.id.bout1);
 		RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) btn_lay.getLayoutParams();
 		layoutParams.leftMargin = ww*4/9;
 	    layoutParams.topMargin = 3*wh/8;
 	    btn_lay.setLayoutParams(layoutParams);
+	    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ww/2,wh/2);
+		params.leftMargin = (int) (ww/4);
+	    params.topMargin = (int) (wh/12);
+	    carte.setLayoutParams(params);
 	}
 	
 	@Override
@@ -162,6 +170,7 @@ public class MenuPrinc extends Activity {
 	@Override
     public boolean onTouchEvent(MotionEvent touchevent) {
         if (vf.getDisplayedChild()==1) {
+        int a=MenuSel.getDisplayedChild();
         switch (touchevent.getAction()) {
         
         case MotionEvent.ACTION_DOWN:
@@ -170,15 +179,19 @@ public class MenuPrinc extends Activity {
         case MotionEvent.ACTION_UP:
             float finalX = touchevent.getX();
             if (initialX-finalX > 10) {
-                if (MenuSel.getDisplayedChild() == 2)
+                if (a == 2)
                     break;
-               MenuSel.showNext();
+                MenuSel.showNext();
             } else if (initialX-finalX < -10) {
-                if (MenuSel.getDisplayedChild() == 0)
+                if (a == 0)
                     break;
                 MenuSel.showPrevious();
             }
             break;
+        }
+        if(carte.getVisibility()==View.VISIBLE && MenuSel.getDisplayedChild()!=a) {
+            carte.setAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_out));
+			carte.setVisibility(View.INVISIBLE);
         }
         }
         return false;
@@ -219,46 +232,18 @@ public class MenuPrinc extends Activity {
 	
 	public void campagne(View v) {
 		opt_reglages.setVisibility(View.INVISIBLE);
+		carte.setVisibility(View.INVISIBLE);
 		vf.setDisplayedChild(1);
 		RelativeLayout lay_sel;
-		RelativeLayout lay_ap;
-		Carte carte;
+		View img;
+		RelativeLayout.LayoutParams params;
+		int[] r = new int[] {R.id.menu_selection_1,R.id.menu_selection_2,R.id.menu_selection_3};
 		for(int ecran=0; ecran<3; ecran++) {
-			if(ecran==0) {
-				lay_sel = (RelativeLayout) findViewById(R.id.menu_selection_1);
-				lay_ap = (RelativeLayout) findViewById(R.id.lay_apercu1);
-				carte = (Carte) findViewById(R.id.apercu1);
-			} else if(ecran==1) {
-				lay_sel = (RelativeLayout) findViewById(R.id.menu_selection_2);
-				lay_ap = (RelativeLayout) findViewById(R.id.lay_apercu2);
-				carte = (Carte) findViewById(R.id.apercu2);
-			} else {
-				lay_sel = (RelativeLayout) findViewById(R.id.menu_selection_3);
-				lay_ap = (RelativeLayout) findViewById(R.id.lay_apercu3);
-				carte = (Carte) findViewById(R.id.apercu3);
-			}
+			lay_sel = (RelativeLayout) findViewById(r[ecran]);
 			lay_sel.removeAllViews();
-			lay_sel.addView(lay_ap);
-			if(ecran==(avancement-1)/12) {
-				MenuSel.setDisplayedChild(ecran);
-				Niveau niv;
-				try {
-					niv = new Niveau(MenuPrinc.this.getAssets().open("niveaux/niveau"+avancement+".txt"));
-					carte.loadNiveau(niv, lay_ap);
-					n_niv=avancement;
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ww/2,wh/2);
-			params.leftMargin = (int) (ww/4);
-		    params.topMargin = (int) (wh/12);
-		    lay_ap.setLayoutParams(params);
-			ImageView img;
-			for(int i=0; i<points1.length; i++) {
-				img = new ImageView(this);
-				if(ecran*12+i+1>=avancement)
+			for(int i=0; i<points.length; i++) {
+				img = new View(this);
+				if(ecran*points.length+i+1>=avancement)
 					img.setBackgroundResource(R.drawable.fleur);
 				else if(Math.random()<0.5)
 					img.setBackgroundResource(R.drawable.emplacement1);
@@ -266,42 +251,41 @@ public class MenuPrinc extends Activity {
 					img.setBackgroundResource(R.drawable.emplacement2);
 				lay_sel.addView(img);
 				int d;
-				if(i<4 || i>9) d=ww/24;
+				if(i<6) d=ww/24;
 				else d=ww/20;
 				params = new RelativeLayout.LayoutParams(d,d);
-				params.leftMargin = (int) (ww*points1[i][0]-d/2);
-			    params.topMargin = (int) (wh*points1[i][1]-d/2);
+				params.leftMargin = (int) (ww*points[i][0]-d/2);
+			    params.topMargin = (int) (wh*points[i][1]-d/2);
 			    img.setLayoutParams(params);
-			    img.setId(ecran*12+i+1);
+			    img.setId(ecran*points.length+i+1);
 			    img.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						if(v.getId()>avancement) return;
-						n_niv=v.getId();
-						int l, a;
-						if((n_niv-1)/12==0) {
-							l=R.id.lay_apercu1;
-							a=R.id.apercu1;
-						} else if((n_niv-1)/12==1) {
-							l=R.id.lay_apercu2;
-							a=R.id.apercu2;
-						} else {
-							l=R.id.lay_apercu3;
-							a=R.id.apercu3;
-						}
-						RelativeLayout lay_ap = (RelativeLayout) findViewById(l);
-						Carte carte = (Carte) findViewById(a);
-						Niveau niv;
-						try {
-							niv = new Niveau(MenuPrinc.this.getAssets().open("niveaux/niveau"+n_niv+".txt"));
-							carte.loadNiveau(niv, lay_ap);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+						if(v.getId()<=avancement) setApercu(v.getId());
 					}
 			    });
 			}
+		}
+		MenuSel.setDisplayedChild((avancement-1)/points.length);
+	}
+	
+	/**
+	 * Charge le niveau d'index n_niv dans l'aperçu.
+	 * @param n_niv l'index du niveau à afficher
+	 */
+	private void setApercu(int n) {
+		if(carte.getVisibility()==View.INVISIBLE) {
+			carte.setAnimation(AnimationUtils.loadAnimation(this, R.anim.aleat_opt_anim));
+			carte.setVisibility(View.VISIBLE);
+		}
+		n_niv=n;
+		Niveau niv;
+		try {
+			niv = new Niveau(MenuPrinc.this.getAssets().open("niveaux/niveau"+n_niv+".txt"));
+			carte.loadNiveau(niv);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	

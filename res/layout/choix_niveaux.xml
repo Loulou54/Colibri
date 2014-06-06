@@ -1,74 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ViewFlipper xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/flipper"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:gravity="center"
-    android:visibility="invisible" >
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MenuPrinc" >
 
-    <!-- View #1 -->
-
-	<RelativeLayout
-        android:id="@+id/menu_selection_1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/menu_selection_1" >
-        
+	<ViewFlipper
+	    android:id="@+id/flipper"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent" >
+	
+	    <!-- View #1 -->
+	
+		<RelativeLayout
+	        android:id="@+id/menu_selection_1"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:background="@drawable/menu_selection_1" >
+			
+		</RelativeLayout>
+	
+	     <!-- View #2 -->
+	
 	    <RelativeLayout
-        android:id="@+id/lay_apercu1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:onClick="launchNiv" >
-	    <com.game.colibri.Carte
-		    android:id="@+id/apercu1"
-		    android:layout_width="match_parent"
-		    android:layout_height="match_parent"
-		    android:background="@drawable/herbe" />
+	        android:id="@+id/menu_selection_2"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:background="@drawable/menu_selection_2" >
+			
 	    </RelativeLayout>
 	    
-	</RelativeLayout>
-
-     <!-- View #2 -->
-
-    <RelativeLayout
-        android:id="@+id/menu_selection_2"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/menu_selection_2" >
-        
-        <RelativeLayout
-        android:id="@+id/lay_apercu2"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:onClick="launchNiv" >
-	    <com.game.colibri.Carte
-		    android:id="@+id/apercu2"
-		    android:layout_width="match_parent"
-		    android:layout_height="match_parent"
-		    android:background="@drawable/herbe" />
+	     <!-- View #3 -->
+	
+	    <RelativeLayout
+	        android:id="@+id/menu_selection_3"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:background="@drawable/menu_selection_3" >
+			
 	    </RelativeLayout>
-    </RelativeLayout>
-    
-     <!-- View #3 -->
+	
+	</ViewFlipper>
+	
+	<!-- Apercu -->
+	<com.game.colibri.Carte
+			    android:id="@+id/apercu"
+			    android:layout_width="match_parent"
+			    android:layout_height="match_parent"
+			    android:background="@drawable/herbe"
+			    android:onClick="launchNiv" />
 
-    <RelativeLayout
-        android:id="@+id/menu_selection_3"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/menu_selection_3" >
-        
-        <RelativeLayout
-        android:id="@+id/lay_apercu3"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:onClick="launchNiv" >
-	    <com.game.colibri.Carte
-		    android:id="@+id/apercu3"
-		    android:layout_width="match_parent"
-		    android:layout_height="match_parent"
-		    android:background="@drawable/herbe" />
-	    </RelativeLayout>
-        
-    </RelativeLayout>
-
-</ViewFlipper>
+</RelativeLayout>

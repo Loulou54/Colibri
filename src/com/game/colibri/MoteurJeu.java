@@ -172,7 +172,7 @@ public class MoteurJeu {
 				carte.colibri.setPos(c*carte.cw, l*carte.ch);
 				if(!outOfMap && carte.n_dyna>0) {
 					niv.carte[l+ml][c+mc]=menhir_rouge;
-					carte.invalidate();
+					carte.fond.invalidate();
 				}
 			}
 			carte.colibri.deplacer();
@@ -236,7 +236,7 @@ public class MoteurJeu {
 				if(nl+ml>=0 && nl+ml<LIG && nc+mc>=0 && nc+mc<COL && niv.carte[nl+ml][nc+mc]==menhir) {
 					niv.carte[nl+ml][nc+mc]=menhir_rouge;
 				}
-				carte.invalidate();
+				carte.fond.invalidate();
 			}
 		}
 	}
@@ -265,17 +265,17 @@ public class MoteurJeu {
 		if(niv.carte[l][c]==fleur) {
 			niv.carte[l][c]=vide;
 			carte.n_fleur--;
-			carte.invalidate();
+			carte.fond.invalidate();
 		} else if(niv.carte[l][c]==fleurm) {
 			niv.carte[l][c]=menhir;
 			carte.n_fleur--;
-			carte.invalidate();
+			carte.fond.invalidate();
 		} else if(niv.carte[l][c]==dyna) {
 			niv.carte[l][c]=vide;
 			carte.n_dyna++;
 			jeu.bout_dyna.setText(Integer.toString(carte.n_dyna));
 			if(carte.n_dyna==1) jeu.showDyna();
-			carte.invalidate();
+			carte.fond.invalidate();
 		} else if(niv.carte[l][c]>=10) { // Passage dans un arc-en-ciel.
 			if(dejaPasse!=niv.carte[l][c]) { // Pour éviter de se téléporter dans l'autre sens.
 				int[] dest = carte.rainbows.get(niv.carte[l][c]);
@@ -300,7 +300,7 @@ public class MoteurJeu {
 		int ml=lastMove[1], mc=lastMove[0];
 		if(l+ml>=0 && l+ml<LIG && c+mc>=0 && c+mc<COL && niv.carte[l+ml][c+mc]==menhir_rouge) {
 			niv.carte[l+ml][c+mc]=menhir;
-			if(ml!=mov[1] || mc!=mov[0]) carte.invalidate();
+			if(ml!=mov[1] || mc!=mov[0]) carte.fond.invalidate();
 		}
 	}
 	
@@ -328,7 +328,7 @@ public class MoteurJeu {
 	 */
 	private void finExplosion(int l, int c) {
 		niv.carte[l][c]=vide;
-		carte.invalidate();
+		carte.fond.invalidate();
 	}
 	
 	/**
