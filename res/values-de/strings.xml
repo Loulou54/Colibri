@@ -22,5 +22,11 @@
 	<string name="info_text">Application developed during the developping project in Telecom Bretagne by the following students :\n Durand Louis, Guyard Valentin, Jacquemod Laura and Thiam Mariam\n </string>
 	<string name="info_text2">We wanted to thank our tutor, Gwenaël Brunet, informatic and network technician at the departement Image and Treatement of Information </string>
 	<string name="instru_text">You are a small hummingbirg in a field full of menhirs in Brittany and you have to taste all the flowers covering the meadow.\n\n You can only fly straight and change direction when you are in front of an obstacle (menhir or fence). \n \n BEWARE the magical flowers which, once fecundated by the pollen your beak carries, transforms into a menhir !</string>
+	<string name="ajout">Neuer Spieler :</string>
+	<string name="accept">OK</string>
+	<string name="annuler">Abbrechen</string>
+	<string name="name">Name</string>
+	<string name="deuxieme">Spieler 2, go !</string>
+	<string name="fin">Multiplayer-Challenge wertig :)</string>
 	
 </resources>

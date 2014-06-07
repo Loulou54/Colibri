@@ -10,7 +10,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/herbe" />
-  
+
   <Button
         android:id="@+id/bout_dyna"
         android:layout_width="75dp"
@@ -158,5 +158,9 @@
 
     </RelativeLayout>
 
+    <include layout="@layout/activity_gagne_multi"/>
+    
+    <include layout="@layout/activity_gagne_multi2"/>
+    
 </RelativeLayout>
 

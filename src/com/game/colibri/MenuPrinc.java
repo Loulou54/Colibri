@@ -1,6 +1,8 @@
 package com.game.colibri;
 
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -44,6 +46,7 @@ public class MenuPrinc extends Activity {
 	private MediaPlayer intro=null,boucle=null;
 	private float initialX;
 	private double[][] points = new double[][] {{0.07625, 0.8145833333333333}, {0.18875, 0.7645833333333333}, {0.31625, 0.7354166666666667}, {0.24875, 0.8208333333333333}, {0.1125, 0.94375}, {0.25, 0.9458333333333333}, {0.405, 0.9208333333333333}, {0.52, 0.9416666666666667}, {0.6275, 0.9333333333333333}, {0.765, 0.9354166666666667}, {0.765, 0.8166666666666667}, {0.83, 0.74375}};
+	private Calendar debut;
 	
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -228,6 +231,7 @@ public class MenuPrinc extends Activity {
 		Jeu.opt.putInt("n_niv", avancement);
 		jeu = new Intent(this, Jeu.class);
 		startActivity(jeu);
+		debut = new GregorianCalendar();
 	}
 	
 	public void campagne(View v) {
@@ -333,6 +337,7 @@ public class MenuPrinc extends Activity {
 		Jeu.opt.putInt("n_niv", n_niv);
 		jeu = new Intent(this, Jeu.class);
 		startActivity(jeu);
+		debut = new GregorianCalendar();
 	}
 	
 	public void facile(View v) {
@@ -347,13 +352,14 @@ public class MenuPrinc extends Activity {
 		launchAleat(30,11);
 	}
 	
-	private void launchAleat(int lon, int var) {
+	public void launchAleat(int lon, int var) {
 		Jeu.opt = new Bundle();
 		Jeu.opt.putBoolean("isRandom", true);
 		Jeu.opt.putInt("long", lon);
 		Jeu.opt.putInt("vari", var);
 		jeu = new Intent(this, Jeu.class);
 		startActivity(jeu);
+		debut = new GregorianCalendar();
 	}
 	
 	public void multijoueur(View v) {
@@ -405,5 +411,13 @@ public class MenuPrinc extends Activity {
 			else
 				intro.pause();
 		}
+	}
+	
+	public Calendar getDebut() {
+		return debut;
+	}
+	
+	public void setDebut(Calendar debut){
+		this.debut = debut;
 	}
 }

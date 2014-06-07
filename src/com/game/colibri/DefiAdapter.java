@@ -24,8 +24,9 @@ public class DefiAdapter extends ArrayAdapter<Joueur> {
 		TextView score = (TextView) rowView.findViewById(R.id.score);
 		Joueur j = getItem(position);
 		name.setText(j.getPseudo());
-		exp.setText("Expérience : 12 563");
-		score.setText("Score : 8 - 5");
+		exp.setText("Expérience :" + j.getExp());
+		int scoreOwner = j.getDefis() - j.getWin();
+		score.setText("Score : " + scoreOwner + " - " + j.getWin());
 		return rowView;
 	}
 }

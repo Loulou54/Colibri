@@ -22,5 +22,11 @@
 	<string name="info_text">Aplicación desarrollada durante el proyecto de desarrollo en Telecom Bretagne por los siguientes estudiantes :\n Durand Louis, Guyard Valentin, Jacquemod Laura y Thiam Mariam\n </string>
 	<string name="info_text2">Agradecemos a nuestro tutor, Gwenaël Brunet, técnico en computación y en red, en el departamento Imagen y Procesamiento de Información </string>
 	<string name="instru_text">Usted es un pequeño colibrí en un campo de menhires en Bretaña y debe disfrutar todas las flores que cubrían la pradera.\n\n Se puede sólo volar en una línea recta y cambiar de dirección cuando se enfrentan a un obstáculo (menhir o valla). \n \n PRECAUCIÓN flores mágicas, tan pronto como son fecundados por el polen que lleva su pico, se transforman en un menhir !</string>
+	<string name="ajout">Nuevo jugador :</string>
+	<string name="accept">OK</string>
+	<string name="annuler">Cancelar</string>
+	<string name="name">Nombre</string>
+	<string name="deuxieme">Jugador 2, go !</string>
+	<string name="fin">Desafío terminado :)</string>
 	
 </resources>

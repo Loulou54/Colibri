@@ -1,6 +1,8 @@
 package com.game.colibri;
 
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -20,6 +22,7 @@ public class Jeu extends Activity {
 	
 	public static Bundle opt;
 	public static MenuPrinc menu;
+	public static Multijoueur multi = null;
 	
 	public Niveau niv;
 	public Carte carte;
@@ -30,6 +33,8 @@ public class Jeu extends Activity {
 	public Button bout_dyna;
 	private boolean brandNew=true, solUsed=false;
 	public int n_niv;
+	public Calendar debutPause;
+	private long temps = 0;
 	
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -86,11 +91,17 @@ public class Jeu extends Activity {
 				solUsed=true;
 		    	play.solution();
 			} else if(keyCode == KeyEvent.KEYCODE_BACK) {
+				debutPause = new GregorianCalendar();
 				play.pause();
 				pause.setVisibility(View.VISIBLE);
 			}
 		} else { // Jeu en pause
 			if(keyCode == KeyEvent.KEYCODE_BACK) {
+				Calendar finpause = new GregorianCalendar();
+				Calendar debut = menu.getDebut();
+				long diff = (finpause.getTimeInMillis()-debutPause.getTimeInMillis());
+				debut.setTimeInMillis(diff+debut.getTimeInMillis());
+				menu.setDebut(debut);
 				pause.setVisibility(View.INVISIBLE);
 		        play.start(); 
 			}
@@ -104,8 +115,23 @@ public class Jeu extends Activity {
 	 * 
 	 */
 	public void gagne() {
+		Calendar fin = new GregorianCalendar();
+		temps = fin.getTimeInMillis() - menu.getDebut().getTimeInMillis();
+		if (multi != null) {
+			if (multi.temps1 == 0) {
+				multi.temps1 = temps;
+				RelativeLayout gagneMulti = (RelativeLayout)findViewById(R.id.gain);
+				gagneMulti.setVisibility(View.VISIBLE);
+			}
+			else {
+				multi.temps2 = temps;
+				RelativeLayout gagneMulti2 = (RelativeLayout)findViewById(R.id.fin);
+				gagneMulti2.setVisibility(View.VISIBLE);
+			}
+		}
+		else
+			gagne.setVisibility(View.VISIBLE);
 		play.pause();
-		gagne.setVisibility(View.VISIBLE);
 		if(carte.n_dyna>0) hideDyna();
 		if(!solUsed) {
 			if(opt.getBoolean("isRandom")) {
@@ -120,6 +146,18 @@ public class Jeu extends Activity {
 		if(n_niv==menu.avancement) menu.avancement++;
 		menu.saveData(); // On sauvegarde la progression.
 		Log.i("C'est Gagné !","BRAVO !");
+	}
+	
+	public void secondJoueur(View v) {
+		menu.setDebut(new GregorianCalendar());
+		RelativeLayout gagneMulti = (RelativeLayout)findViewById(R.id.gain);
+		gagneMulti.setVisibility(View.INVISIBLE);
+		recommencer(v);
+	}
+	
+	public void fin(View v){
+		multi.finDefi();
+		this.finish();
 	}
 	
 	/**
@@ -195,7 +233,7 @@ public class Jeu extends Activity {
 	}
 	
 	public void quitter(View v) {
-    	Jeu.this.finish();
+    	this.finish();
 	}
 	
 	public void suivant(View v) {
@@ -204,4 +242,7 @@ public class Jeu extends Activity {
 		launch_niv(false);
 	}
 	
+	public long getTemps() {
+		return temps;
+	}
 }

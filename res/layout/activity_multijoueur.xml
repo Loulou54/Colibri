@@ -1,5 +1,9 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginLeft="1dp"
@@ -36,7 +40,7 @@
 	        android:textSize="16sp" />
         
     </LinearLayout>
-
+	
     <ListView
         android:id="@+id/listView1"
         android:layout_width="match_parent"
@@ -45,3 +49,77 @@
     </ListView>
 
 </LinearLayout>
+
+	<LinearLayout
+        android:id="@+id/ajoutJoueur"
+        android:layout_width="270dp"
+        android:layout_height="144dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_marginTop="50dp"
+        android:background="@drawable/carre"
+        android:orientation="vertical"
+        android:visibility="invisible">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/ajout"
+            android:textSize="18sp"
+            android:textStyle="bold|italic" 
+            android:textColor="@android:color/white"/>
+
+        <LinearLayout
+            android:layout_marginTop="5dp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_marginLeft="35dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/name"
+                android:textColor="@android:color/white" />
+
+            <EditText
+                android:id="@+id/nomJoueur"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:layout_marginLeft="15dp"
+                android:width="150dp" >
+
+                <requestFocus />
+            </EditText>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <Button
+                android:layout_marginLeft="55dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/annuler"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:onClick="cancel"
+                android:width="100dp" />
+            
+            <Button
+                android:layout_marginLeft="15dp"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/accept"
+                android:textColor="@android:color/white"
+                android:onClick="newJoueur"
+                android:textSize="16sp" />
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>
