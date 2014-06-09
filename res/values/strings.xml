@@ -13,7 +13,7 @@
     <string name="content1">Colibri</string>
     <string name="reprendre">Resume</string>
     <string name="recommencer">Start over</string>
-    <string name="sortir">Main Menu</string>
+    <string name="sortir">Quit</string>
     <string name="info">Informations</string>
 	<string name="instru">Instructions</string>
 	<string name="param">Parameters</string>

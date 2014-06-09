@@ -1,7 +1,6 @@
 package com.game.colibri;
 
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import android.media.MediaPlayer;
@@ -18,6 +17,7 @@ import android.view.animation.Animation.AnimationListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.ViewFlipper;
 import android.app.Activity;
 import android.content.Intent;
@@ -28,7 +28,7 @@ import android.content.SharedPreferences;
  */
 public class MenuPrinc extends Activity {
 	
-	
+	public static MediaPlayer intro=null,boucle=null;
 	
 	public int ww,wh;
 	public int avancement; // Progression du joueur dans les niveaux campagne.
@@ -43,10 +43,9 @@ public class MenuPrinc extends Activity {
 	private Carte carte; // L'instance de carte permettant de faire un apercu dans le menu de sélection de niveaux.
 	private LinearLayout opt_aleat;
 	private LinearLayout opt_reglages;
-	private MediaPlayer intro=null,boucle=null;
 	private float initialX;
 	private double[][] points = new double[][] {{0.07625, 0.8145833333333333}, {0.18875, 0.7645833333333333}, {0.31625, 0.7354166666666667}, {0.24875, 0.8208333333333333}, {0.1125, 0.94375}, {0.25, 0.9458333333333333}, {0.405, 0.9208333333333333}, {0.52, 0.9416666666666667}, {0.6275, 0.9333333333333333}, {0.765, 0.9354166666666667}, {0.765, 0.8166666666666667}, {0.83, 0.74375}};
-	private Calendar debut;
+	private GregorianCalendar debut;
 	
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -68,19 +67,21 @@ public class MenuPrinc extends Activity {
 		Jeu.menu=this;
 		Multijoueur.menu=this;
 		loadData();
-		intro = MediaPlayer.create(this, R.raw.intro);
-		intro.setLooping(false);
-		boucle = MediaPlayer.create(this, R.raw.boucle);
-		boucle.setLooping(true);
-		intro.start();
-		intro.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-			@Override
-			public void onCompletion(MediaPlayer mp) {
-				intro.release();
-			    intro = null;
-				boucle.start();
-			}
-		});
+		if(intro==null && boucle==null) {
+			intro = MediaPlayer.create(this, R.raw.intro);
+			intro.setLooping(false);
+			boucle = MediaPlayer.create(this, R.raw.boucle);
+			boucle.setLooping(true);
+			intro.start();
+			intro.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+				@Override
+				public void onCompletion(MediaPlayer mp) {
+					intro.release();
+				    intro = null;
+					boucle.start();
+				}
+			});
+		}
 	}
 
 	// Le placement des boutons est calculé ici en fonction des dimensions de l'écran. (Astuce pour contourner le temps d'établissement de l'affichage empêchant ces opérations dans le onCreate)
@@ -92,6 +93,8 @@ public class MenuPrinc extends Activity {
 		RelativeLayout root = (RelativeLayout) findViewById(R.id.root);
 		ww = root.getWidth();
 		wh = root.getHeight();
+		TextView exp = (TextView) findViewById(R.id.exp_menu);
+		exp.setText("Expérience : "+experience);
 		if(brandNew) placeButton();
 		if(vf.getDisplayedChild()==1) campagne(carte); // Permet de rafraîchir la progression lorsque l'on quitte le jeu et revient au menu de sélection.
 	}
@@ -206,7 +209,6 @@ public class MenuPrinc extends Activity {
 	private void loadData() {
 		avancement=pref.getInt("niveau", 1);
 		experience=pref.getInt("exp", 0);
-		avancement=23;
 		n_niv=avancement;
 		Log.i("Avancement :","Niv "+avancement);
 		Log.i("Experience :","Score :"+experience);
@@ -396,10 +398,7 @@ public class MenuPrinc extends Activity {
 			son_off.setVisibility(View.INVISIBLE);
 			son_off.setClickable(false);
 			son_on.setClickable(true);
-			if(intro==null)
-				boucle.start();
-			else
-				intro.start();
+			startMusic();
 		}
 		else {
 			son_off.setVisibility(View.VISIBLE);
@@ -413,11 +412,25 @@ public class MenuPrinc extends Activity {
 		}
 	}
 	
-	public Calendar getDebut() {
+	public static void startMusic() {
+		if(intro==null)
+			boucle.start();
+		else
+			intro.start();
+	}
+	
+	public static void stopMusic() {
+		if(intro==null)
+			boucle.pause();
+		else
+			intro.pause();
+	}
+	
+	public GregorianCalendar getDebut() {
 		return debut;
 	}
 	
-	public void setDebut(Calendar debut){
+	public void setDebut(GregorianCalendar debut){
 		this.debut = debut;
 	}
 }

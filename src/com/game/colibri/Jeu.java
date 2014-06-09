@@ -1,7 +1,6 @@
 package com.game.colibri;
 
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import android.app.Activity;
@@ -31,9 +30,9 @@ public class Jeu extends Activity {
 	public RelativeLayout perdu; 
 	public RelativeLayout gagne; 
 	public Button bout_dyna;
-	private boolean brandNew=true, solUsed=false;
+	private boolean brandNew=true, solUsed=false, music=false;
 	public int n_niv;
-	public Calendar debutPause;
+	public GregorianCalendar debutPause;
 	private long temps = 0;
 	
 	/* (non-Javadoc)
@@ -50,6 +49,10 @@ public class Jeu extends Activity {
         perdu= (RelativeLayout) findViewById(R.id.perdu);
 		gagne= (RelativeLayout) findViewById(R.id.gagner);
 		play = new MoteurJeu(this,carte);
+		if(MenuPrinc.intro!=null)
+			music=MenuPrinc.intro.isPlaying();
+		else
+			music=MenuPrinc.boucle.isPlaying();
 		Log.i("onCreate","FINI");
 	}
 	
@@ -61,6 +64,17 @@ public class Jeu extends Activity {
 		if (brandNew) { // événement appelé lorsque le RelativeLayout "lay" est prêt ! C'est ici que l'on peut charger le niveau et ajouter les View "Animal".
 			launch_niv(false);
 			brandNew=false;
+		} else {
+			if(!hasFocus) {
+				debutPause = new GregorianCalendar();
+				play.pause();
+				pause.setVisibility(View.VISIBLE);
+				if(music)
+					MenuPrinc.stopMusic();
+			} else {
+				if(music)
+					MenuPrinc.startMusic();
+			}
 		}
 	}
 	
@@ -85,7 +99,7 @@ public class Jeu extends Activity {
 				play.direction(MoteurJeu.LEFT);
 			} else if(keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
 				play.direction(MoteurJeu.DOWN);
-			} else if((keyCode == KeyEvent.KEYCODE_MENU || keyCode == KeyEvent.KEYCODE_ESCAPE) && niv.solution!=null) { // Solution !
+			} else if((keyCode == KeyEvent.KEYCODE_MENU || keyCode == KeyEvent.KEYCODE_ESCAPE) && niv.solution!=null && n_niv<menu.avancement && multi==null) { // Solution !
 				if(carte.n_dyna>0) hideDyna();
 		    	launch_niv(true);
 				solUsed=true;
@@ -95,16 +109,18 @@ public class Jeu extends Activity {
 				play.pause();
 				pause.setVisibility(View.VISIBLE);
 			}
-		} else { // Jeu en pause
+		} else if(pause.getVisibility()==View.VISIBLE) { // Jeu en pause
 			if(keyCode == KeyEvent.KEYCODE_BACK) {
-				Calendar finpause = new GregorianCalendar();
-				Calendar debut = menu.getDebut();
+				GregorianCalendar finpause = new GregorianCalendar();
+				GregorianCalendar debut = menu.getDebut();
 				long diff = (finpause.getTimeInMillis()-debutPause.getTimeInMillis());
 				debut.setTimeInMillis(diff+debut.getTimeInMillis());
 				menu.setDebut(debut);
 				pause.setVisibility(View.INVISIBLE);
 		        play.start(); 
 			}
+		} else {
+			recommencer(gagne);
 		}
 	return true;
 	}
@@ -115,9 +131,11 @@ public class Jeu extends Activity {
 	 * 
 	 */
 	public void gagne() {
-		Calendar fin = new GregorianCalendar();
+		play.pause();
+		if(carte.n_dyna>0) hideDyna();
+		GregorianCalendar fin = new GregorianCalendar();
 		temps = fin.getTimeInMillis() - menu.getDebut().getTimeInMillis();
-		if (multi != null) {
+		if (multi != null) { // Mode multijoueur
 			if (multi.temps1 == 0) {
 				multi.temps1 = temps;
 				RelativeLayout gagneMulti = (RelativeLayout)findViewById(R.id.gain);
@@ -129,22 +147,21 @@ public class Jeu extends Activity {
 				gagneMulti2.setVisibility(View.VISIBLE);
 			}
 		}
-		else
+		else {
 			gagne.setVisibility(View.VISIBLE);
-		play.pause();
-		if(carte.n_dyna>0) hideDyna();
-		if(!solUsed) {
-			if(opt.getBoolean("isRandom")) {
-				menu.experience+=100+play.niv.solution.length*10;
-			} else {
-				if(n_niv==menu.avancement)
-					menu.experience+=100+n_niv*50;
-				else
-					menu.experience+=100+n_niv*10;
+			if(!solUsed) {
+				if(opt.getBoolean("isRandom")) {
+					menu.experience+=100+play.niv.solution.length*10;
+				} else {
+					if(n_niv==menu.avancement) {
+						menu.avancement++;
+						menu.experience+=100+n_niv*40;
+					} else
+						menu.experience+=n_niv*10;
+				}
+				menu.saveData(); // On sauvegarde la progression.
 			}
 		}
-		if(n_niv==menu.avancement) menu.avancement++;
-		menu.saveData(); // On sauvegarde la progression.
 		Log.i("C'est Gagné !","BRAVO !");
 	}
 	
@@ -156,7 +173,8 @@ public class Jeu extends Activity {
 	}
 	
 	public void fin(View v){
-		multi.finDefi();
+		multi.finDefi(play.niv.solution.length);
+		music=false;
 		this.finish();
 	}
 	
@@ -164,8 +182,9 @@ public class Jeu extends Activity {
 	 * Le colibri est mort : affiche l'écran associé.
 	 */
 	public void mort() {
-		perdu.setVisibility(View.VISIBLE);
-		Log.i("Oh non !","Vous vous êtes fait écraser !");
+		if(!play.isRunning && pause.getVisibility()==View.INVISIBLE) {
+			perdu.setVisibility(View.VISIBLE);
+		}
 	}
 	
 	/**
@@ -227,12 +246,14 @@ public class Jeu extends Activity {
 	
 	public void recommencer(View v) {
 		pause.setVisibility(View.INVISIBLE);
+		gagne.setVisibility(View.INVISIBLE);
 		perdu.setVisibility(View.INVISIBLE);
     	if(carte.n_dyna>0) hideDyna();
     	launch_niv(true);
 	}
 	
 	public void quitter(View v) {
+		music=false;
     	this.finish();
 	}
 	

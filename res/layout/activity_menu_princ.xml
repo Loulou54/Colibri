@@ -182,6 +182,17 @@
         android:layout_marginBottom="6dp"
         android:onClick="musique" />
 
+    <TextView
+        android:id="@+id/exp_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp"
+        android:text="@string/app_name"
+        android:textSize="16sp"
+        android:textColor="@color/orange" />
+
 </RelativeLayout>
 
 <include layout="@layout/choix_niveaux" />
