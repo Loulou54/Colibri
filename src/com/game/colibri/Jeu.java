@@ -22,6 +22,7 @@ public class Jeu extends Activity {
 	public static Bundle opt;
 	public static MenuPrinc menu;
 	public static Multijoueur multi = null;
+	public static final int NIV_MAX=36;
 	
 	public Niveau niv;
 	public Carte carte;
@@ -108,19 +109,18 @@ public class Jeu extends Activity {
 				debutPause = new GregorianCalendar();
 				play.pause();
 				pause.setVisibility(View.VISIBLE);
-			}
+			} else
+				return false;
 		} else if(pause.getVisibility()==View.VISIBLE) { // Jeu en pause
-			if(keyCode == KeyEvent.KEYCODE_BACK) {
-				GregorianCalendar finpause = new GregorianCalendar();
-				GregorianCalendar debut = menu.getDebut();
-				long diff = (finpause.getTimeInMillis()-debutPause.getTimeInMillis());
-				debut.setTimeInMillis(diff+debut.getTimeInMillis());
-				menu.setDebut(debut);
-				pause.setVisibility(View.INVISIBLE);
-		        play.start(); 
-			}
+			if(keyCode == KeyEvent.KEYCODE_BACK)
+				reprendre(gagne);
+			else
+				return false;
 		} else {
-			recommencer(gagne);
+			if(keyCode == KeyEvent.KEYCODE_BACK)
+				recommencer(gagne);
+			else
+				return false;
 		}
 	return true;
 	}
@@ -235,11 +235,16 @@ public class Jeu extends Activity {
 		play.start();
 	}
 	
-	/**
+	/*
 	 * Les fonctions suivantes sont déclenchées par les appuis sur les boutons des menus Pause, Gagné et Mort.
 	 */
 	
 	public void reprendre(View v) {
+		GregorianCalendar finpause = new GregorianCalendar();
+		GregorianCalendar debut = menu.getDebut();
+		long diff = (finpause.getTimeInMillis()-debutPause.getTimeInMillis());
+		debut.setTimeInMillis(diff+debut.getTimeInMillis());
+		menu.setDebut(debut);
 		pause.setVisibility(View.INVISIBLE);
         play.start(); 
 	}
@@ -259,6 +264,10 @@ public class Jeu extends Activity {
 	
 	public void suivant(View v) {
 		gagne.setVisibility(View.INVISIBLE);
+		if(n_niv==NIV_MAX) {
+			quitter(v);
+			return;
+		}
 		if(!opt.getBoolean("isRandom")) n_niv++;
 		launch_niv(false);
 	}

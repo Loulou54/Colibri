@@ -230,7 +230,7 @@ public class MenuPrinc extends Activity {
 	public void continuer(View v) {
 		opt_reglages.setVisibility(View.INVISIBLE);
 		Jeu.opt.putBoolean("isRandom", false);
-		Jeu.opt.putInt("n_niv", avancement);
+		Jeu.opt.putInt("n_niv", Math.min(avancement,Jeu.NIV_MAX));
 		jeu = new Intent(this, Jeu.class);
 		startActivity(jeu);
 		debut = new GregorianCalendar();
