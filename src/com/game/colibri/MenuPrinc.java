@@ -12,8 +12,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.Animation;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Animation.AnimationListener;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -96,7 +98,12 @@ public class MenuPrinc extends Activity {
 		TextView exp = (TextView) findViewById(R.id.exp_menu);
 		exp.setText("Expérience : "+experience);
 		if(brandNew) placeButton();
-		if(vf.getDisplayedChild()==1) campagne(carte); // Permet de rafraîchir la progression lorsque l'on quitte le jeu et revient au menu de sélection.
+		if(vf.getDisplayedChild()==1) {
+			if(hasFocus)
+				campagne(carte); // Permet de rafraîchir la progression lorsque l'on quitte le jeu et revient au menu de sélection.
+			else
+				((Colibri) findViewById(R.id.coli)).stop();
+		}
 	}
 	
 	/**
@@ -104,11 +111,18 @@ public class MenuPrinc extends Activity {
 	 */
 	private void placeButton() {
 		brandNew=false;
-		Button btn_lay = (Button)findViewById(R.id.bout1);
-		RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) btn_lay.getLayoutParams();
-		layoutParams.leftMargin = ww*4/9;
-	    layoutParams.topMargin = 3*wh/8;
-	    btn_lay.setLayoutParams(layoutParams);
+		int[] boutons = new int[] {R.id.bout1,R.id.bout2,R.id.bout3,R.id.bout4};
+		for(int i=0; i<boutons.length; i++) {
+			Button btn_lay = (Button)findViewById(boutons[i]);
+			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) btn_lay.getLayoutParams();
+			if(i==0) {
+				layoutParams.leftMargin = ww*4/9;
+			    layoutParams.topMargin = 3*wh/8;
+			}
+		    layoutParams.width = 4*ww/10;
+		    layoutParams.height = 128*ww/2320;
+		    btn_lay.setLayoutParams(layoutParams);
+		}
 	    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ww/2,wh/2);
 		params.leftMargin = (int) (ww/4);
 	    params.topMargin = (int) (wh/12);
@@ -198,6 +212,7 @@ public class MenuPrinc extends Activity {
         if(carte.getVisibility()==View.VISIBLE && MenuSel.getDisplayedChild()!=a) {
             carte.setAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_out));
 			carte.setVisibility(View.INVISIBLE);
+			deplaceColibri(new double[] {0.1,0.6},true);
         }
         }
         return false;
@@ -241,14 +256,23 @@ public class MenuPrinc extends Activity {
 		carte.setVisibility(View.INVISIBLE);
 		vf.setDisplayedChild(1);
 		RelativeLayout lay_sel;
-		View img;
+		Button img;
 		RelativeLayout.LayoutParams params;
+		Colibri coli = (Colibri) findViewById(R.id.coli);
+		params=new RelativeLayout.LayoutParams(ww/17,wh/10);
+		params.leftMargin = ww/10;
+	    params.topMargin = wh/2;
+	    coli.setLayoutParams(params);
+	    coli.savePosFinAnim(ww/10, wh/2, false);
+	    coli.mx=1;
+    	coli.setSpriteDirection();
+		coli.start();
 		int[] r = new int[] {R.id.menu_selection_1,R.id.menu_selection_2,R.id.menu_selection_3};
 		for(int ecran=0; ecran<3; ecran++) {
 			lay_sel = (RelativeLayout) findViewById(r[ecran]);
 			lay_sel.removeAllViews();
 			for(int i=0; i<points.length; i++) {
-				img = new View(this);
+				img = new Button(this);
 				if(ecran*points.length+i+1>=avancement)
 					img.setBackgroundResource(R.drawable.fleur);
 				else if(Math.random()<0.5)
@@ -272,14 +296,15 @@ public class MenuPrinc extends Activity {
 			    });
 			}
 		}
-		MenuSel.setDisplayedChild((avancement-1)/points.length);
+		MenuSel.setDisplayedChild((n_niv-1)/points.length);
 	}
 	
 	/**
-	 * Charge le niveau d'index n_niv dans l'aperçu.
+	 * Charge le niveau d'index n_niv dans l'aperçu et déplace le colibri sur le point.
 	 * @param n_niv l'index du niveau à afficher
 	 */
 	private void setApercu(int n) {
+		if(n!=n_niv) deplaceColibri(points[(n-1)%points.length],false);
 		if(carte.getVisibility()==View.INVISIBLE) {
 			carte.setAnimation(AnimationUtils.loadAnimation(this, R.anim.aleat_opt_anim));
 			carte.setVisibility(View.VISIBLE);
@@ -293,6 +318,21 @@ public class MenuPrinc extends Activity {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+	}
+	
+	private void deplaceColibri(double[] co, boolean regardeVersDroite) {
+		Colibri coli = (Colibri) findViewById(R.id.coli);
+		coli.setPosFinAnim(); // Au cas où l'animation n'était pas terminée.
+		RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) coli.getLayoutParams();
+		int xf=(int) (ww*co[0])-params.width/2, yf=(int) (wh*co[1])-3*params.height/4;
+	    TranslateAnimation anim = new TranslateAnimation(0,xf-params.leftMargin,0,yf-params.topMargin);
+	    anim.setDuration(800);
+	    anim.setInterpolator(new AccelerateDecelerateInterpolator());
+	    coli.savePosFinAnim(xf,yf,regardeVersDroite);
+    	coli.mx=(int) Math.signum(xf-params.leftMargin);
+    	coli.setSpriteDirection();
+	    coli.setAnimation(anim);
 	}
 	
 	public void aleatoire(View v) {

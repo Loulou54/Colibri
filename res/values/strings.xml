@@ -11,6 +11,7 @@
     <string name="moy">Intermediate</string>
     <string name="dif">Expert</string>
     <string name="content1">Colibri</string>
+    <string name="pause">-= Pause =-</string>
     <string name="reprendre">Resume</string>
     <string name="recommencer">Start over</string>
     <string name="sortir">Quit</string>

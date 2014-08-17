@@ -5,7 +5,7 @@
     android:id="@+id/gain"
     android:layout_alignParentLeft="true"
     android:layout_alignParentTop="true"
-    android:background="@drawable/arrier"
+    android:background="@color/cyan"
     android:visibility="invisible">
 
     <Button

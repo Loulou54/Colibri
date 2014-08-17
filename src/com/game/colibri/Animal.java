@@ -44,10 +44,12 @@ public abstract class Animal extends ImageView {
 	 */
 	public Animal(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		params=(RelativeLayout.LayoutParams) this.getLayoutParams();
 	}
 	
 	public Animal(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
+		params=(RelativeLayout.LayoutParams) this.getLayoutParams();
 	}
 	
 	

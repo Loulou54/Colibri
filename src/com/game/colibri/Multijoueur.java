@@ -76,18 +76,15 @@ public class Multijoueur extends Activity {
 		menu.launchAleat(18,8);
 	}
 	
-	public void finDefi(int len) {
+	public void finDefi(int exp1, int exp2) {
 		j.defi();
 		user.defi();
-		if (temps1 > temps2) {
+		if (temps1 > temps2)
 			j.win();
-			j.addExp(len*20);
-			user.addExp(len*5);
-		} else {
+		else
 			user.win();
-			user.addExp(len*20);
-			j.addExp(len*5);
-		}
+		user.addExp(exp1);
+		j.addExp(exp2);
 		menu.experience=user.getExp();
 		menu.editor.putInt("defis", user.getDefis());
 		menu.editor.putInt("win", user.getWin());

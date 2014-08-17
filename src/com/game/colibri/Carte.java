@@ -97,7 +97,6 @@ public class Carte extends RelativeLayout {
     	    		    				can.drawBitmap(rainbow, c*cw-cw/4, l*ch, null);
     	    		    		}
     	    		    	}
-    	    		    Log.i("onDraw","Rafraichissement !");
     	    	    	}
     	    	    }
     	    	};

@@ -5,13 +5,13 @@ import java.util.GregorianCalendar;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 /**
  * Activité gérant le jeu proprement dit. Elle affiche notamment la View "Carte" en plein écran.
@@ -54,7 +54,6 @@ public class Jeu extends Activity {
 			music=MenuPrinc.intro.isPlaying();
 		else
 			music=MenuPrinc.boucle.isPlaying();
-		Log.i("onCreate","FINI");
 	}
 	
 	/* (non-Javadoc)
@@ -117,8 +116,10 @@ public class Jeu extends Activity {
 			else
 				return false;
 		} else {
-			if(keyCode == KeyEvent.KEYCODE_BACK)
+			if(keyCode == KeyEvent.KEYCODE_BACK && multi==null) {
+				menu.setDebut(new GregorianCalendar());
 				recommencer(gagne);
+			}
 			else
 				return false;
 		}
@@ -144,25 +145,44 @@ public class Jeu extends Activity {
 			else {
 				multi.temps2 = temps;
 				RelativeLayout gagneMulti2 = (RelativeLayout)findViewById(R.id.fin);
+				TextView txt = (TextView) findViewById(R.id.multi_res);
+				String tps1=multi.temps1/1000+"."+(multi.temps1%1000)/10;
+				String tps2=multi.temps2/1000+"."+(multi.temps2%1000)/10;
+				int exp1,exp2;
+				if(multi.temps1 > multi.temps2) {
+					exp1=play.niv.solution.length*5;
+					exp2=play.niv.solution.length*20;
+				} else {
+					exp1=play.niv.solution.length*20;
+					exp2=play.niv.solution.length*5;
+				}
+				multi.finDefi(exp1,exp2);
+				txt.setText("Temps : "+tps1+"  vs  "+tps2
+						+"\nExpérience : + "+exp1+"  -=-  + "+exp2
+						+"\nScore : "+(multi.j.getDefis()-multi.j.getWin())+"  -=-  "+multi.j.getWin());
 				gagneMulti2.setVisibility(View.VISIBLE);
 			}
 		}
 		else {
-			gagne.setVisibility(View.VISIBLE);
+			int exp=0;
 			if(!solUsed) {
 				if(opt.getBoolean("isRandom")) {
-					menu.experience+=100+play.niv.solution.length*10;
+					exp=100+play.niv.solution.length*10;
 				} else {
 					if(n_niv==menu.avancement) {
 						menu.avancement++;
-						menu.experience+=100+n_niv*40;
+						exp=100+n_niv*40;
 					} else
-						menu.experience+=n_niv*10;
+						exp=n_niv*10;
 				}
+				menu.experience+=exp;
 				menu.saveData(); // On sauvegarde la progression.
 			}
+			TextView txt = (TextView) findViewById(R.id.resultats);
+			txt.setText("Temps : "+temps/1000+"."+(temps%1000)/10
+					+"\nExpérience : + "+exp);
+			gagne.setVisibility(View.VISIBLE);
 		}
-		Log.i("C'est Gagné !","BRAVO !");
 	}
 	
 	public void secondJoueur(View v) {
@@ -173,7 +193,6 @@ public class Jeu extends Activity {
 	}
 	
 	public void fin(View v){
-		multi.finDefi(play.niv.solution.length);
 		music=false;
 		multi=null;
 		this.finish();
@@ -266,6 +285,7 @@ public class Jeu extends Activity {
 	
 	public void suivant(View v) {
 		gagne.setVisibility(View.INVISIBLE);
+		menu.setDebut(new GregorianCalendar());
 		if(n_niv==NIV_MAX) {
 			quitter(v);
 			return;

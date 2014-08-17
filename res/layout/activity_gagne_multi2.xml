@@ -5,21 +5,8 @@
     android:id="@+id/fin"
     android:layout_alignParentLeft="true"
     android:layout_alignParentTop="true"
-    android:background="@drawable/arrier"
+    android:background="@color/cyan"
     android:visibility="invisible" >
-
-    <Button
-        android:id="@+id/continuer"
-        android:layout_width="300dp"
-        android:layout_height="50dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="150dp"
-        android:background="@drawable/boutons"
-        android:gravity="center"
-        android:textColor="@android:color/white"
-        android:text="@string/multi"
-        android:onClick="fin" />
 
     <TextView
         android:id="@+id/textView1"
@@ -27,11 +14,38 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="38dp"
+        android:layout_marginTop="20dp"
         android:text="@string/fin"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/bleu"
         android:textSize="32sp"
         android:textStyle="bold" />
+    
+    <TextView
+        android:id="@+id/multi_res"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
+        android:gravity="left"
+        android:textSize="25sp"
+        android:fontFamily="sans-serif-light"
+        android:textColor="@color/saumon"
+        android:text="@string/app_name"
+         />
+    
+    <Button
+        android:id="@+id/continuer"
+        android:layout_width="300dp"
+        android:layout_height="50dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="180dp"
+        android:background="@drawable/boutons"
+        android:gravity="center"
+        android:textColor="@android:color/white"
+        android:text="@string/multi"
+        android:onClick="fin" />
     
 </RelativeLayout>
