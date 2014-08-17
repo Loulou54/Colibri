@@ -5,10 +5,13 @@ import android.util.AttributeSet;
 
 public class Colibri extends Animal {
 	
+	public int v_max;
+	
 	public Colibri(Context context, int dbx, int dby, int w, int h) {
 		super(context,dbx,dby,w,h);
 		this.setBackgroundResource(R.drawable.colibri_d);
 		acc=cw/10;
+		v_max=3*cw/4;
 	    step=0;
 	}
 	
@@ -27,7 +30,7 @@ public class Colibri extends Animal {
 	
 	@Override
 	public void deplacer() {
-		step=Math.min(step+acc, 3*cw/4); // Vitesse plafonnée à 3/4 case/frame.
+		step=Math.min(step+acc, v_max); // Vitesse plafonnée à v_max case/frame.
 		params.leftMargin += mx*step;
 	    params.topMargin += my*step;
 	    this.setLayoutParams(params);

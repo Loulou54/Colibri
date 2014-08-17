@@ -175,6 +175,7 @@ public class Jeu extends Activity {
 	public void fin(View v){
 		multi.finDefi(play.niv.solution.length);
 		music=false;
+		multi=null;
 		this.finish();
 	}
 	
@@ -259,6 +260,7 @@ public class Jeu extends Activity {
 	
 	public void quitter(View v) {
 		music=false;
+		multi=null;
     	this.finish();
 	}
 	

@@ -77,7 +77,6 @@ public class Multijoueur extends Activity {
 	}
 	
 	public void finDefi(int len) {
-		Jeu.multi=null;
 		j.defi();
 		user.defi();
 		if (temps1 > temps2) {

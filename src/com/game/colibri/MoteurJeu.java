@@ -201,7 +201,11 @@ public class MoteurJeu {
 			// Choisit de quel côté de la vache il faut replacer le colibri
 			int l=carte.colibri.getRow(), c=carte.colibri.getCol();
 			if(carte.n_dyna>0) removeMenhirRouge(lastMove); // On enlève le menhir rouge mais on ne rafraîchit pas.
-			if(carte.cw-Math.abs(vx-cx) < carte.ch-Math.abs(vy-cy)) { // sur l'horizontale
+			boolean plutotHoriz=carte.cw-Math.abs(vx-cx) < carte.ch-Math.abs(vy-cy);
+			boolean clairementSurHoriz=plutotHoriz && 3*carte.cw/4 < Math.abs(vx-cx);
+			boolean clairementSurVert=!plutotHoriz && 3*carte.cw/4 < Math.abs(vy-cy);
+			boolean vaVite=carte.colibri.step>2*carte.colibri.v_max/3;
+			if(!vaVite && plutotHoriz || vaVite && (clairementSurHoriz || carte.colibri.mx!=0) && !clairementSurVert) { // sur l'horizontale
 				if(cx<vx) {
 					if(c-1<0 || niv.carte[l][c-1]==menhir) cx=Math.max(vx-carte.cw,c*carte.cw); // Détecte si le colibri est bloqué par un menhir ou un bord.
 					else cx=vx-carte.cw;
@@ -231,12 +235,13 @@ public class MoteurJeu {
 			ramasser(); // On ramasse l'item potentiel
 			int nl=carte.colibri.getRow(), nc=carte.colibri.getCol();
 			// Si le colibri a été poussé sur une autre case, il faut changer le menhir rouge de sélection !
-			if(carte.n_dyna>0 && (nl!=l || nc!=c)) {
+			if(carte.n_dyna>0 && carte.colibri.mx+carte.colibri.my==0) {
 				int ml=lastMove[1], mc=lastMove[0];
 				if(nl+ml>=0 && nl+ml<LIG && nc+mc>=0 && nc+mc<COL && niv.carte[nl+ml][nc+mc]==menhir) {
 					niv.carte[nl+ml][nc+mc]=menhir_rouge;
 				}
-				carte.fond.invalidate();
+				if(nl!=l || nc!=c)
+					carte.fond.invalidate();
 			}
 		}
 	}

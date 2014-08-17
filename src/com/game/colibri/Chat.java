@@ -7,12 +7,14 @@ public class Chat extends Animal {
 	
 	private int[][] itineraire=null; // itinéraire des vaches/chats. Coordonnées de chaque point de passage. (au moins 2) Ex : {{1,1},{1,4},{3,4}}
 	private int chkpt=0; // le prochain checkpoint de l'animal dans itineraire.
+	public int v_max;
 	
 	public Chat(Context context, int w, int h, int[][] itin) {
 		super(context,cw*itin[0][1],ch*itin[0][0]-ch/4,w,h);
 		this.setBackgroundResource(R.drawable.chat);
 		itineraire=itin;
 		acc=cw/16;
+		v_max=cw/4;
     	step=0;
 	}
 	
@@ -31,7 +33,7 @@ public class Chat extends Animal {
 	
 	@Override
 	public void deplacer() {
-		step=Math.min(step+acc, cw/4);
+		step=Math.min(step+acc, v_max);
     	// on teste si l'on est arrivé au checkpoint :
     	int c=itineraire[chkpt][1] , l=itineraire[chkpt][0];
     	if (Math.abs(c*cw-params.leftMargin)<=step) {
