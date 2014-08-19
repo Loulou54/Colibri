@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Colibri</string>
+    <string name="app_name">Colibrí</string>
     <string name="jouer">Continuar</string>
     <string name="campagne">Campaña</string>
     <string name="aleat">Mapa Aleatorio</string>
@@ -10,15 +10,16 @@
     <string name="fac">Principiantes</string>
     <string name="moy">Intermedio</string>
     <string name="dif">Experto</string>
-    <string name="content1">Colibri</string>
+    <string name="content1">Colibrí</string>
     <string name="reprendre">Reanudar</string>
     <string name="recommencer">Recomenzar</string>
     <string name="sortir">Dejar</string>
+    <string name="solution">Solución</string>
     <string name="info">Informatión</string>
 	<string name="instru">Instrucción</string>
 	<string name="param">Parámetros</string>
 	<string name="nouveau_defi">Nuevo desafío</string>
-	<string name="score">Puntuación :</string>
+	<string name="score">Score :</string>
 	<string name="info_text">Aplicación desarrollada durante el proyecto de desarrollo en Telecom Bretagne por los siguientes estudiantes :\n Durand Louis, Guyard Valentin, Jacquemod Laura y Thiam Mariam\n </string>
 	<string name="info_text2">Agradecemos a nuestro tutor, Gwenaël Brunet, técnico en computación y en red, en el departamento Imagen y Procesamiento de Información </string>
 	<string name="instru_text">Usted es un pequeño colibrí en un campo de menhires en Bretaña y debe disfrutar todas las flores que cubrían la pradera.\n\n Se puede sólo volar en una línea recta y cambiar de dirección cuando se enfrentan a un obstáculo (menhir o valla). \n \n PRECAUCIÓN flores mágicas, tan pronto como son fecundados por el polen que lleva su pico, se transforman en un menhir !</string>
@@ -28,5 +29,10 @@
 	<string name="name">Nombre</string>
 	<string name="deuxieme">Jugador 2, go !</string>
 	<string name="fin">Desafío terminado :)</string>
+	<string name="bravo">Bien jugado!</string>
+	<string name="exp">Experiencia</string>
+	<string name="defis_joues">Desafios</string>
+	<string name="defis_gagnés">Victorias</string>
+	<string name="etat">Jugar</string>
 	
 </resources>

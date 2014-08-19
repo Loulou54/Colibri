@@ -1,32 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Colibri</string>
+    <string name="app_name">Kolibri</string>
     <string name="jouer">Fortsetzen</string>
-    <string name="campagne">Feldzug</string>
+    <string name="campagne">Kampagne</string>
     <string name="aleat">Zufallskarte</string>
     <string name="multi">Multiplayer-Challenge</string>
     <string name="instructions">Anweisung</string>
     <string name="fac">Anfänger</string>
     <string name="moy">Mittlere</string>
     <string name="dif">Könner</string>
-    <string name="content1">Colibri</string>
-    <string name="reprendre">Ubernehmen</string>
+    <string name="content1">Kolibri</string>
+    <string name="reprendre">Fortsetzen</string>
     <string name="recommencer">Wiederholen</string>
     <string name="sortir">Verlassen</string>
+    <string name="solution">Lösung</string>
     <string name="info">Informationen</string>
 	<string name="instru">Anweisungen</string>
 	<string name="param">Parameter</string>
 	<string name="nouveau_defi">Neue Herausforderung</string>
 	<string name="score">Spielstand :</string>
-	<string name="info_text">Application developed during the developping project in Telecom Bretagne by the following students :\n Durand Louis, Guyard Valentin, Jacquemod Laura and Thiam Mariam\n </string>
-	<string name="info_text2">We wanted to thank our tutor, Gwenaël Brunet, informatic and network technician at the departement Image and Treatement of Information </string>
-	<string name="instru_text">You are a small hummingbirg in a field full of menhirs in Brittany and you have to taste all the flowers covering the meadow.\n\n You can only fly straight and change direction when you are in front of an obstacle (menhir or fence). \n \n BEWARE the magical flowers which, once fecundated by the pollen your beak carries, transforms into a menhir !</string>
+	<string name="info_text">Applikation entwickelt während der Entwicklungsprojekt in Telecom Bretagne durch die folgenden Studenten :\n Durand Louis, Guyard Valentin, Jacquemod Laura and Thiam Mariam\n </string>
+	<string name="info_text2">Wir bedanken unseren Tutor, Gwenaël Brunet, Informationen- und Netzwerktechniker in der Abteilung Bild und Behandlung von Informationen.</string>
+	<string name="instru_text">Sie sind ein Kolibri in eine Hinkelsteinfeld in Bretagne und Sie müssen jede Blumen fressen, die auf dem weiche bretonische Erde liegen. Sie können aber nur geradehaus fliegen und ihre Richtung nur gegenüber ein Hindernis (Hinkelstein oder Zaun).\n\n PASSEN SIE AUF vor die Zauberblumen, die einst vom Pollen, die Ihr Schnabel trägt befruchteten werden, wandeln sich zu Hinkelsteine !</string>
 	<string name="ajout">Neuer Spieler :</string>
 	<string name="accept">OK</string>
 	<string name="annuler">Abbrechen</string>
 	<string name="name">Name</string>
-	<string name="deuxieme">Spieler 2, go !</string>
-	<string name="fin">Multiplayer-Challenge wertig :)</string>
+	<string name="deuxieme">Spieler 2, los !</string>
+	<string name="fin">Multiplayer-Challenge vertig :)</string>
+	<string name="bravo">Gut gespielt !</string>
+	<string name="exp">Erfahrung</string>
+	<string name="defis_joues">Spiele</string>
+	<string name="defis_gagnés">Siege</string>
+	<string name="etat">Spielen</string>
 	
 </resources>

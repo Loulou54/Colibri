@@ -27,6 +27,8 @@ public class Multijoueur extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		DefiAdapter.expMot=getString(R.string.exp);
+		DefiAdapter.scoreMot=getString(R.string.score);
 		setContentView(R.layout.activity_multijoueur);
 		lv = (ListView) findViewById(R.id.listView1);
 		loadPlayers();
@@ -73,7 +75,7 @@ public class Multijoueur extends Activity {
 		Jeu.multi=this;
 		temps1=0;
 		temps2=0;
-		menu.launchAleat(18,8);
+		menu.launchAleat(8,26);
 	}
 	
 	public void finDefi(int exp1, int exp2) {
@@ -138,10 +140,10 @@ public class Multijoueur extends Activity {
 		TextView name = (TextView) findViewById(R.id.user_name);
 		name.setText(user.getPseudo());
 		TextView exp = (TextView) findViewById(R.id.user_exp);
-		exp.setText("Expérience :\n"+user.getExp());
+		exp.setText(getString(R.string.exp)+" :\n"+user.getExp());
 		TextView defis = (TextView) findViewById(R.id.user_defis);
-		defis.setText("Défis joués : "+user.getDefis());
+		defis.setText(getString(R.string.defis_joues)+" : "+user.getDefis());
 		TextView win = (TextView) findViewById(R.id.user_wins);
-		win.setText("Défis gagnés : "+user.getWin());
+		win.setText(getString(R.string.defis_gagnés)+" : "+user.getWin());
 	}
 }

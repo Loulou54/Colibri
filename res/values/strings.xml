@@ -15,19 +15,25 @@
     <string name="reprendre">Resume</string>
     <string name="recommencer">Start over</string>
     <string name="sortir">Quit</string>
+    <string name="solution">Solution</string>
     <string name="info">Informations</string>
 	<string name="instru">Instructions</string>
 	<string name="param">Parameters</string>
 	<string name="nouveau_defi">New Challenge</string>
 	<string name="score">Score :</string>
-	<string name="info_text">Application developed during the developping project in Telecom Bretagne by the following students :\n Durand Louis, Guyard Valentin, Jacquemod Laura and Thiam Mariam\n </string>
-	<string name="info_text2">We wanted to thank our tutor, Gwenaël Brunet, informatic and network technician at the departement Image and Treatement of Information </string>
-	<string name="instru_text">You are a small hummingbird in a field full of menhirs in Brittany and you have to taste all the flowers covering the meadow.\n\n You can only fly straight and change direction when you are in front of an obstacle (menhir or fence). \n \n BEWARE the magical flowers which, once fecundated by the pollen your beak carries, transforms into a menhir !</string>
+	<string name="info_text">Application developed during the development project in Telecom Bretagne by the following students :\n Durand Louis, Guyard Valentin, Jacquemod Laura and Thiam Mariam\n </string>
+	<string name="info_text2">We wanted to thank our tutor, Gwenaël Brunet, information and network technician at the department Image and Treatment of Information.</string>
+	<string name="instru_text">You are a little hummingbird in a field full of menhirs in Brittany and you have to taste all the flowers covering the meadow.\n\n You can only fly straight and change direction when you are in front of an obstacle (menhir or fence). \n \n BEWARE the magical flowers which, once fecundated by the pollen your beak carries, transforms into a menhir !</string>
 	<string name="ajout">New player :</string>
 	<string name="accept">OK</string>
 	<string name="annuler">Cancel</string>
 	<string name="name">Name</string>
 	<string name="deuxieme">Player 2, get ready !</string>
 	<string name="fin">Challenge finished :)</string>
+	<string name="bravo">Well played !</string>
+	<string name="exp">Experience</string>
+	<string name="defis_joues">Challenges</string>
+	<string name="defis_gagnés">Wins</string>
+	<string name="etat">Play</string>
 	
 </resources>

@@ -14,19 +14,25 @@
     <string name="reprendre">Reprendre</string>
     <string name="recommencer">Recommencer</string>
     <string name="sortir">Quitter</string>
+    <string name="solution">Solution</string>
     <string name="info">Informations</string>
 	<string name="instru">Instructions</string>
 	<string name="param">Paramètres</string>
 	<string name="nouveau_defi">Nouveau Défi</string>
 	<string name="score">Score :</string>
 	<string name="info_text">Application développée au sein du projet développement à Télécom Bretagne par les élèves suivants :\n Durand Louis, Guyard Valentin, Jacquemod Laura et Thiam Mariam\n </string>
-	<string name="info_text2">Nous tenons à remercier notre tuteur, Gwenaël Brunet, technicien informatique et réseau au département Image et Traitement de l Information </string>
-	<string name="instru_text">Vous êtes un petit colibri dans un champ de menhirs en Bretagne et vous devez goûter à toutes les fleurs qui jonchent la prairie.\n\n Vous pouvez voler seulement en ligne droite et changer de direction seulement lorsque vous faites face à un obstacle (menhir ou clôture). \n \n ATTENTION aux fleurs magiques qui dès qu elles sont fécondées par le pollen que transporte votre bec, se transforment en menhir !</string>
+	<string name="info_text2">Nous tenons à remercier notre tuteur, Gwenaël Brunet, technicien informatique et réseau au département Image et Traitement de l\'Information </string>
+	<string name="instru_text">Vous êtes un petit colibri dans un champ de menhirs en Bretagne et vous devez goûter à toutes les fleurs qui jonchent la prairie.\n\n Vous ne pouvez voler qu\'en ligne droite et changer de direction seulement lorsque vous faites face à un obstacle (menhir ou clôture). \n \n ATTENTION aux fleurs magiques qui dès qu\'elles sont fécondées par le pollen que transporte votre bec, se transforment en menhir !</string>
 	<string name="ajout">Nouveau joueur :</string>
 	<string name="accept">OK</string>
 	<string name="annuler">Annuler</string>
 	<string name="name">Nom</string>
-	<string name="deuxieme">Joueur 2, c est parti !</string>
+	<string name="deuxieme">Joueur 2, c\'est parti !</string>
 	<string name="fin">Défi fini :)</string>
+	<string name="bravo">Bien joué !</string>
+	<string name="exp">Expérience</string>
+	<string name="defis_joues">Défis</string>
+	<string name="defis_gagnés">Victoires</string>
+	<string name="etat">Jouer</string>
 	
 </resources>

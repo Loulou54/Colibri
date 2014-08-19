@@ -96,7 +96,7 @@ public class MenuPrinc extends Activity {
 		ww = root.getWidth();
 		wh = root.getHeight();
 		TextView exp = (TextView) findViewById(R.id.exp_menu);
-		exp.setText("Expérience : "+experience);
+		exp.setText(getString(R.string.exp)+" : "+experience);
 		if(brandNew) placeButton();
 		if(vf.getDisplayedChild()==1) {
 			if(hasFocus)
@@ -304,7 +304,7 @@ public class MenuPrinc extends Activity {
 	 * @param n_niv l'index du niveau à afficher
 	 */
 	private void setApercu(int n) {
-		if(n!=n_niv) deplaceColibri(points[(n-1)%points.length],false);
+		if(n!=n_niv || carte.getVisibility()==View.INVISIBLE) deplaceColibri(points[(n-1)%points.length],false);
 		if(carte.getVisibility()==View.INVISIBLE) {
 			carte.setAnimation(AnimationUtils.loadAnimation(this, R.anim.aleat_opt_anim));
 			carte.setVisibility(View.VISIBLE);
@@ -387,11 +387,11 @@ public class MenuPrinc extends Activity {
 	}
 	
 	public void moyen(View v) {
-		launchAleat(18,8);
+		launchAleat(15,8);
 	}
 
 	public void difficile(View v) {
-		launchAleat(30,11);
+		launchAleat(28,11);
 	}
 	
 	public void launchAleat(int lon, int var) {

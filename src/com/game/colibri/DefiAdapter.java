@@ -13,6 +13,8 @@ import android.widget.TextView;
 
 public class DefiAdapter extends ArrayAdapter<Joueur> {
 	
+	public static String expMot="",scoreMot="";
+	
 	public DefiAdapter(Context context, ArrayList<Joueur> adversaires) {
 		super(context, R.layout.choix_niveaux, adversaires);
 	}
@@ -29,9 +31,9 @@ public class DefiAdapter extends ArrayAdapter<Joueur> {
 		Joueur j = getItem(position);
 		avatar.setImageResource(j.getAvatar());
 		name.setText(j.getPseudo());
-		exp.setText("Expérience :" + j.getExp());
+		exp.setText(expMot+" : " + j.getExp());
 		int scoreOwner = j.getDefis() - j.getWin();
-		score.setText("Score : " + scoreOwner + " - " + j.getWin());
+		score.setText(scoreMot+" " + scoreOwner + " - " + j.getWin());
 		fer.setId(position);
 		return rowView;
 	}

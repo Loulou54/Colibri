@@ -67,8 +67,10 @@ public class Jeu extends Activity {
 		} else {
 			if(!hasFocus) {
 				debutPause = new GregorianCalendar();
-				play.pause();
-				pause.setVisibility(View.VISIBLE);
+				if(play.isRunning) {
+					play.pause();
+					pause.setVisibility(View.VISIBLE);
+				}
 				if(music)
 					MenuPrinc.stopMusic();
 			} else {
@@ -250,6 +252,12 @@ public class Jeu extends Activity {
 			}
 		}
 		solUsed=false;
+		Button so=(Button) findViewById(R.id.but4);
+		if(opt.getBoolean("isRandom") && multi==null) { // Pour niveaux : niv.solution!=null && n_niv<menu.avancement
+			so.setVisibility(View.VISIBLE);
+		} else {
+			so.setVisibility(View.INVISIBLE);
+		}
 		carte.loadNiveau(niv);
 		play.init();
 		play.start();
@@ -283,6 +291,12 @@ public class Jeu extends Activity {
     	this.finish();
 	}
 	
+	public void solution(View v) {
+		recommencer(v);
+		solUsed=true;
+    	play.solution();
+	}
+		
 	public void suivant(View v) {
 		gagne.setVisibility(View.INVISIBLE);
 		menu.setDebut(new GregorianCalendar());

@@ -37,9 +37,6 @@ public final class R {
          Customize dimensions originally defined in res/values/dimens.xml (such as
          screen margins) for sw720dp devices (e.g. 10" tablets) in landscape here.
     
- Default screen margins, per the Android Design guidelines. 
- Default screen margins, per the Android Design guidelines. 
- Default screen margins, per the Android Design guidelines. 
          */
         public static final int activity_horizontal_margin=0x7f070000;
         public static final int activity_vertical_margin=0x7f070001;
@@ -116,66 +113,68 @@ public final class R {
         public static final int vache_rg=0x7f020042;
     }
     public static final class id {
-        public static final int ajoutJoueur=0x7f0a002e;
-        public static final int apercu=0x7f0a003a;
-        public static final int avatar=0x7f0a0030;
-        public static final int bout1=0x7f0a001a;
-        public static final int bout2=0x7f0a001b;
-        public static final int bout3=0x7f0a001c;
-        public static final int bout4=0x7f0a0021;
-        public static final int bout5=0x7f0a0022;
+        public static final int ajoutJoueur=0x7f0a0030;
+        public static final int apercu=0x7f0a003c;
+        public static final int avatar=0x7f0a0032;
+        public static final int bout1=0x7f0a001c;
+        public static final int bout2=0x7f0a001d;
+        public static final int bout3=0x7f0a001e;
+        public static final int bout4=0x7f0a0023;
+        public static final int bout5=0x7f0a0024;
         public static final int bout_dyna=0x7f0a000d;
-        public static final int boutmusique=0x7f0a0025;
-        public static final int boutmusique2=0x7f0a0026;
+        public static final int boutmusique=0x7f0a0027;
+        public static final int boutmusique2=0x7f0a0028;
         public static final int bouton1=0x7f0a0006;
+        public static final int bravo_txt=0x7f0a0014;
         public static final int but1=0x7f0a000f;
         public static final int but2=0x7f0a0010;
         public static final int but3=0x7f0a0011;
+        public static final int but4=0x7f0a0012;
         public static final int carte=0x7f0a000c;
-        public static final int coli=0x7f0a003b;
+        public static final int coli=0x7f0a003d;
         public static final int continuer=0x7f0a0001;
-        public static final int difficile=0x7f0a0020;
-        public static final int etat=0x7f0a0035;
-        public static final int exit=0x7f0a0014;
-        public static final int exp=0x7f0a0032;
-        public static final int exp_menu=0x7f0a0027;
-        public static final int facile=0x7f0a001e;
-        public static final int fermer=0x7f0a0034;
+        public static final int difficile=0x7f0a0022;
+        public static final int etat=0x7f0a0037;
+        public static final int exit=0x7f0a0016;
+        public static final int exp=0x7f0a0034;
+        public static final int exp_menu=0x7f0a0029;
+        public static final int facile=0x7f0a0020;
+        public static final int fermer=0x7f0a0036;
         public static final int fin=0x7f0a0003;
-        public static final int flip=0x7f0a0018;
-        public static final int flipper=0x7f0a0036;
-        public static final int gagner=0x7f0a0012;
+        public static final int flip=0x7f0a001a;
+        public static final int flipper=0x7f0a0038;
+        public static final int gagner=0x7f0a0013;
         public static final int gain=0x7f0a0000;
         public static final int info=0x7f0a0005;
-        public static final int instru=0x7f0a0024;
+        public static final int instru=0x7f0a0026;
         public static final int lay=0x7f0a000b;
-        public static final int listView1=0x7f0a002d;
-        public static final int menu_selection_1=0x7f0a0037;
-        public static final int menu_selection_2=0x7f0a0038;
-        public static final int menu_selection_3=0x7f0a0039;
-        public static final int moyen=0x7f0a001f;
+        public static final int listView1=0x7f0a002f;
+        public static final int menu_selection_1=0x7f0a0039;
+        public static final int menu_selection_2=0x7f0a003a;
+        public static final int menu_selection_3=0x7f0a003b;
+        public static final int moyen=0x7f0a0021;
         public static final int multi_res=0x7f0a0004;
-        public static final int name=0x7f0a0031;
-        public static final int nomJoueur=0x7f0a002f;
-        public static final int opt_aleat=0x7f0a001d;
-        public static final int opt_reglages=0x7f0a0023;
+        public static final int name=0x7f0a0033;
+        public static final int nomJoueur=0x7f0a0031;
+        public static final int opt_aleat=0x7f0a001f;
+        public static final int opt_reglages=0x7f0a0025;
         public static final int pause=0x7f0a000e;
-        public static final int perdu=0x7f0a0015;
-        public static final int replay=0x7f0a0016;
-        public static final int resultats=0x7f0a0013;
-        public static final int root=0x7f0a0019;
-        public static final int score=0x7f0a0033;
-        public static final int sortie=0x7f0a0017;
+        public static final int perdu=0x7f0a0017;
+        public static final int replay=0x7f0a0018;
+        public static final int resultats=0x7f0a0015;
+        public static final int root=0x7f0a001b;
+        public static final int score=0x7f0a0035;
+        public static final int sortie=0x7f0a0019;
         public static final int textInstru1=0x7f0a0009;
         public static final int textInstru2=0x7f0a000a;
         public static final int textView1=0x7f0a0002;
         public static final int textView2=0x7f0a0007;
         public static final int textView3=0x7f0a0008;
-        public static final int user_avatar=0x7f0a0028;
-        public static final int user_defis=0x7f0a002b;
-        public static final int user_exp=0x7f0a002a;
-        public static final int user_name=0x7f0a0029;
-        public static final int user_wins=0x7f0a002c;
+        public static final int user_avatar=0x7f0a002a;
+        public static final int user_defis=0x7f0a002d;
+        public static final int user_exp=0x7f0a002c;
+        public static final int user_name=0x7f0a002b;
+        public static final int user_wins=0x7f0a002e;
     }
     public static final class layout {
         public static final int activity_gagne_multi=0x7f030000;
@@ -193,33 +192,39 @@ public final class R {
         public static final int intro=0x7f050001;
     }
     public static final class string {
-        public static final int accept=0x7f080017;
-        public static final int ajout=0x7f080016;
+        public static final int accept=0x7f080018;
+        public static final int ajout=0x7f080017;
         public static final int aleat=0x7f080003;
-        public static final int annuler=0x7f080018;
+        public static final int annuler=0x7f080019;
         public static final int app_name=0x7f080000;
+        public static final int bravo=0x7f08001d;
         public static final int campagne=0x7f080002;
         public static final int content1=0x7f080009;
-        public static final int deuxieme=0x7f08001a;
+        public static final int defis_gagnés=0x7f080020;
+        public static final int defis_joues=0x7f08001f;
+        public static final int deuxieme=0x7f08001b;
         public static final int dif=0x7f080008;
+        public static final int etat=0x7f080021;
+        public static final int exp=0x7f08001e;
         public static final int fac=0x7f080006;
-        public static final int fin=0x7f08001b;
-        public static final int info=0x7f08000e;
-        public static final int info_text=0x7f080013;
-        public static final int info_text2=0x7f080014;
-        public static final int instru=0x7f08000f;
-        public static final int instru_text=0x7f080015;
+        public static final int fin=0x7f08001c;
+        public static final int info=0x7f08000f;
+        public static final int info_text=0x7f080014;
+        public static final int info_text2=0x7f080015;
+        public static final int instru=0x7f080010;
+        public static final int instru_text=0x7f080016;
         public static final int instructions=0x7f080005;
         public static final int jouer=0x7f080001;
         public static final int moy=0x7f080007;
         public static final int multi=0x7f080004;
-        public static final int name=0x7f080019;
-        public static final int nouveau_defi=0x7f080011;
-        public static final int param=0x7f080010;
+        public static final int name=0x7f08001a;
+        public static final int nouveau_defi=0x7f080012;
+        public static final int param=0x7f080011;
         public static final int pause=0x7f08000a;
         public static final int recommencer=0x7f08000c;
         public static final int reprendre=0x7f08000b;
-        public static final int score=0x7f080012;
+        public static final int score=0x7f080013;
+        public static final int solution=0x7f08000e;
         public static final int sortir=0x7f08000d;
     }
     public static final class style {
@@ -243,42 +248,9 @@ public final class R {
         res/values-v11/styles.xml on API 14+ devices.
     
  API 14 theme customizations can go here. 
-
-        Base application theme, dependent on API level. This theme is replaced
-        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
-    
-
-            Theme customizations available in newer API levels can go in
-            res/values-vXX/styles.xml, while customizations related to
-            backward-compatibility can go here.
-        
-
-        Base application theme, dependent on API level. This theme is replaced
-        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
-    
-
-            Theme customizations available in newer API levels can go in
-            res/values-vXX/styles.xml, while customizations related to
-            backward-compatibility can go here.
-        
-
-        Base application theme, dependent on API level. This theme is replaced
-        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
-    
-
-            Theme customizations available in newer API levels can go in
-            res/values-vXX/styles.xml, while customizations related to
-            backward-compatibility can go here.
-        
          */
         public static final int AppBaseTheme=0x7f090000;
         /**  Application theme. 
- All customizations that are NOT specific to a particular API-level can go here. 
- Application theme. 
- All customizations that are NOT specific to a particular API-level can go here. 
- Application theme. 
- All customizations that are NOT specific to a particular API-level can go here. 
- Application theme. 
  All customizations that are NOT specific to a particular API-level can go here. 
          */
         public static final int AppTheme=0x7f090001;
