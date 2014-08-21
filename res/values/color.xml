@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="red">#ff0808</color>
-    <color name="green">#08ff08</color>
     <color name="cyan">#70D1EEEE</color>
     <color name="orange">#FF8C00</color>
     <color name="choco">#AA8B4513</color>

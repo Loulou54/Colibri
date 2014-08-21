@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/info"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/information"
@@ -9,7 +8,7 @@
     tools:context=".MenuPrinc" >
     
     <Button
-        android:id="@+id/bouton1"
+        android:id="@+id/info_sortir"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
@@ -24,7 +23,7 @@
         android:textSize="16sp" />
     
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/info_text1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -38,12 +37,12 @@
         android:typeface="monospace" />
         
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/info_text2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_alignRight="@+id/bouton1"
-        android:layout_below="@+id/textView1"
+        android:layout_alignRight="@+id/info_sortir"
+        android:layout_below="@+id/info_text1"
         android:layout_marginLeft="15dp"
         android:layout_marginTop="20dp"
         android:gravity="center"
@@ -53,12 +52,12 @@
         android:typeface="serif" />
     
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/info_text3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textView2"
-        android:layout_alignRight="@+id/textView2"
-		android:layout_below="@+id/textView2"
+        android:layout_alignLeft="@+id/info_text2"
+        android:layout_alignRight="@+id/info_text2"
+		android:layout_below="@+id/info_text2"
         android:gravity="center"
         android:text="@string/info_text2"
         android:textColor="@android:color/white"

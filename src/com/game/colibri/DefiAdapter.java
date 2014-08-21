@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 public class DefiAdapter extends ArrayAdapter<Joueur> {
 	
-	public static String expMot="",scoreMot="";
+	public static String expMot="Exp",scoreMot="Score";
 	
 	public DefiAdapter(Context context, ArrayList<Joueur> adversaires) {
 		super(context, R.layout.choix_niveaux, adversaires);

@@ -9,7 +9,7 @@
     android:visibility="invisible" >
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/fin_j2_txt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -25,7 +25,7 @@
         android:id="@+id/multi_res"
         android:layout_width="400dp"
         android:layout_height="140dp"
-        android:layout_below="@+id/textView1"
+        android:layout_below="@+id/fin_j2_txt"
         android:layout_centerHorizontal="true"
         android:paddingLeft="40dp"
         android:gravity="center_vertical"
@@ -37,7 +37,6 @@
          />
     
     <Button
-        android:id="@+id/continuer"
         android:layout_width="250dp"
         android:layout_height="40dp"
         android:layout_alignParentTop="true"

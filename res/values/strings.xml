@@ -6,11 +6,9 @@
     <string name="campagne">Campaign</string>
     <string name="aleat">Random Map</string>
     <string name="multi">Multiplayer Challenge</string>
-    <string name="instructions">Instructions</string>
     <string name="fac">Beginner</string>
     <string name="moy">Intermediate</string>
     <string name="dif">Expert</string>
-    <string name="content1">Colibri</string>
     <string name="pause">-= Pause =-</string>
     <string name="reprendre">Resume</string>
     <string name="recommencer">Start over</string>
@@ -18,7 +16,6 @@
     <string name="solution">Solution</string>
     <string name="info">Informations</string>
 	<string name="instru">Instructions</string>
-	<string name="param">Parameters</string>
 	<string name="nouveau_defi">New Challenge</string>
 	<string name="score">Score :</string>
 	<string name="info_text">Application developed during the development project in Telecom Bretagne by the following students :\n Durand Louis, Guyard Valentin, Jacquemod Laura and Thiam Mariam\n </string>
@@ -31,6 +28,7 @@
 	<string name="deuxieme">Player 2, get ready !</string>
 	<string name="fin">Challenge finished :)</string>
 	<string name="bravo">Well played !</string>
+	<string name="temps">Time</string>
 	<string name="exp">Experience</string>
 	<string name="defis_joues">Challenges</string>
 	<string name="defis_gagnés">Wins</string>

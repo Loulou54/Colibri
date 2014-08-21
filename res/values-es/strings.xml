@@ -6,18 +6,16 @@
     <string name="campagne">Campaña</string>
     <string name="aleat">Mapa Aleatorio</string>
     <string name="multi">Desafío Multijugador</string>
-    <string name="instructions">Instrucciones</string>
     <string name="fac">Principiantes</string>
     <string name="moy">Intermedio</string>
     <string name="dif">Experto</string>
-    <string name="content1">Colibrí</string>
+    <string name="pause">-= Pausa =-</string>
     <string name="reprendre">Reanudar</string>
     <string name="recommencer">Recomenzar</string>
     <string name="sortir">Dejar</string>
     <string name="solution">Solución</string>
     <string name="info">Informatión</string>
 	<string name="instru">Instrucción</string>
-	<string name="param">Parámetros</string>
 	<string name="nouveau_defi">Nuevo desafío</string>
 	<string name="score">Score :</string>
 	<string name="info_text">Aplicación desarrollada durante el proyecto de desarrollo en Telecom Bretagne por los siguientes estudiantes :\n Durand Louis, Guyard Valentin, Jacquemod Laura y Thiam Mariam\n </string>
@@ -30,6 +28,7 @@
 	<string name="deuxieme">Jugador 2, go !</string>
 	<string name="fin">Desafío terminado :)</string>
 	<string name="bravo">Bien jugado!</string>
+	<string name="temps">Tiempo</string>
 	<string name="exp">Experiencia</string>
 	<string name="defis_joues">Desafios</string>
 	<string name="defis_gagnés">Victorias</string>

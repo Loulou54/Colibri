@@ -358,11 +358,11 @@ public class MoteurJeu {
 		}*/
 		
 		// Version glissement à seuil de vitesse
-		if (ev.getActionMasked()==MotionEvent.ACTION_DOWN) {
+		if (ev.getAction()==MotionEvent.ACTION_DOWN) {
 			trace_diff[1][0]=x;
 			trace_diff[1][1]=y;
 		}
-		else if (ev.getActionMasked()==MotionEvent.ACTION_MOVE) {
+		else if (ev.getAction()==MotionEvent.ACTION_MOVE) {
 			trace_diff[0][0]=trace_diff[1][0];
 			trace_diff[0][1]=trace_diff[1][1];
 			trace_diff[1][0]=x;

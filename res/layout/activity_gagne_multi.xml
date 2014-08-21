@@ -9,7 +9,6 @@
     android:visibility="invisible">
 
     <Button
-        android:id="@+id/continuer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -20,7 +19,6 @@
         android:onClick="secondJoueur" />
 
     <TextView
-        android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"

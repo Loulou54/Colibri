@@ -159,9 +159,9 @@ public class Jeu extends Activity {
 					exp2=play.niv.solution.length*5;
 				}
 				multi.finDefi(exp1,exp2);
-				txt.setText("Temps : "+tps1+"  vs  "+tps2
-						+"\nExpérience : + "+exp1+"  -=-  + "+exp2
-						+"\nScore : "+(multi.j.getDefis()-multi.j.getWin())+"  -=-  "+multi.j.getWin());
+				txt.setText(getString(R.string.temps)+" : "+tps1+"  vs  "+tps2
+						+"\n"+getString(R.string.exp)+" : + "+exp1+"  -=-  + "+exp2
+						+"\n"+getString(R.string.score)+" "+(multi.j.getDefis()-multi.j.getWin())+"  -=-  "+multi.j.getWin());
 				gagneMulti2.setVisibility(View.VISIBLE);
 			}
 		}
@@ -181,8 +181,8 @@ public class Jeu extends Activity {
 				menu.saveData(); // On sauvegarde la progression.
 			}
 			TextView txt = (TextView) findViewById(R.id.resultats);
-			txt.setText("Temps : "+temps/1000+"."+(temps%1000)/10
-					+"\nExpérience : + "+exp);
+			txt.setText(getString(R.string.temps)+" : "+temps/1000+"."+(temps%1000)/10
+					+"\n"+getString(R.string.exp)+" : + "+exp);
 			gagne.setVisibility(View.VISIBLE);
 		}
 	}

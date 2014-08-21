@@ -6,18 +6,16 @@
     <string name="campagne">Kampagne</string>
     <string name="aleat">Zufallskarte</string>
     <string name="multi">Multiplayer-Challenge</string>
-    <string name="instructions">Anweisung</string>
     <string name="fac">Anfänger</string>
     <string name="moy">Mittlere</string>
     <string name="dif">Könner</string>
-    <string name="content1">Kolibri</string>
+    <string name="pause">-= Pause =-</string>
     <string name="reprendre">Fortsetzen</string>
     <string name="recommencer">Wiederholen</string>
     <string name="sortir">Verlassen</string>
     <string name="solution">Lösung</string>
     <string name="info">Informationen</string>
 	<string name="instru">Anweisungen</string>
-	<string name="param">Parameter</string>
 	<string name="nouveau_defi">Neue Herausforderung</string>
 	<string name="score">Spielstand :</string>
 	<string name="info_text">Applikation entwickelt während der Entwicklungsprojekt in Telecom Bretagne durch die folgenden Studenten :\n Durand Louis, Guyard Valentin, Jacquemod Laura and Thiam Mariam\n </string>
@@ -30,6 +28,7 @@
 	<string name="deuxieme">Spieler 2, los !</string>
 	<string name="fin">Multiplayer-Challenge vertig :)</string>
 	<string name="bravo">Gut gespielt !</string>
+	<string name="temps">Zeit</string>
 	<string name="exp">Erfahrung</string>
 	<string name="defis_joues">Spiele</string>
 	<string name="defis_gagnés">Siege</string>

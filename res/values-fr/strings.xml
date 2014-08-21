@@ -6,18 +6,16 @@
     <string name="campagne">Campagne</string>
     <string name="aleat">Carte Aléatoire</string>
     <string name="multi">Défi Multijoueur</string>
-    <string name="instructions">Instructions</string>
     <string name="fac">Débutant</string>
     <string name="moy">Intermédiaire</string>
     <string name="dif">Expert</string>
-    <string name="content1">Colibri</string>
+    <string name="pause">-= Pause =-</string>
     <string name="reprendre">Reprendre</string>
     <string name="recommencer">Recommencer</string>
     <string name="sortir">Quitter</string>
     <string name="solution">Solution</string>
     <string name="info">Informations</string>
 	<string name="instru">Instructions</string>
-	<string name="param">Paramètres</string>
 	<string name="nouveau_defi">Nouveau Défi</string>
 	<string name="score">Score :</string>
 	<string name="info_text">Application développée au sein du projet développement à Télécom Bretagne par les élèves suivants :\n Durand Louis, Guyard Valentin, Jacquemod Laura et Thiam Mariam\n </string>
@@ -30,6 +28,7 @@
 	<string name="deuxieme">Joueur 2, c\'est parti !</string>
 	<string name="fin">Défi fini :)</string>
 	<string name="bravo">Bien joué !</string>
+	<string name="temps">Temps</string>
 	<string name="exp">Expérience</string>
 	<string name="defis_joues">Défis</string>
 	<string name="defis_gagnés">Victoires</string>
