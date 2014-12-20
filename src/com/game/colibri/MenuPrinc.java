@@ -37,11 +37,11 @@ public class MenuPrinc extends Activity {
 	private int n_niv; // Niveau sélectionné dans Campagne
 	public int experience; // L'expérience du joueur.
 	private boolean brandNew=true;
+	private int screen=0; // Définit quel écran est affiché : 0:menu, 1:choix niveaux, 2:infos, 3:instructions. Remplace l'utilisation de ViewFlipper qui pouvait causer des outOfMemoryError.
 	public SharedPreferences pref;
 	public SharedPreferences.Editor editor;
-	private Intent jeu,multi;
+	private RelativeLayout root;
 	private ViewFlipper MenuSel;
-	private ViewFlipper vf; // ViewFlipper permettant de passer de l'écran de menu principal à celui des instrus ou infos
 	private Carte carte; // L'instance de carte permettant de faire un apercu dans le menu de sélection de niveaux.
 	private LinearLayout opt_aleat;
 	private LinearLayout opt_reglages;
@@ -56,13 +56,8 @@ public class MenuPrinc extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_menu_princ);
-		vf = (ViewFlipper) findViewById(R.id.flip);
-		MenuSel = (ViewFlipper) findViewById(R.id.flipper);
-        MenuSel.setInAnimation(this, android.R.anim.fade_in);
-        MenuSel.setOutAnimation(this, android.R.anim.fade_out);
-        carte = (Carte) findViewById(R.id.apercu);
-		opt_aleat = (LinearLayout) findViewById(R.id.opt_aleat);
-		opt_reglages = (LinearLayout) findViewById(R.id.opt_reglages);
+		root=(RelativeLayout) findViewById(R.id.root);
+		displayMenu();
 		pref = PreferenceManager.getDefaultSharedPreferences(this);
 		editor = pref.edit();
 		Jeu.opt = new Bundle(); // On va contourner le fait que startActivity(Intent i, Bundle b) ne soit pas supporté sur API < 16, en utilisant un Bundle de classe.
@@ -85,6 +80,66 @@ public class MenuPrinc extends Activity {
 			});
 		}
 	}
+	
+	/**
+	 * Pour afficher le menu principal dans root
+	 */
+	private void displayMenu() {
+		delReferences();
+		screen=0;
+		root.removeAllViews();
+		root.addView(View.inflate(this, R.layout.menu_princ, null));
+		opt_aleat = (LinearLayout) findViewById(R.id.opt_aleat);
+		opt_reglages = (LinearLayout) findViewById(R.id.opt_reglages);
+		placeButton();
+		TextView exp = (TextView) findViewById(R.id.exp_menu);
+		exp.setText(getString(R.string.exp)+" : "+experience);
+	}
+	
+	/**
+	 * Pour afficher l'écran de choix de niveaux dans root
+	 */
+	private void displayChoixNiveaux() {
+		delReferences();
+		screen=1;
+		root.removeAllViews();
+		root.addView(View.inflate(this, R.layout.choix_niveaux, null));
+		MenuSel = (ViewFlipper) findViewById(R.id.flipper);
+        MenuSel.setInAnimation(this, android.R.anim.fade_in);
+        MenuSel.setOutAnimation(this, android.R.anim.fade_out);
+        carte = (Carte) findViewById(R.id.apercu);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ww/2,wh/2);
+		params.leftMargin = (int) (ww/4);
+	    params.topMargin = (int) (wh/12);
+	    carte.setLayoutParams(params);
+	}
+	
+	/**
+	 * Pour afficher l'écran d'informations dans root
+	 */
+	private void displayInfos() {
+		delReferences();
+		screen=2;
+		root.removeAllViews();
+		root.addView(View.inflate(this, R.layout.activity_info, null));
+	}
+	
+	/**
+	 * Pour afficher l'écran d'informations dans root
+	 */
+	private void displayInstrus() {
+		delReferences();
+		screen=3;
+		root.removeAllViews();
+		root.addView(View.inflate(this, R.layout.activity_instru, null));
+	}
+	
+	private void delReferences() {
+		opt_aleat = null;
+		opt_reglages = null;
+		MenuSel = null;
+		carte = null;
+	}
 
 	// Le placement des boutons est calculé ici en fonction des dimensions de l'écran. (Astuce pour contourner le temps d'établissement de l'affichage empêchant ces opérations dans le onCreate)
 	/* (non-Javadoc)
@@ -92,25 +147,20 @@ public class MenuPrinc extends Activity {
 	 */
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
-		RelativeLayout root = (RelativeLayout) findViewById(R.id.root);
 		ww = root.getWidth();
 		wh = root.getHeight();
-		TextView exp = (TextView) findViewById(R.id.exp_menu);
-		exp.setText(getString(R.string.exp)+" : "+experience);
-		if(brandNew) placeButton();
-		if(vf.getDisplayedChild()==1) {
-			if(hasFocus)
-				campagne(carte); // Permet de rafraîchir la progression lorsque l'on quitte le jeu et revient au menu de sélection.
-			else
-				((Colibri) findViewById(R.id.coli)).stop();
+		if(brandNew) {
+			brandNew=false;
+			displayMenu();
 		}
+		if(screen==1 && hasFocus)
+			campagne(carte); // Permet de rafraîchir la progression lorsque l'on quitte le jeu et revient au menu de sélection.
 	}
 	
 	/**
-	 * Place le premier bouton à la position voulue. Les autres sont placés par rapport à lui.
+	 * Place le premier bouton à la position voulue. Les autres sont placés par rapport à lui. Redimensionne chaque bouton à la largeur/hauteur voulue.
 	 */
 	private void placeButton() {
-		brandNew=false;
 		int[] boutons = new int[] {R.id.bout1,R.id.bout2,R.id.bout3,R.id.bout4};
 		for(int i=0; i<boutons.length; i++) {
 			Button btn_lay = (Button)findViewById(boutons[i]);
@@ -123,17 +173,13 @@ public class MenuPrinc extends Activity {
 		    layoutParams.height = 128*ww/2320;
 		    btn_lay.setLayoutParams(layoutParams);
 		}
-	    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ww/2,wh/2);
-		params.leftMargin = (int) (ww/4);
-	    params.topMargin = (int) (wh/12);
-	    carte.setLayoutParams(params);
 	}
 	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if(keyCode == KeyEvent.KEYCODE_BACK) {
-			if(vf.getDisplayedChild()!=0) {
-				vf.setDisplayedChild(0);
+			if(screen!=0) {
+				displayMenu();
 			}
 			else if (opt_reglages.getVisibility()==View.VISIBLE) {
 				opt_reglages.setVisibility(View.INVISIBLE);
@@ -189,7 +235,7 @@ public class MenuPrinc extends Activity {
 	 */
 	@Override
     public boolean onTouchEvent(MotionEvent touchevent) {
-        if (vf.getDisplayedChild()==1) {
+        if (screen==1) {
         int a=MenuSel.getDisplayedChild();
         switch (touchevent.getAction()) {
         
@@ -246,15 +292,13 @@ public class MenuPrinc extends Activity {
 		opt_reglages.setVisibility(View.INVISIBLE);
 		Jeu.opt.putBoolean("isRandom", false);
 		Jeu.opt.putInt("n_niv", Math.min(avancement,Jeu.NIV_MAX));
-		jeu = new Intent(this, Jeu.class);
-		startActivity(jeu);
+		startActivity(new Intent(this, Jeu.class));
 		debut = new GregorianCalendar();
 	}
 	
 	public void campagne(View v) {
-		opt_reglages.setVisibility(View.INVISIBLE);
+		displayChoixNiveaux();
 		carte.setVisibility(View.INVISIBLE);
-		vf.setDisplayedChild(1);
 		RelativeLayout lay_sel;
 		Button img;
 		RelativeLayout.LayoutParams params;
@@ -377,8 +421,7 @@ public class MenuPrinc extends Activity {
 	public void launchNiv(View v) {
 		Jeu.opt.putBoolean("isRandom", false);
 		Jeu.opt.putInt("n_niv", n_niv);
-		jeu = new Intent(this, Jeu.class);
-		startActivity(jeu);
+		startActivity(new Intent(this, Jeu.class));
 		debut = new GregorianCalendar();
 	}
 	
@@ -399,15 +442,13 @@ public class MenuPrinc extends Activity {
 		Jeu.opt.putBoolean("isRandom", true);
 		Jeu.opt.putInt("long", lon);
 		Jeu.opt.putInt("vari", var);
-		jeu = new Intent(this, Jeu.class);
-		startActivity(jeu);
+		startActivity(new Intent(this, Jeu.class));
 		debut = new GregorianCalendar();
 	}
 	
 	public void multijoueur(View v) {
 		opt_reglages.setVisibility(View.INVISIBLE);
-		multi = new Intent(this, Multijoueur.class);
-		startActivity(multi);
+		startActivity(new Intent(this, Multijoueur.class));
 	}
 	
 	public void reglages(View v) {
@@ -418,15 +459,15 @@ public class MenuPrinc extends Activity {
 	}
 	
 	public void retour(View v) {
-		vf.setDisplayedChild(0);
+		displayMenu();
 	}
 	
 	public void info(View v) {
-		vf.setDisplayedChild(2);
+		displayInfos();
 	}
 	
 	public void instru(View v) {
-		vf.setDisplayedChild(3);
+		displayInstrus();
 	}
 	
 	public void musique(View v) {

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -53,7 +52,6 @@ public class Multijoueur extends Activity {
 		dispUser();
 		// TODO : tester si user non inscrit et afficher procédure d'inscription.
 		loadAdv();
-		Log.i("Adversaires:",adversaires.toString());
 		adapt = new DefiAdapter(this, adversaires);
 		lv.setAdapter(adapt);
 	}
@@ -120,8 +118,9 @@ public class Multijoueur extends Activity {
 	
 	private void loadAdv() {
 		adversaires = new ArrayList<Joueur>();
-		String adv = menu.pref.getString("adversaires", "");
-		if(adv!="") {
+		String adv = menu.pref.getString("adversaires", "[]");
+		if(adv.length()>2) {
+			adv=adv.substring(1, adv.length()-1);
 			for(String ad : adv.split(", ")) {
 				adversaires.add(new Joueur(ad));
 			}
@@ -130,7 +129,7 @@ public class Multijoueur extends Activity {
 	
 	private void saveAdv() {
 		String adv = adversaires.toString();
-		menu.editor.putString("adversaires", adv.substring(1, adv.length()-1));
+		menu.editor.putString("adversaires", adv);
 		menu.editor.commit();
 		adapt.notifyDataSetChanged();
 		dispUser();
