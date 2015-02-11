@@ -19,8 +19,7 @@ import android.view.animation.Animation.AnimationListener;
  */
 public class MoteurJeu {
 	
-	
-	
+	public int frame;
 	private Carte carte;
 	public Niveau niv;
 	private Jeu jeu;
@@ -82,6 +81,7 @@ public class MoteurJeu {
 	public void init() {
 		niv=carte.niv; // pour avoir une référence locale vers le niveau en cours et un nom moins long
 		buf.clear();
+		frame=0;
 	}
 	
 	/**
@@ -113,7 +113,7 @@ public class MoteurJeu {
 			c.stop();
 		}
 	}
-
+	
 	private void mort() {
 		pause();
 		carte.animMort();
@@ -137,7 +137,7 @@ public class MoteurJeu {
 	 */
 	public void solution() {
 		for(int[] m : niv.solution) {
-    		buf.addLast(m);
+    		buf.addLast(m.clone());
     	}
 	}
 	
@@ -146,16 +146,22 @@ public class MoteurJeu {
 	 * C'est ici que s'effectue les déplacements des animaux.
 	 */
 	private void move() {
+		frame++;
 		if (carte.colibri.mx==0 & carte.colibri.my==0) { // Le colibri est à l'arrêt
 			if (buf.size()>0) {
-				int[] mov=buf.poll();
-				carte.colibri.setDirection(mov); // On effectue le prochain mouvement de la file.
-				carte.colibri.setSpriteDirection(); // On choisit la direction de l'image.
-				if(carte.n_dyna>0) removeMenhirRouge(mov); // On enlève si nécessaire le menhir rouge de sélection.
-				if(mov[0]==mov[1]) { // <=> mov=={0,0} : pose une dynamite.
-					exploseMenhir();
+				int[] mov=buf.getFirst();
+				if(mov[2]<=frame) {
+					buf.removeFirst();
+					carte.colibri.setDirection(mov); // On effectue le prochain mouvement de la file.
+					carte.colibri.setSpriteDirection(); // On choisit la direction de l'image.
+					if(carte.n_dyna>0) removeMenhirRouge(mov); // On enlève si nécessaire le menhir rouge de sélection.
+					if(mov[0]==mov[1]) { // <=> mov=={0,0} : pose une dynamite.
+						exploseMenhir();
+					}
+					lastMove=mov;
 				}
-				lastMove=mov;
+				else
+					carte.colibri.step=0;
 			}
 			else carte.colibri.step=0; // La vitesse est mise à 0. Dans le premier cas, la vitesse est conservée.
 		} else { // Le colibri est en mouvement
@@ -170,12 +176,14 @@ public class MoteurJeu {
 				carte.colibri.mx=0;
 				carte.colibri.my=0;
 				carte.colibri.setPos(c*carte.cw, l*carte.ch);
+				System.out.println("Frame : "+frame+" Pos : "+l+","+c);
 				if(!outOfMap && carte.n_dyna>0) {
 					niv.carte[l+ml][c+mc]=menhir_rouge;
 					carte.fond.invalidate();
 				}
 			}
-			carte.colibri.deplacer();
+			else
+				carte.colibri.deplacer();
 		}
 		for(Vache v : carte.vaches) {
 			v.deplacer();
@@ -243,6 +251,7 @@ public class MoteurJeu {
 				if(nl!=l || nc!=c)
 					carte.fond.invalidate();
 			}
+			System.out.println("Frame : "+frame+" Pos : "+carte.colibri.getRow()+","+carte.colibri.getCol());
 		}
 	}
 	
@@ -393,20 +402,20 @@ public class MoteurJeu {
 	 */
 	public void direction(int dir) {
 		int[] mvt;
-		if(buf.size()==0) mvt=new int[2];
+		if(buf.size()==0) mvt=new int[3];
 		else mvt=buf.getLast();
 		switch (dir) {
 		case UP:
-			if(mvt[1]!=-1) buf.add(new int[]{0,-1});
+			if(mvt[1]!=-1) buf.add(new int[]{0,-1,0});
 			break;
 		case RIGHT:
-			if(mvt[0]!=1) buf.add(new int[]{1,0});
+			if(mvt[0]!=1) buf.add(new int[]{1,0,0});
 			break;
 		case LEFT:
-			if(mvt[0]!=-1) buf.add(new int[]{-1,0});
+			if(mvt[0]!=-1) buf.add(new int[]{-1,0,0});
 			break;
 		case DOWN:
-			if(mvt[1]!=1) buf.add(new int[]{0,1});
+			if(mvt[1]!=1) buf.add(new int[]{0,1,0});
 			break;
 		}
 	}
@@ -415,7 +424,7 @@ public class MoteurJeu {
 	 * Ajoute à la file l'action de poser une dynamite.
 	 */
 	public void dynamite() {
-		buf.add(new int[]{0,0});
+		buf.add(new int[]{0,0,0});
 	}
 	
 }
