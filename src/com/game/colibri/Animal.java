@@ -9,31 +9,30 @@ import android.widget.RelativeLayout;
 public abstract class Animal extends ImageView {
 	
 	protected RelativeLayout.LayoutParams params;
-	public static int cw,ch; // largeur et hauteur d'une case
-	public int step; // pas des mouvements en px/frame
-	protected int acc; // accélération en px/frame/frame
+	public static double cw,ch; // largeur et hauteur d'une case en pixels
+	private double ww,hh; // Largeur et hauteur de l'animal en pixels
+	protected double xx,yy; // Position en cases
+	public double v_max; // Vitesse maximale en case/frame
+	public double step; // pas des mouvements en case/frame
+	protected double acc; // accélération en case/frame/frame
 	public int mx,my; // sens du mouvement de l'animal (1,-1,0)
 	
 	/**
 	 * Constructeur java d'un animal 
 	 * 
 	 * @param context le contexte de création 
-	 * @param id_anim la ressource "drawable" de l'animation
-	 * @param dbx abscisse du coin supérieur gauche
-	 * @param dby ordonnée du coin supérieur gauche
-	 * @param w largeur
-	 * @param h hauteur
-	 * @param cw largeur d'une case de la carte
-	 * @param ch hauteur d'une case de la carte
+	 * @param dbx abscisse du coin supérieur gauche en cases
+	 * @param dby ordonnée du coin supérieur gauche en cases
+	 * @param w largeur de l'animal en cases
+	 * @param h hauteur de l'animal en cases
 	 */
-	public Animal(Context context, int dbx, int dby, int w, int h) {
+	public Animal(Context context, double dbx, double dby, double w, double h) {
 		super(context);
-		params=new RelativeLayout.LayoutParams(w,h);
-		params.leftMargin = dbx;
-	    params.topMargin = dby;
+		ww=w; hh=h;
+		params=new RelativeLayout.LayoutParams((int)(w*cw), (int)(h*ch));
+		setPos(dbx,dby);
 	    mx=0;
 	    my=0;
-	    this.setLayoutParams(params);
 	}
 	
 	
@@ -54,13 +53,14 @@ public abstract class Animal extends ImageView {
 	
 	
 	/**
-	 * Met a jour la  postion 
+	 * Met a jour la postion en cases.
 	 * 		@param x la nouvelle  abcisse 
 	 * 		@param y le nouveau ordonné 
 	 */
-	public void setPos(int x, int y) {
-		params.leftMargin = x;
-	    params.topMargin = y;
+	public void setPos(double x, double y) {
+		xx=x; yy=y;
+		params.leftMargin = (int)(xx*cw);
+	    params.topMargin = (int)(yy*ch);
 		this.setLayoutParams(params);
 	}
 	
@@ -87,13 +87,14 @@ public abstract class Animal extends ImageView {
 	}
 	
 	/**
-	 * Déplace l'animal rapport a sa position d'origne d'une certaine valeur
+	 * Déplace l'animal rapport a sa position d'origne d'une certaine valeur en cases.
 	 * 		@param dx le delta dont il faut déplacer l'abcisse 
 	 * 		@param dy le delta dont il faut délacer l'ordonné
 	 */
-	public void deplacer(int dx, int dy) {
-		params.leftMargin += dx;
-	    params.topMargin += dy;
+	public void deplacer(double dx, double dy) {
+		xx+=dx; yy+=dy;
+		params.leftMargin = (int)(xx*cw);
+	    params.topMargin = (int)(yy*ch);
 		this.setLayoutParams(params);
 	}
 	
@@ -103,26 +104,26 @@ public abstract class Animal extends ImageView {
 	public abstract void deplacer();
 	
 	/**
-	 * Retourne la positon  de l'animal
+	 * Retourne la positon de l'animal en nombre de cases.
 	 * 
 	 * 		@return la position {x,y} de l'animal dans un tableau 
 	 */
-	public int[] getPos() {
-	    return new int[] {params.leftMargin , params.topMargin};
+	public double[] getPos() {
+	    return new double[] {xx , yy};
 	}
 	
 	/**
 	 * Retourne la ligne sur laquelle se trouve le centre de l'animal
 	 */
 	public int getRow() {
-		return (params.topMargin+params.height/2)/ch;
+		return (int)(yy+hh/2);
 	}
 	
 	/**
 	 * Retourne la colonne sur laquelle se trouve le centre de l'animal
 	 */
 	public int getCol() {
-		return (params.leftMargin+params.width/2)/cw;
+		return (int)(xx+ww/2);
 	}
 	
 	/**

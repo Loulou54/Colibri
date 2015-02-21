@@ -6,15 +6,14 @@ import android.widget.RelativeLayout;
 
 public class Colibri extends Animal {
 	
-	public int v_max;
-	private int xf=10,yf=10;
+	private double xf=10,yf=10; // Pour le colibri du menu de sélection : définit les coord en pixels de la position visée.
 	private boolean versDroite=false;
 	
-	public Colibri(Context context, int dbx, int dby, int w, int h) {
+	public Colibri(Context context, double dbx, double dby, double w, double h) {
 		super(context,dbx,dby,w,h);
 		this.setBackgroundResource(R.drawable.colibri_d);
-		acc=cw/10;
-		v_max=3*cw/4;
+		acc=0.1;
+		v_max=0.75;
 	    step=0;
 	}
 	
@@ -36,9 +35,7 @@ public class Colibri extends Animal {
 	@Override
 	public void deplacer() {
 		step=Math.min(step+acc, v_max); // Vitesse plafonnée à v_max case/frame.
-		params.leftMargin += mx*step;
-	    params.topMargin += my*step;
-	    this.setLayoutParams(params);
+		deplacer(mx*step,my*step);
 	}
 	
 	public void setSpriteDirection() {
@@ -52,7 +49,7 @@ public class Colibri extends Animal {
 	/**
 	 * Pour le menu de sélection, permet d'enregistrer la position du colibri à la fin d'un déplacement.
 	 */
-	public void savePosFinAnim(int x, int y, boolean regardeVersDroite) {
+	public void savePosFinAnim(double x, double y, boolean regardeVersDroite) {
 		xf=x;
 		yf=y;
 		versDroite=regardeVersDroite;
@@ -63,9 +60,7 @@ public class Colibri extends Animal {
 	 */
 	public void setPosFinAnim() {
 		params=(RelativeLayout.LayoutParams) this.getLayoutParams();
-	    params.leftMargin = xf;
-	    params.topMargin = yf;
-	    this.setLayoutParams(params);
+		setPos(xf/cw,yf/ch);
 	    if(versDroite) {
 	    	mx=1;
 	    	setSpriteDirection();

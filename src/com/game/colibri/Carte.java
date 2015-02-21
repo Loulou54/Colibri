@@ -26,7 +26,8 @@ public class Carte extends RelativeLayout {
 	 * Nécessité de rafraîchir fond à chaque élément ramassé.
 	 */
 	
-	public int ww,wh,cw,ch; // windowWidth/Height, caseWidth/Height en pixels
+	public int ww,wh; // windowWidth/Height
+	public double cw,ch; // caseWidth/Height en pixels
 	private static final int LIG=12, COL=20;
 	public Niveau niv=null; // Le niveau à afficher
 	public int n_fleur,n_dyna; // Le nombre de fleurs sur la carte et le nombre de dynamites ramassées.
@@ -84,17 +85,17 @@ public class Carte extends RelativeLayout {
     	    		    	for (int l=0; l<LIG; l++) {
     	    		    		for (int c=0; c<COL; c++) {
     	    		    			if (niv.carte[l][c]==1)
-    	    		    				can.drawBitmap(menhir, c*cw-cw/8, l*ch, null);
+    	    		    				can.drawBitmap(menhir, (int)(c*cw-cw/8), (int)(l*ch), null);
     	    		    			else if (niv.carte[l][c]==2)
-    	    		    				can.drawBitmap(fleur, c*cw, l*ch, null);
+    	    		    				can.drawBitmap(fleur, (int)(c*cw), (int)(l*ch), null);
     	    		    			else if (niv.carte[l][c]==3)
-    	    		    				can.drawBitmap(fleurm, c*cw, l*ch, null);
+    	    		    				can.drawBitmap(fleurm, (int)(c*cw), (int)(l*ch), null);
     	    		    			else if (niv.carte[l][c]==4)
-    	    		    				can.drawBitmap(dyna, c*cw, l*ch, null);
+    	    		    				can.drawBitmap(dyna, (int)(c*cw), (int)(l*ch), null);
     	    		    			else if (niv.carte[l][c]==5)
-    	    		    				can.drawBitmap(menhir_rouge, c*cw-cw/8, l*ch, null);
+    	    		    				can.drawBitmap(menhir_rouge, (int)(c*cw-cw/8), (int)(l*ch), null);
     	    		    			else if (niv.carte[l][c]>=10)
-    	    		    				can.drawBitmap(rainbow, c*cw-cw/4, l*ch, null);
+    	    		    				can.drawBitmap(rainbow, (int)(c*cw-cw/4), (int)(l*ch), null);
     	    		    		}
     	    		    	}
     	    	    	}
@@ -147,17 +148,17 @@ public class Carte extends RelativeLayout {
     			}
     		}
     	}
-    	colibri = new Colibri(this.getContext(), niv.db_c*cw, niv.db_l*ch, cw, ch);
+    	colibri = new Colibri(this.getContext(), niv.db_c, niv.db_l, 1, 1);
     	addView(colibri);
     	addView(sang);
     	sang.setVisibility(INVISIBLE);
     	// On crée les vaches et les chats
     	for (int[][] itin : niv.vaches) {
-    		vaches.addLast(new Vache(this.getContext(), cw, ch, itin));
+    		vaches.addLast(new Vache(this.getContext(), 1, 1, itin));
     		addView(vaches.getLast());
     	}
     	for (int[][] itin : niv.chats) {
-    		chats.addLast(new Chat(this.getContext(), cw, 5*ch/4, itin));
+    		chats.addLast(new Chat(this.getContext(), 1, 1.25, itin));
     		addView(chats.getLast());
     	}
     	addView(mort);
@@ -169,10 +170,10 @@ public class Carte extends RelativeLayout {
      * Effectue l'animation de mort du colibri. :( (flaque de sang qui se répend + tête de mort qui s'envole)
      */
     public void animMort() {
-    	RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(3*cw/2,3*ch/2);
-    	int[] pos = colibri.getPos();
-		params.leftMargin = pos[0]-cw/4;
-	    params.topMargin = pos[1]-ch/4;
+    	RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams((int)(3*cw/2), (int)(3*ch/2));
+    	double[] pos = colibri.getPos();
+		params.leftMargin = (int)(cw*pos[0]-cw/4);
+	    params.topMargin = (int)(ch*pos[1]-ch/4);
 	    mort.setLayoutParams(params);
 	    mort.setVisibility(VISIBLE);
 	    sang.setLayoutParams(params);
@@ -187,10 +188,10 @@ public class Carte extends RelativeLayout {
     public void animBoom(int l, int c) {
     	index_dyna--;
     	View e = explo.get(index_dyna);
-    	RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(3*cw/2,3*ch/2);
-		params.leftMargin = c*cw-cw/4;
-	    params.topMargin = l*ch;
-	    params.bottomMargin = (LIG-l)*ch+3*ch/2;
+    	RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams((int)(3*cw/2), (int)(3*ch/2));
+		params.leftMargin = (int)(c*cw-cw/4);
+	    params.topMargin = (int)(l*ch);
+	    params.bottomMargin = (int)((LIG-l)*ch+3*ch/2);
 	    e.setLayoutParams(params);
     	e.setVisibility(VISIBLE);
     	((AnimationDrawable) e.getBackground()).start();
@@ -208,14 +209,14 @@ public class Carte extends RelativeLayout {
 		ww=super.getWidth();
 		wh=super.getHeight();
 		Log.i("Dimensions écran :",ww+"*"+wh);
-		cw=ww/COL;
-		ch=wh/LIG;
-		menhir = Bitmap.createScaledBitmap(menhir0, 5*cw/4, 5*ch/4, true);
-		fleur = Bitmap.createScaledBitmap(fleur0, cw, ch, true);
-		fleurm = Bitmap.createScaledBitmap(fleurm0, cw, ch, true);
-		dyna = Bitmap.createScaledBitmap(dyna0, cw, ch, true);
-		menhir_rouge = Bitmap.createScaledBitmap(menhir_rouge0, 5*cw/4, 5*ch/4, true);
-		rainbow = Bitmap.createScaledBitmap(rainbow0, 3*cw/2, ch, true);
+		cw=((double)ww)/COL;
+		ch=((double)wh)/LIG;
+		menhir = Bitmap.createScaledBitmap(menhir0, (int)(5*cw/4), (int)(5*ch/4), true);
+		fleur = Bitmap.createScaledBitmap(fleur0, (int)cw, (int)ch, true);
+		fleurm = Bitmap.createScaledBitmap(fleurm0, (int)cw, (int)ch, true);
+		dyna = Bitmap.createScaledBitmap(dyna0, (int)cw, (int)ch, true);
+		menhir_rouge = Bitmap.createScaledBitmap(menhir_rouge0, (int)(5*cw/4), (int)(5*ch/4), true);
+		rainbow = Bitmap.createScaledBitmap(rainbow0, (int)(3*cw/2), (int)ch, true);
     	this.invalidate();
 	}
 }

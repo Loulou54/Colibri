@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import android.annotation.SuppressLint;
 import android.os.Handler;
 import android.os.Message;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
@@ -19,7 +20,7 @@ import android.view.animation.Animation.AnimationListener;
  */
 public class MoteurJeu {
 	
-	public int frame;
+	public static int frame;
 	private Carte carte;
 	public Niveau niv;
 	private Jeu jeu;
@@ -28,7 +29,7 @@ public class MoteurJeu {
 	private LinkedList <int[]> buf; // la file d'attente des touches
 	private int[] lastMove=new int[] {0,0};
 	private int[][] trace_diff; // Contient le différentiel de position lors des ACTION_MOVE.
-	private static final int SEUIL=15; // seuil de vitesse de glissement du doigt sur l'écran.
+	private static int SEUIL=15; // seuil de vitesse de glissement du doigt sur l'écran.
 	private static final int PERIODE=1000/25; // pour 25 frames par secondes
 	public static int menhir=1;
 	public static int fleur=2;
@@ -73,6 +74,7 @@ public class MoteurJeu {
 		jeu=activ;
 		buf = new LinkedList<int[]>();
 		trace_diff=new int[2][2];
+		SEUIL = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 15, activ.getResources().getDisplayMetrics());
 	}
 	
 	/**
@@ -175,7 +177,7 @@ public class MoteurJeu {
 			if(outOfMap || niv.carte[l+ml][c+mc]==menhir){
 				carte.colibri.mx=0;
 				carte.colibri.my=0;
-				carte.colibri.setPos(c*carte.cw, l*carte.ch);
+				carte.colibri.setPos(c, l);
 				System.out.println("Frame : "+frame+" Pos : "+l+","+c);
 				if(!outOfMap && carte.n_dyna>0) {
 					niv.carte[l+ml][c+mc]=menhir_rouge;
@@ -201,44 +203,44 @@ public class MoteurJeu {
 	 * @param va la vache dont il faut tester la position par rapport au colibri
 	 */
 	private void collisionVache(Vache va) {
-		int[] c_co = carte.colibri.getPos();
-		int cx=c_co[0],cy=c_co[1];
-		int[] c_va = va.getPos();
-		int vx=c_va[0],vy=c_va[1];
-		if(Math.abs(vx-cx)<carte.cw && Math.abs(vy-cy)<carte.ch) { // teste si colision
+		double[] c_co = carte.colibri.getPos();
+		double cx=c_co[0],cy=c_co[1];
+		double[] c_va = va.getPos();
+		double vx=c_va[0],vy=c_va[1];
+		if(Math.abs(vx-cx)<1 && Math.abs(vy-cy)<1) { // teste si colision
 			// Choisit de quel côté de la vache il faut replacer le colibri
 			int l=carte.colibri.getRow(), c=carte.colibri.getCol();
 			if(carte.n_dyna>0) removeMenhirRouge(lastMove); // On enlève le menhir rouge mais on ne rafraîchit pas.
-			boolean plutotHoriz=carte.cw-Math.abs(vx-cx) < carte.ch-Math.abs(vy-cy);
-			boolean clairementSurHoriz=plutotHoriz && 3*carte.cw/4 < Math.abs(vx-cx);
-			boolean clairementSurVert=!plutotHoriz && 3*carte.cw/4 < Math.abs(vy-cy);
+			boolean plutotHoriz=1-Math.abs(vx-cx) < 1-Math.abs(vy-cy);
+			boolean clairementSurHoriz=plutotHoriz && 0.75 < Math.abs(vx-cx);
+			boolean clairementSurVert=!plutotHoriz && 0.75 < Math.abs(vy-cy);
 			boolean vaVite=carte.colibri.step>2*carte.colibri.v_max/3;
 			if(!vaVite && plutotHoriz || vaVite && (clairementSurHoriz || carte.colibri.mx!=0) && !clairementSurVert) { // sur l'horizontale
 				if(cx<vx) {
-					if(c-1<0 || niv.carte[l][c-1]==menhir) cx=Math.max(vx-carte.cw,c*carte.cw); // Détecte si le colibri est bloqué par un menhir ou un bord.
-					else cx=vx-carte.cw;
+					if(c-1<0 || niv.carte[l][c-1]==menhir) cx=Math.max(vx-1,c); // Détecte si le colibri est bloqué par un menhir ou un bord.
+					else cx=vx-1;
 					carte.colibri.mx=Math.min(carte.colibri.mx, 0); // arrête le mouvement du colibri s'il est vers la vache
 				}
 				else {
-					if(c+1>=COL || niv.carte[l][c+1]==menhir) cx=Math.min(vx+carte.cw,c*carte.cw);
-					else cx=vx+carte.cw;
+					if(c+1>=COL || niv.carte[l][c+1]==menhir) cx=Math.min(vx+1,c);
+					else cx=vx+1;
 					carte.colibri.mx=Math.max(carte.colibri.mx, 0);
 				}
 				carte.colibri.setPos(cx , cy);
-				if(Math.abs(vx-cx)<carte.cw/2) mort();
+				if(Math.abs(vx-cx)<0.5) mort();
 			} else { // sur la verticale
 				if(cy<vy) {
-					if(l-1<0 || niv.carte[l-1][c]==menhir) cy=Math.max(vy-carte.ch,l*carte.ch);
-					else cy=vy-carte.ch;
+					if(l-1<0 || niv.carte[l-1][c]==menhir) cy=Math.max(vy-1,l);
+					else cy=vy-1;
 					carte.colibri.my=Math.min(carte.colibri.my, 0);
 				}
 				else {
-					if(l+1>=LIG || niv.carte[l+1][c]==menhir) cy=Math.min(vy+carte.ch,l*carte.ch);
-					else cy=vy+carte.ch;
+					if(l+1>=LIG || niv.carte[l+1][c]==menhir) cy=Math.min(vy+1,l);
+					else cy=vy+1;
 					carte.colibri.my=Math.max(carte.colibri.my, 0);
 				}
 				carte.colibri.setPos(cx , cy);
-				if(Math.abs(vy-cy)<carte.ch/2) mort();
+				if(Math.abs(vy-cy)<0.5) mort();
 			}
 			ramasser(); // On ramasse l'item potentiel
 			int nl=carte.colibri.getRow(), nc=carte.colibri.getCol();
@@ -260,11 +262,11 @@ public class MoteurJeu {
 	 * @param va le chat dont il faut tester la position par rapport au colibri
 	 */
 	private void collisionChat(Chat va) {
-		int[] c_co = carte.colibri.getPos();
-		int cx=c_co[0],cy=c_co[1];
-		int[] c_va = va.getPos();
-		int vx=c_va[0],vy=c_va[1];
-		if(Math.abs(vx-cx)<3*carte.cw/4 && Math.abs(vy-cy)<3*carte.ch/4) { // teste si colision
+		double[] c_co = carte.colibri.getPos();
+		double cx=c_co[0],cy=c_co[1];
+		double[] c_va = va.getPos();
+		double vx=c_va[0],vy=c_va[1];
+		if(Math.abs(vx-cx)<0.75 && Math.abs(vy-cy)<0.75) { // teste si colision
 			mort();
 		}
 	}
@@ -293,11 +295,11 @@ public class MoteurJeu {
 		} else if(niv.carte[l][c]>=10) { // Passage dans un arc-en-ciel.
 			if(dejaPasse!=niv.carte[l][c]) { // Pour éviter de se téléporter dans l'autre sens.
 				int[] dest = carte.rainbows.get(niv.carte[l][c]);
-				int step = carte.colibri.step;
+				double step = carte.colibri.step;
 				if(dest[0]==l && dest[1]==c)
-					carte.colibri.setPos(dest[3]*carte.cw-carte.colibri.mx*step, dest[2]*carte.ch-carte.colibri.my*step);
+					carte.colibri.setPos(dest[3]-carte.colibri.mx*step, dest[2]-carte.colibri.my*step);
 				else
-					carte.colibri.setPos(dest[1]*carte.cw-carte.colibri.mx*step, dest[0]*carte.ch-carte.colibri.my*step);
+					carte.colibri.setPos(dest[1]-carte.colibri.mx*step, dest[0]-carte.colibri.my*step);
 			}
 			dejaPasse=niv.carte[l][c];
 		} else

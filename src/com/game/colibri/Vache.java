@@ -8,12 +8,13 @@ public class Vache extends Animal {
 	private int[][] itineraire=null; // itinéraire des vaches/chats. Coordonnées de chaque point de passage. (au moins 2) Ex : {{1,1},{1,4},{3,4}}
 	private int chkpt=0; // le prochain checkpoint de l'animal dans itineraire.
 	
-	public Vache(Context context, int w, int h, int[][] itin) {
-		super(context,cw*itin[0][1],ch*itin[0][0],w,h);
+	public Vache(Context context, double w, double h, int[][] itin) {
+		super(context,itin[0][1],itin[0][0],w,h);
 		this.setBackgroundResource(R.drawable.vache);
 		itineraire=itin;
 		acc=0;
-    	step=cw/20;
+		v_max=0.05;
+    	step=v_max;
 	}
 	
 	/**
@@ -33,20 +34,20 @@ public class Vache extends Animal {
 	public void deplacer() {
     	// on teste si l'on est arrivé au checkpoint :
     	int c=itineraire[chkpt][1] , l=itineraire[chkpt][0];
-    	if (Math.abs(c*cw-params.leftMargin)<=step) {
+    	if (Math.abs(c-xx)<=step+0.01) { // +0.01 pour englober les erreurs de calcul sur les doubles.
     		mx=0;
-    		params.leftMargin=c*cw;
-    	} else params.leftMargin += mx*step;
-    	if (Math.abs(l*ch-params.topMargin)<=step) {
+    		xx=c;
+    	} else xx += mx*step;
+    	if (Math.abs(l-yy)<=step+0.01) {
     		my=0;
-    		params.topMargin=l*ch;
-    	} else params.topMargin += my*step;
+    		yy=l;
+    	} else yy += my*step;
 		if (mx==0 && my==0) {
 			chkpt=(chkpt+1)%itineraire.length;
 			mx=(int) Math.signum(itineraire[chkpt][1]-c);
 			my=(int) Math.signum(itineraire[chkpt][0]-l);
 		}
-		this.setLayoutParams(params);
+		setPos(xx,yy);
 	}
 
 }
