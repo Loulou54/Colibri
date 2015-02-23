@@ -464,9 +464,9 @@ public class Niveau {
 	}
 	
 	
-	public Passages passColibri;
-	public Passages passVaches;
-	//private Passages passChats;
+	private Passages passColibri;
+	private Passages passVaches;
+	private Passages passChats;
 	private int frame, frameMem;
 	private long seed;
 	private double step,v_max,acc;
@@ -484,6 +484,102 @@ public class Niveau {
 		if(tot!=dist)
 			pos.add(sig*(dist-tot));
 	}
+	
+	// GÉNÉRATION PARCOURS CHATS
+	
+	private boolean valideCheminRChat(int r, int c, int rf, int cf, int frameMod, int period) {
+		int s = Integer.signum(cf-c);
+		Occurence chat = new Occurence(frameMod, period, 6);
+		frameMod+=2; // Dû à l'accélération.
+		while(c>=0 && c<20 && c!=cf+s && carteOrigin[r][c]%2==0 && !passVaches.isColidingWith(r, c, chat) && !passColibri.isColidingWith(r, c, chat) && !passChats.isColidingWith(r, c, chat)) {
+			frameMod=(frameMod+4)%period;
+			chat = new Occurence(frameMod, period, 6);
+			c+=s;
+		}
+		return c==cf+s;
+	}
+	
+	private boolean valideCheminCChat(int r, int c, int rf, int cf, int frameMod, int period) {
+		int s = Integer.signum(rf-r);
+		Occurence chat = new Occurence(frameMod, period, 6);
+		frameMod+=2;
+		while(r>=0 && r<12 && r!=rf+s && carteOrigin[r][c]%2==0 && !passVaches.isColidingWith(r, c, chat) && !passColibri.isColidingWith(r, c, chat) && !passChats.isColidingWith(r, c, chat)) {
+			frameMod=(frameMod+4)%period;
+			chat = new Occurence(frameMod, period, 6);
+			r+=s;
+		}
+		return r==rf+s;
+	}
+	
+	/**
+	 * Génère un parcours pour un chat devant passer à (r,c) aux instants 0%lon[0].
+	 * La longueur du parcours généré sera stocké dans lon.
+	 * @param r ligne de l'emplacement voulu
+	 * @param c colonne de l'emplacement voulu
+	 * @param lon longueur (en frames) d'un cycle du parcours
+	 * @return la liste des checkpoints de la vache si succès, en faisant démarrer la vache
+	 * de manière à ce qu'elle arrive en (r,c) à l'instant voulu ; null sinon.
+	 */
+	private int[][] geneChat(int r, int c, int[] lon) {
+		Random ra = new Random();
+		ra.setSeed(seed);
+		int distLig = ra.nextInt(6)+1;
+		int distCol = ra.nextInt(6)+1;
+		LinkedList<Integer> posLig = new LinkedList<Integer>(); // Possibilités de déplacement sur les lignes, dont la somme fait 0. Ex : [3,1,2,-1,-1,-3,-1]
+		LinkedList<Integer> posCol = new LinkedList<Integer>(); // Idem sur les colonnes.
+		fillPosAleat(ra,distLig,posLig,1);
+		fillPosAleat(ra,distLig,posLig,-1);
+		fillPosAleat(ra,distCol,posCol,1);
+		fillPosAleat(ra,distCol,posCol,-1);
+		int pof;
+		int cs=posCol.size(),ls=posLig.size();
+		int dep;
+		int n;
+		lon[0] = (distLig+distCol)*8+(posLig.size()+posCol.size())*2;
+		int frameMod = 0;
+		boolean valide;
+		int[][] deplacements = new int[cs+ls][2];
+		int cpt=0, boucles=0;
+		while((cs!=0 || ls!=0) && boucles<=Math.max(cs+ls , 4)) {
+			if(boucles==0) {
+				deplacements[cpt][0]=r; deplacements[cpt][1]=c;}
+			pof=ra.nextInt(2);
+			if(pof==0 && cs!=0 || ls==0) { // Déplacement selon une colonne
+				n=ra.nextInt(cs);
+				dep=posCol.get(n);
+				valide=valideCheminCChat(r, c, r+dep, c, frameMod, lon[0]);
+				if(valide) {
+					r+=dep;
+					frameMod=(frameMod+2+4*Math.abs(dep))%lon[0];
+					cpt++;
+					posCol.remove(n);
+					cs--;
+					boucles=0;
+				} else
+					boucles++;
+			} else { // Déplacement selon une ligne
+				n=ra.nextInt(ls);
+				dep=posLig.get(n);
+				valide=valideCheminRChat(r, c, r, c+dep, frameMod, lon[0]);
+				if(valide) {
+					c+=dep;
+					frameMod=(frameMod+2+4*Math.abs(dep))%lon[0];
+					cpt++;
+					posLig.remove(n);
+					ls--;
+					boucles=0;
+				} else
+					boucles++;
+			}
+		}
+		if(boucles==0) { // On a trouvé un chemin de chat !
+			return deplacements;
+		} else { // Il n'y a pas assez de place pour le chemin prévu.
+			return null;
+		}
+	}
+	
+	// GÉNÉRATION PARCOURS VACHES
 	
 	private boolean valideCheminRVache(int r, int c, int rf, int cf, int frameMod, int period, Occurence colibri, int rc, int cc) {
 		int s = Integer.signum(cf-c);
@@ -507,6 +603,19 @@ public class Niveau {
 		return r==rf+s;
 	}
 	
+	/**
+	 * Génère un parcours pour une vache devant passer à (r,c) à l'instant frameDeb.
+	 * La longueur du parcours généré sera stocké dans lon, et le colibri se trouvant
+	 * en (rColi,cColi) ne sera pas poussé par la vache générée. 
+	 * @param r ligne de l'emplacement voulu
+	 * @param c colonne de l'emplacement voulu
+	 * @param frameDeb instant en frames lors duquel la vache doit se trouver en (r,c)
+	 * @param lon longueur (en frames) d'un cycle du parcours
+	 * @param rColi ligne du colibri
+	 * @param cColi colonne du colibri
+	 * @return la liste des checkpoints de la vache si succès, en faisant démarrer la vache
+	 * de manière à ce qu'elle arrive en (r,c) à l'instant voulu ; null sinon.
+	 */
 	private int[][] geneVache(int r, int c, int frameDeb, int[] lon, int rColi, int cColi) {
 		Random ra = new Random();
 		ra.setSeed(seed);
@@ -613,9 +722,8 @@ public class Niveau {
 		int i = cd;
 		double step2 = (wait==0) ? step : 0;
 		frame+=wait;
-		int frColib=frameMem;
-		Occurence colibri = new Occurence(frColib, 0, frame-frameMem);
-		while(i!=cf && carteOrigin[rd][i+s]%2==0 && !passVaches.isColidingWith(rd, i+s, colibri)){
+		int frColib;
+		while(i!=cf && carteOrigin[rd][i+s]%2==0 && !passVaches.isColidingWith(rd, i+s, new Occurence(frame+2, 0, 3))){ // L'occurence construite ici n'est qu'une estimation de la prochaine.
 			while((int) av==i) {
 				step2=Math.min(step2+acc, v_max);
 				av+=s*step2;
@@ -624,7 +732,7 @@ public class Niveau {
 			i = (int) av;
 			chemin[rd][i]+=1;
 			frColib=(frame+frameMem)/2;
-			colibri=passColibri.addOccurence(rd,i-s,frColib,0,frame-frameMem);
+			passColibri.addOccurence(rd,i-s,frColib,0,frame-frameMem); // On ajoute l'occurence de la case qu'on vient de QUITTER.
 			frameMem = frame;
 			if(r.nextInt(4)==0){
 				carteOrigin[rd][i]=2;
@@ -654,9 +762,8 @@ public class Niveau {
 		int i = rd;
 		double step2 = (wait==0) ? step : 0;
 		frame+=wait;
-		int frColib=frameMem;
-		Occurence colibri = new Occurence(frColib, 0, frame-frameMem);
-		while(i!=rf && carteOrigin[i+s][cd]%2==0 && !passVaches.isColidingWith(i+s, cd, colibri)){
+		int frColib;
+		while(i!=rf && carteOrigin[i+s][cd]%2==0 && !passVaches.isColidingWith(i+s, cd, new Occurence(frame+2, 0, 3))) { // L'occurence construite ici n'est qu'une estimation de la prochaine.
 			while((int) av==i) {
 				step2=Math.min(step2+acc, v_max);
 				av+=s*step2;
@@ -665,7 +772,7 @@ public class Niveau {
 			i = (int) av;
 			chemin[i][cd]+=1;
 			frColib=(frame+frameMem)/2;
-			colibri=passColibri.addOccurence(i-s,cd,frColib,0,frame-frameMem);
+			passColibri.addOccurence(i-s,cd,frColib,0,frame-frameMem); // On ajoute l'occurence de la case qu'on vient de QUITTER.
 			frameMem = frame;
 			if(r.nextInt(4)==0){
 				carteOrigin[i][cd]=2;
@@ -682,28 +789,27 @@ public class Niveau {
 	private boolean valideCheminCBool(int rd, int cd, int rf, int cf, int s, int[] wait){
 		double av = rd+0.5;
 		int i = rd;
-		int frColib=frameMem;
-		int frame2=frame+wait[0], frameMem2=frameMem;
+		int frame2=frame+wait[0];
 		double step2 = (wait[0]==0) ? step : 0;
-		Occurence colibri = new Occurence(frColib, 0, frame2-frameMem2);
-		while(i!=rf && carteOrigin[i+s][cd]%2==0 && !passVaches.isColidingWith(i+s, cd, colibri)){
+		while(i!=rf && carteOrigin[i+s][cd]%2==0 && !passVaches.isColidingWith(i+s, cd, new Occurence(frame2+2, 0, 3))){
 			while((int) av==i) {
 				step2=Math.min(step2+acc, v_max);
 				av+=s*step2;
 				frame2++;
 			}
 			i = (int) av;
-			frColib=(frame2+frameMem2)/2;
-			colibri = new Occurence(frColib, 0, frame2-frameMem2);
-			frameMem2 = frame2;
 		}
 		// S'assurer que l'on rentre suffisamment dans le milieu de la vache pour être sûr de ne pas la louper, sinon, l'éviter.
-		Occurence occ = passVaches.returnColisionWith(i+s, cd, colibri);
+		Occurence occ = passVaches.returnColisionWith(i+s, cd, new Occurence(frame2+2, 0, 3));
 		if(occ!=null && wait[0]<100) {
-			if(occ.difference(frColib)>6) {
+			if(occ.difference(frame2+2)>6) {
 				if(wait[0]==0)
 					wait[0]-=2;
-				wait[0]=Math.max(1 , wait[0]+20-(frColib%20)); // Attention : une valeur interdite : 0 (si frColib%20=18) !
+				wait[0]=Math.max(1 , wait[0]+20-((frame2+2)%20)); // Attention : une valeur interdite : 0 (si frColib%20=18) !
+				if(wait[0]>=100) {
+					wait[0]=-1;
+					return false;
+				}
 				return valideCheminCBool(rd,cd,rf,cf,s,wait);
 			}
 		}
@@ -715,27 +821,26 @@ public class Niveau {
 	private boolean valideCheminRBool(int rd, int cd, int rf,int cf, int s, int[] wait){
 		double av = cd+0.5;
 		int i = cd;
-		int frColib=frameMem;
-		int frame2=frame+wait[0], frameMem2=frameMem;
+		int frame2=frame+wait[0];
 		double step2 = (wait[0]==0) ? step : 0;
-		Occurence colibri = new Occurence(frColib, 0, frame2-frameMem2);
-		while(i!=cf && carteOrigin[rd][i+s]%2==0 && !passVaches.isColidingWith(rd, i+s, colibri)){
+		while(i!=cf && carteOrigin[rd][i+s]%2==0 && !passVaches.isColidingWith(rd, i+s, new Occurence(frame2+2, 0, 3))){
 			while((int) av==i) {
 				step2=Math.min(step2+acc, v_max);
 				av+=s*step2;
 				frame2++;
 			}
 			i = (int) av;
-			frColib=(frame2+frameMem2)/2;
-			colibri = new Occurence(frColib, 0, frame2-frameMem2);
-			frameMem2 = frame2;
 		}
-		Occurence occ = passVaches.returnColisionWith(rd, i+s, colibri);
+		Occurence occ = passVaches.returnColisionWith(rd, i+s, new Occurence(frame2+2, 0, 3));
 		if(occ!=null && wait[0]<100) {
-			if(occ.difference(frColib)>6) {
+			if(occ.difference(frame2+2)>6) {
 				if(wait[0]==0)
 					wait[0]-=2;
-				wait[0]=Math.max(1 , wait[0]+20-(frColib%20));
+				wait[0]=Math.max(1 , wait[0]+20-((frame2+2)%20));
+				if(wait[0]>=100) {
+					wait[0]=-1;
+					return false;
+				}
 				return valideCheminRBool(rd,cd,rf,cf,s,wait);
 			}
 		}
@@ -744,24 +849,26 @@ public class Niveau {
 		return i==cf;
 	}
 	
-	private void addVache(int[][] itin, int lon) {
+	private void addAnimal(int[][] itin, int lon, Passages pass, LinkedList<int[][]> animaux, int step, int frames, int accel) {
 		int ca=0;
+		int cpt=1;
 		int r=itin[0][0],c=itin[0][1];
 		for(int[] m : itin) {
 			while(r!=m[0] || c!=m[1]) {
-				passVaches.addOccurence(r, c, ca*20, lon, 18);
+				pass.addOccurence(r, c, ca*step+cpt*accel, lon, frames);
 				ca++;
 				r+=Math.signum(m[0]-r);
 				c+=Math.signum(m[1]-c);
 			}
+			cpt++;
 		}
 		while(r!=itin[0][0] || c!=itin[0][1]) {
-			passVaches.addOccurence(r, c, ca*20, lon, 18);
+			pass.addOccurence(r, c, ca*step+cpt*accel, lon, frames);
 			ca++;
 			r+=Math.signum(itin[0][0]-r);
 			c+=Math.signum(itin[0][1]-c);
 		}
-		vaches.add(itin);
+		animaux.add(itin);
 	}
 	
 	/**
@@ -817,7 +924,7 @@ public class Niveau {
 							else {
 								rf=valideCheminC(r,c,ran,c,s,w[0]);
 								frame--; // Rectification, la détection d'une vache se fait en une frame ou deux de moins qu'un menhir..
-								addVache(list_vache,lon[0]);
+								addAnimal(list_vache,lon[0],passVaches,vaches,20,18,0);
 							}
 						}
 						else { // On s'arrête avant sur un obstacle.
@@ -878,7 +985,7 @@ public class Niveau {
 							else {
 								cf=valideCheminR(r,c,r,ran,s,w[0]);
 								frame--;
-								addVache(list_vache,lon[0]);
+								addAnimal(list_vache,lon[0],passVaches,vaches,20,18,0);
 							}
 						}
 						else {
@@ -910,7 +1017,31 @@ public class Niveau {
 				}
 			}
 		}
-		return loop==0;
+		if(loop!=0)
+			return false;
+		if(pChats) { // On ajoute des chats si voulu.
+			int nCats = random.nextInt(1+nChats*2/3);
+			for(int i=0; i<nCats; i++) {
+				int lcat=random.nextInt(12), ccat=random.nextInt(20);
+				while(carteOrigin[lcat][ccat]%2==1) {
+					lcat=random.nextInt(12);
+					ccat=random.nextInt(20);
+				}
+				int boucles=0;
+				int[] lon={0};
+				list_vache=null; // ~=list_chat, je ne fais que réutiliser la référence.
+				while(list_vache==null && boucles<10) {
+					list_vache = geneChat(lcat, ccat, lon);
+					boucles++;
+				}
+				if(list_vache==null)
+					i--;
+				else {
+					addAnimal(list_vache,lon[0],passChats,chats,4,3,2);
+				}
+			}
+		}
+		return true;
 	}
 	
 	/**
@@ -938,6 +1069,9 @@ public class Niveau {
 		//Rseed=-2758439859207146033L;
 		//Rseed=-1528515903479504062L;
 		//Rseed=-3137553431549039113L;
+		//Rseed=-6447234018825680602L;
+		//Rseed=-4988562022539313297L;
+		//Rseed=48676815938959734L;
 		System.out.println("SEED : "+seed);
 		r.setSeed(seed);
 		int longueur = lon+r.nextInt(var);
@@ -951,7 +1085,7 @@ public class Niveau {
 		chemin[db_l][db_c]=1;
 		passColibri = new Passages(20);
 		passVaches = new Passages(20);
-		//passChats = new Passages(20);
+		passChats = new Passages(20);
 		if(!geneChemin(longueur,db_l,db_c)) { // on génère la carte pour une solution en "longueur" coups !
 			init();
 			geneNivRand(lon,var);
