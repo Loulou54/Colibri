@@ -152,18 +152,19 @@ public class MoteurJeu {
 		if (carte.colibri.mx==0 & carte.colibri.my==0) { // Le colibri est à l'arrêt
 			if (buf.size()>0) {
 				int[] mov=buf.getFirst();
+				if(mov[2]!=0)
+					carte.colibri.step=0;
 				if(mov[2]<=frame) {
 					buf.removeFirst();
 					carte.colibri.setDirection(mov); // On effectue le prochain mouvement de la file.
 					carte.colibri.setSpriteDirection(); // On choisit la direction de l'image.
 					if(carte.n_dyna>0) removeMenhirRouge(mov); // On enlève si nécessaire le menhir rouge de sélection.
 					if(mov[0]==mov[1]) { // <=> mov=={0,0} : pose une dynamite.
+						System.out.println("DYNAMITE : "+frame);
 						exploseMenhir();
 					}
 					lastMove=mov;
 				}
-				else
-					carte.colibri.step=0;
 			}
 			else carte.colibri.step=0; // La vitesse est mise à 0. Dans le premier cas, la vitesse est conservée.
 		} else { // Le colibri est en mouvement
@@ -253,7 +254,7 @@ public class MoteurJeu {
 				if(nl!=l || nc!=c)
 					carte.fond.invalidate();
 			}
-			System.out.println("Frame : "+frame+" Pos : "+carte.colibri.getRow()+","+carte.colibri.getCol());
+			System.out.println("Frame : "+frame+" Pos : "+carte.colibri.getRow()+","+carte.colibri.getCol()+" VACHE");
 		}
 	}
 	
