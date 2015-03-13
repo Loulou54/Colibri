@@ -39,9 +39,9 @@ public class Chat extends Animal {
     		mx=0;
     		xx=c;
     	} else xx += mx*step;
-    	if (Math.abs(l-yy)<=step+0.01) {
+    	if (Math.abs(l-yy-0.25)<=step+0.01) {
     		my=0;
-    		yy=l-0.25;
+    		yy=l-0.25; // Décalage pour faire dépasser la queue du chat vers le haut.
     	} else yy += my*step;
 		if (mx==0 && my==0) {
 			step=0;

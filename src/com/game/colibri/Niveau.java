@@ -412,6 +412,17 @@ public class Niveau {
 		}
 		
 		/**
+		 * Supprime la dernière occurence à la case (rd,cd) s'il y a lieu.
+		 * @param rd ligne
+		 * @param cd colonne
+		 */
+		public void removeLast(int r, int c) {
+			LinkedList <Occurence> occurences = passages.get(r*col+c);
+			if(occurences!=null)
+				occurences.removeLast();
+		}
+		
+		/**
 		 * Retourne la liste des passages (occurences) sur la case (r,c)
 		 * @param r
 		 * @param c
@@ -453,7 +464,7 @@ public class Niveau {
 			String s="";
 			for(int i=0; i<passages.size(); i++) {
 				LinkedList<Occurence> occs = passages.valueAt(i);
-				s+="("+(passages.keyAt(i)/20)+","+(passages.keyAt(i)%20)+") : ";
+				s+="("+(passages.keyAt(i)/col)+","+(passages.keyAt(i)%col)+") : ";
 				for(Occurence o : occs) {
 					s+=o.r+" "+o.mod+" "+o.delta+" | ";
 				}
@@ -468,16 +479,18 @@ public class Niveau {
 	private Passages passVaches;
 	private Passages passChats;
 	private int frame, frameMem;
-	private long seed;
+	public long seed=0;
+	private Random random;
 	private double step,v_max,acc;
 	public int nVaches=5, nDyna=5, nChats=5, nArcs=5; // Paramètres de quantité
 	public boolean pVaches=true, pDyna=true, pChats=true, pArcs=true; // Paramètres de présence
+	private SparseArray<int[]> rainbows;
 	
-	private void fillPosAleat(Random ra, int dist, LinkedList<Integer> pos, int sig) { // Génération des possibilités.
+	private void fillPosAleat(int dist, LinkedList<Integer> pos, int sig) { // Génération des possibilités.
 		int tot = 0;
 		int n;
 		while(tot<=dist-3) {
-			n=ra.nextInt(3)+1;
+			n=random.nextInt(3)+1;
 			tot+=n;
 			pos.add(sig*n);
 		}
@@ -489,11 +502,11 @@ public class Niveau {
 	
 	private boolean valideCheminRChat(int r, int c, int rf, int cf, int frameMod, int period) {
 		int s = Integer.signum(cf-c);
-		Occurence chat = new Occurence(frameMod, period, 6);
+		Occurence chat = new Occurence(frameMod, period, 5);
 		frameMod+=2; // Dû à l'accélération.
-		while(c>=0 && c<20 && c!=cf+s && Math.abs(carteOrigin[r][c]-7)!=1 && carteOrigin[r][c]%2==0 && !passVaches.isColidingWith(r, c, chat) && !passColibri.isColidingWith(r, c, chat) && !passChats.isColidingWith(r, c, chat)) {
+		while(c>=0 && c<20 && c!=cf+s && Math.abs(carteOrigin[r][c]-7)!=1 && carteOrigin[r][c]<10 && carteOrigin[r][c]%2==0 && !passVaches.isColidingWith(r, c, chat) && !passColibri.isColidingWith(r, c, chat) && !passChats.isColidingWith(r, c, chat)) {
 			frameMod=(frameMod+4)%period;
-			chat = new Occurence(frameMod, period, 6);
+			chat = new Occurence(frameMod, period, 5);
 			c+=s;
 		}
 		return c==cf+s;
@@ -501,11 +514,11 @@ public class Niveau {
 	
 	private boolean valideCheminCChat(int r, int c, int rf, int cf, int frameMod, int period) {
 		int s = Integer.signum(rf-r);
-		Occurence chat = new Occurence(frameMod, period, 6);
+		Occurence chat = new Occurence(frameMod, period, 5);
 		frameMod+=2;
-		while(r>=0 && r<12 && r!=rf+s && Math.abs(carteOrigin[r][c]-7)!=1 && carteOrigin[r][c]%2==0 && !passVaches.isColidingWith(r, c, chat) && !passColibri.isColidingWith(r, c, chat) && !passChats.isColidingWith(r, c, chat)) {
+		while(r>=0 && r<12 && r!=rf+s && Math.abs(carteOrigin[r][c]-7)!=1 && carteOrigin[r][c]<10 && carteOrigin[r][c]%2==0 && !passVaches.isColidingWith(r, c, chat) && !passColibri.isColidingWith(r, c, chat) && !passChats.isColidingWith(r, c, chat)) {
 			frameMod=(frameMod+4)%period;
-			chat = new Occurence(frameMod, period, 6);
+			chat = new Occurence(frameMod, period, 5);
 			r+=s;
 		}
 		return r==rf+s;
@@ -521,16 +534,14 @@ public class Niveau {
 	 * de manière à ce qu'elle arrive en (r,c) à l'instant voulu ; null sinon.
 	 */
 	private int[][] geneChat(int r, int c, int[] lon) {
-		Random ra = new Random();
-		ra.setSeed(seed);
-		int distLig = ra.nextInt(6)+1;
-		int distCol = ra.nextInt(6)+1;
+		int distLig = random.nextInt(6)+1;
+		int distCol = random.nextInt(6)+1;
 		LinkedList<Integer> posLig = new LinkedList<Integer>(); // Possibilités de déplacement sur les lignes, dont la somme fait 0. Ex : [3,1,2,-1,-1,-3,-1]
 		LinkedList<Integer> posCol = new LinkedList<Integer>(); // Idem sur les colonnes.
-		fillPosAleat(ra,distLig,posLig,1);
-		fillPosAleat(ra,distLig,posLig,-1);
-		fillPosAleat(ra,distCol,posCol,1);
-		fillPosAleat(ra,distCol,posCol,-1);
+		fillPosAleat(distLig,posLig,1);
+		fillPosAleat(distLig,posLig,-1);
+		fillPosAleat(distCol,posCol,1);
+		fillPosAleat(distCol,posCol,-1);
 		int pof;
 		int cs=posCol.size(),ls=posLig.size();
 		int dep;
@@ -543,9 +554,9 @@ public class Niveau {
 		while((cs!=0 || ls!=0) && boucles<=Math.max(cs+ls , 4)) {
 			if(boucles==0) {
 				deplacements[cpt][0]=r; deplacements[cpt][1]=c;}
-			pof=ra.nextInt(2);
+			pof=random.nextInt(2);
 			if(pof==0 && cs!=0 || ls==0) { // Déplacement selon une colonne
-				n=ra.nextInt(cs);
+				n=random.nextInt(cs);
 				dep=posCol.get(n);
 				valide=valideCheminCChat(r, c, r+dep, c, frameMod, lon[0]);
 				if(valide) {
@@ -558,7 +569,7 @@ public class Niveau {
 				} else
 					boucles++;
 			} else { // Déplacement selon une ligne
-				n=ra.nextInt(ls);
+				n=random.nextInt(ls);
 				dep=posLig.get(n);
 				valide=valideCheminRChat(r, c, r, c+dep, frameMod, lon[0]);
 				if(valide) {
@@ -584,7 +595,7 @@ public class Niveau {
 	private boolean valideCheminRVache(int r, int c, int rf, int cf, int frameMod, int period, Occurence colibri, int rc, int cc) {
 		int s = Integer.signum(cf-c);
 		Occurence vache = new Occurence(frameMod, period, 18); // Delta = 20-2 car la vitesse d'une vache est de 1/20 case/frame et que l'on peut passer même quand la vache est un peu sur la case.
-		while(c>=0 && c<20 && c!=cf+s && Math.abs(carteOrigin[r][c]-7)!=1 && carteOrigin[r][c]%2==0 && !passVaches.isColidingWith(r, c, vache) && !passColibri.isColidingWith(r, c, vache) && !(r==rc && c==cc && colibri.isColidingWith(vache))) {
+		while(c>=0 && c<20 && c!=cf+s && Math.abs(carteOrigin[r][c]-7)!=1 && carteOrigin[r][c]<10 && carteOrigin[r][c]%2==0 && !passVaches.isColidingWith(r, c, vache) && !passColibri.isColidingWith(r, c, vache) && !(r==rc && c==cc && colibri.isColidingWith(vache))) {
 			frameMod=(frameMod+20)%period;
 			vache = new Occurence(frameMod, period, 18);
 			c+=s;
@@ -595,7 +606,7 @@ public class Niveau {
 	private boolean valideCheminCVache(int r, int c, int rf, int cf, int frameMod, int period, Occurence colibri, int rc, int cc) {
 		int s = Integer.signum(rf-r);
 		Occurence vache = new Occurence(frameMod, period, 18); // Delta = 20-2 car la vitesse d'une vache est de 1/20 case/frame et que l'on peut passer même quand la vache est un peu sur la case.
-		while(r>=0 && r<12 && r!=rf+s && Math.abs(carteOrigin[r][c]-7)!=1 && carteOrigin[r][c]%2==0 && !passVaches.isColidingWith(r, c, vache) && !passColibri.isColidingWith(r, c, vache) && !(r==rc && c==cc && colibri.isColidingWith(vache))) {
+		while(r>=0 && r<12 && r!=rf+s && Math.abs(carteOrigin[r][c]-7)!=1 && carteOrigin[r][c]<10 && carteOrigin[r][c]%2==0 && !passVaches.isColidingWith(r, c, vache) && !passColibri.isColidingWith(r, c, vache) && !(r==rc && c==cc && colibri.isColidingWith(vache))) {
 			frameMod=(frameMod+20)%period;
 			vache = new Occurence(frameMod, period, 18);
 			r+=s;
@@ -617,16 +628,14 @@ public class Niveau {
 	 * de manière à ce qu'elle arrive en (r,c) à l'instant voulu ; null sinon.
 	 */
 	private int[][] geneVache(int r, int c, int frameDeb, int[] lon, int rColi, int cColi) {
-		Random ra = new Random();
-		ra.setSeed(seed);
-		int distLig = ra.nextInt(6)+1;
-		int distCol = ra.nextInt(6)+1;
+		int distLig = random.nextInt(6)+1;
+		int distCol = random.nextInt(6)+1;
 		LinkedList<Integer> posLig = new LinkedList<Integer>(); // Possibilités de déplacement sur les lignes, dont la somme fait 0. Ex : [3,1,2,-1,-1,-3,-1]
 		LinkedList<Integer> posCol = new LinkedList<Integer>(); // Idem sur les colonnes.
-		fillPosAleat(ra,distLig,posLig,1);
-		fillPosAleat(ra,distLig,posLig,-1);
-		fillPosAleat(ra,distCol,posCol,1);
-		fillPosAleat(ra,distCol,posCol,-1);
+		fillPosAleat(distLig,posLig,1);
+		fillPosAleat(distLig,posLig,-1);
+		fillPosAleat(distCol,posCol,1);
+		fillPosAleat(distCol,posCol,-1);
 		int pof;
 		int cs=posCol.size(),ls=posLig.size();
 		int dep;
@@ -642,9 +651,9 @@ public class Niveau {
 		while((cs!=0 || ls!=0) && boucles<=Math.max(cs+ls , 4)) {
 			if(boucles==0) {
 				deplacements[cpt][0]=r; deplacements[cpt][1]=c;}
-			pof=ra.nextInt(2);
+			pof=random.nextInt(2);
 			if(pof==0 && cs!=0 || ls==0) { // Déplacement selon une colonne
-				n=ra.nextInt(cs);
+				n=random.nextInt(cs);
 				dep=posCol.get(n);
 				valide=valideCheminCVache(r, c, r+dep, c, frameMod, lon[0], colibri, rColi, cColi);
 				if(valide) {
@@ -666,7 +675,7 @@ public class Niveau {
 				} else
 					boucles++;
 			} else { // Déplacement selon une ligne
-				n=ra.nextInt(ls);
+				n=random.nextInt(ls);
 				dep=posLig.get(n);
 				valide=valideCheminRVache(r, c, r, c+dep, frameMod, lon[0], colibri, rColi, cColi);
 				if(valide) {
@@ -715,15 +724,14 @@ public class Niveau {
 	 * @param s sens deplacement selon la ligne 
 	 * @return un chemin
 	 */
-	public int valideCheminR(int rd, int cd, int rf,int cf, int s, int wait){
-		Random r = new Random();
-		r.setSeed(seed);
+	public int[] valideCheminR(int rd, int cd, int rf,int cf, int s, int wait){
 		double av = cd+0.5;
-		int i = cd;
+		int i = cd, rdd=rd;
 		double step2 = (wait==0) ? step : 0;
 		frame+=wait;
 		int frColib;
-		while(i!=cf && carteOrigin[rd][i+s]%2==0 && !passVaches.isColidingWith(rd, i+s, new Occurence(frame+2, 0, 3))){ // L'occurence construite ici n'est qu'une estimation de la prochaine.
+		passColibri.removeLast(rd,cd); // On supprime l'occurence temporaire qui va être remplacée par la vraie dans la boucle.
+		while((rd!=rf || i!=cf) && i+s>=0 && i+s<20 && carteOrigin[rd][i+s]%2==0 && !passVaches.isColidingWith(rd, i+s, new Occurence(frame+2, 0, 3))){ // L'occurence construite ici n'est qu'une estimation de la prochaine.
 			while((int) av==i) {
 				step2=Math.min(step2+acc, v_max);
 				av+=s*step2;
@@ -734,16 +742,29 @@ public class Niveau {
 			frColib=(frame+frameMem)/2;
 			passColibri.addOccurence(rd,i-s,frColib,0,frame-frameMem); // On ajoute l'occurence de la case qu'on vient de QUITTER.
 			frameMem = frame;
-			if(r.nextInt(4)==0 && carteOrigin[rd][i]==0){
+			if(random.nextInt(4)==0 && carteOrigin[rd][i]==0){
 				carteOrigin[rd][i]=2;
 			}
+			if(carteOrigin[rd][i]>=10) { //Arc-en-ciel
+				passColibri.addOccurence(rd,i,frColib+1,0,frame-frameMem);
+				int[] dest = rainbows.get(carteOrigin[rd][i]);
+				if(dest[0]==rd && dest[1]==i) {
+					rd=dest[2]; i=dest[3];
+				} else {
+					rd=dest[0]; i=dest[1];
+				}
+				chemin[rd][i]+=1;
+				frame++;
+				av=i+0.5;
+			}
 		}
-		if(i!=cd) {
-			frame += (i!=cf && carteOrigin[rd][i+s]%2==0) ? 1 : 2;
+		passColibri.addOccurence(rd,i,frame+10,0,20); // Occurence temporaire (qui sera enlevée avant le prochain déplacement) pour éviter qu'une vache dans le prochain déplacement marche ici.
+		if(i!=cd || rd!=rdd) {
+			frame += (i!=cf && i+s>=0 && i+s<20 && carteOrigin[rd][i+s]%2==0) ? 1 : 2;
 			step=step2;
 		} else
 			frame-=wait;
-		return i;
+		return new int[] {rd,i};
 	}
 
 	/**
@@ -755,15 +776,14 @@ public class Niveau {
 	 * @param s sens deplacement selon la ligne 
 	 * @return un  chemin
 	 */
-	public int valideCheminC(int rd, int cd, int rf, int cf, int s, int wait){
-		Random r = new Random();
-		r.setSeed(seed);
+	public int[] valideCheminC(int rd, int cd, int rf, int cf, int s, int wait){
 		double av = rd+0.5;
-		int i = rd;
+		int i = rd, cdd = cd;
 		double step2 = (wait==0) ? step : 0;
 		frame+=wait;
 		int frColib;
-		while(i!=rf && carteOrigin[i+s][cd]%2==0 && !passVaches.isColidingWith(i+s, cd, new Occurence(frame+2, 0, 3))) { // L'occurence construite ici n'est qu'une estimation de la prochaine.
+		passColibri.removeLast(rd,cd); // On supprime l'occurence temporaire qui va être remplacée par la vraie dans la boucle.
+		while((i!=rf || cd!=cf) && i+s>=0 && i+s<12 && carteOrigin[i+s][cd]%2==0 && !passVaches.isColidingWith(i+s, cd, new Occurence(frame+2, 0, 3))) { // L'occurence construite ici n'est qu'une estimation de la prochaine.
 			while((int) av==i) {
 				step2=Math.min(step2+acc, v_max);
 				av+=s*step2;
@@ -774,79 +794,123 @@ public class Niveau {
 			frColib=(frame+frameMem)/2;
 			passColibri.addOccurence(i-s,cd,frColib,0,frame-frameMem); // On ajoute l'occurence de la case qu'on vient de QUITTER.
 			frameMem = frame;
-			if(r.nextInt(4)==0 && carteOrigin[i][cd]==0){
+			if(random.nextInt(4)==0 && carteOrigin[i][cd]==0){
 				carteOrigin[i][cd]=2;
 			}
+			if(carteOrigin[i][cd]>=10) { //Arc-en-ciel
+				passColibri.addOccurence(i,cd,frColib+1,0,frame-frameMem);
+				int[] dest = rainbows.get(carteOrigin[i][cd]);
+				if(dest[0]==i && dest[1]==cd) {
+					i=dest[2]; cd=dest[3];
+				} else {
+					i=dest[0]; cd=dest[1];
+				}
+				chemin[i][cd]+=1;
+				frame++;
+				av=i+0.5;
+			}
 		}
-		if(i!=rd) {
-			frame += (i!=rf && carteOrigin[i+s][cd]%2==0) ? 1 : 2;
+		passColibri.addOccurence(i,cd,frame+10,0,20); // Occurence temporaire (qui sera enlevée avant le prochain déplacement) pour éviter qu'une vache dans le prochain déplacement marche ici.
+		if(i!=rd || cd!=cdd) {
+			frame += (i!=rf && i+s>=0 && i+s<12 && carteOrigin[i+s][cd]%2==0) ? 1 : 2;
 			step=step2;
 		} else
 			frame-=wait;
-		return i;
+		return new int[] {i,cd};
 	}
 	
 	private boolean valideCheminCBool(int rd, int cd, int rf, int cf, int s, int[] wait){
 		double av = rd+0.5;
-		int i = rd;
+		int i = rd, cdd = cd;
 		int frame2=frame+wait[0];
+		int arc=0;
 		double step2 = (wait[0]==0) ? step : 0;
-		while(i!=rf && carteOrigin[i+s][cd]%2==0 && !passVaches.isColidingWith(i+s, cd, new Occurence(frame2+2, 0, 3))){
+		while((i!=rf || cd!=cf) && i+s>=0 && i+s<12 && carteOrigin[i+s][cd]%2==0 && !passVaches.isColidingWith(i+s, cd, new Occurence(frame2+2, 0, 3))){
 			while((int) av==i) {
 				step2=Math.min(step2+acc, v_max);
 				av+=s*step2;
 				frame2++;
 			}
 			i = (int) av;
+			if(carteOrigin[i][cd]>=10) { //Arc-en-ciel
+				int[] dest = rainbows.get(carteOrigin[i][cd]);
+				if(dest[0]==i && dest[1]==cd) {
+					i=dest[2]; cd=dest[3];
+				} else {
+					i=dest[0]; cd=dest[1];
+				}
+				frame2++;
+				av=i+0.5;
+				if(arc==carteOrigin[i][cd]) { // Pour éviter de tourner en boucle dans des arcs.
+					wait[0]=-1;
+					break;
+				} else if(arc==0) arc=carteOrigin[i][cd];
+			}
 		}
 		// S'assurer que l'on rentre suffisamment dans le milieu de la vache pour être sûr de ne pas la louper, sinon, l'éviter.
 		Occurence occ = passVaches.returnColisionWith(i+s, cd, new Occurence(frame2+2, 0, 3));
-		if(occ!=null && wait[0]<120) {
+		if(occ!=null) {
 			if(occ.difference(frame2+2)>6) {
 				if(wait[0]==0)
 					wait[0]-=2;
-				wait[0]=Math.max(1 , wait[0]+20-((frame2+2)%20)); // Attention : une valeur interdite : 0 (si frColib%20=18) !
-				if(wait[0]>=120) {
+				wait[0]=Math.max(1 , wait[0]+22-((frame2+2)%20)); // 22=20 +2 de marge. Attention : une valeur interdite : 0 (si frColib%20=18) !
+				if(wait[0]>=120) { // Pour éviter trop de niveau de récursion, on annule.
 					wait[0]=-1;
 					return false;
 				}
-				return valideCheminCBool(rd,cd,rf,cf,s,wait);
+				return valideCheminCBool(rd,cdd,rf,cf,s,wait);
 			}
 		}
 		if(passVaches.isColidingWith(i, cd, new Occurence(frame2+6,0,4))) // Permet de détecter si la vache va pousser le colibri à l'arrêt.
 			wait[0]=-1;
-		return i==rf;
+		return i==rf && cd==cf;
 	}
 	
 	private boolean valideCheminRBool(int rd, int cd, int rf,int cf, int s, int[] wait){
 		double av = cd+0.5;
-		int i = cd;
+		int i = cd, rdd = rd;
 		int frame2=frame+wait[0];
+		int arc=0;
 		double step2 = (wait[0]==0) ? step : 0;
-		while(i!=cf && carteOrigin[rd][i+s]%2==0 && !passVaches.isColidingWith(rd, i+s, new Occurence(frame2+2, 0, 3))){
+		while((rd!=rf || i!=cf) && i+s>=0 && i+s<20 && carteOrigin[rd][i+s]%2==0 && !passVaches.isColidingWith(rd, i+s, new Occurence(frame2+2, 0, 3))){
 			while((int) av==i) {
 				step2=Math.min(step2+acc, v_max);
 				av+=s*step2;
 				frame2++;
 			}
 			i = (int) av;
+			if(carteOrigin[rd][i]>=10) { //Arc-en-ciel
+				int[] dest = rainbows.get(carteOrigin[rd][i]);
+				if(dest[0]==rd && dest[1]==i) {
+					rd=dest[2]; i=dest[3];
+				} else {
+					rd=dest[0]; i=dest[1];
+				}
+				frame2++;
+				av=i+0.5;
+				if(arc==carteOrigin[rd][i]) { // Pour éviter de tourner en boucle dans des arcs.
+					wait[0]=-1;
+					break;
+				}
+				else if(arc==0) arc=carteOrigin[rd][i];
+			}
 		}
 		Occurence occ = passVaches.returnColisionWith(rd, i+s, new Occurence(frame2+2, 0, 3));
-		if(occ!=null && wait[0]<120) {
+		if(occ!=null) {
 			if(occ.difference(frame2+2)>6) {
 				if(wait[0]==0)
 					wait[0]-=2;
-				wait[0]=Math.max(1 , wait[0]+20-((frame2+2)%20));
+				wait[0]=Math.max(1 , wait[0]+22-((frame2+2)%20));
 				if(wait[0]>=120) {
 					wait[0]=-1;
 					return false;
 				}
-				return valideCheminRBool(rd,cd,rf,cf,s,wait);
+				return valideCheminRBool(rdd,cd,rf,cf,s,wait);
 			}
 		}
 		if(passVaches.isColidingWith(rd, i, new Occurence(frame2+6,0,4))) // Permet de détecter si la vache va pousser le colibri à l'arrêt.
 			wait[0]=-1;
-		return i==cf;
+		return rd==rf && i==cf;
 	}
 	
 	private void addAnimal(int[][] itin, int lon, Passages pass, LinkedList<int[][]> animaux, int step, int frames, int accel) {
@@ -883,41 +947,33 @@ public class Niveau {
 	 * @param n_fleur
 	 * @param mvt
 	 */
-	public boolean geneChemin(int n,int r,int c, int nbDyna, int nCats){
+	public boolean geneChemin(int n,int r,int c, int nbDyna, int nCats, int nbArcs){
 		int rd=r, cd=c;
-		Random random = new Random();
-		random.setSeed(seed);
-		int direc, bord, ran, s;
-		int rf, cf;
+		int direc, bord, ran=0, s=1;
+		int rf,cf;
+		int[] posf;
 		int loop=0;
 		int[] w = {0};
 		int frameDepart;
 		int[][] list_vache;
 		int stockDyna=0, cote=0, iiMen=0; // Le nombre de dyna à poser ; le nombre de dyna posée mais pas utilisée ; le cote du menhir explosé lorsqu'une dyna est utilisée.
-		boolean dropDyna=false, exploseMen=false; // Indique si une dynamite doit être posée pour le déplacement considéré.
+		int numArcs=10; // Le numéro de la prochaine paire d'arc-en-ciels à poser.
+		boolean poseArc=false, dropDyna=false, exploseMen=false; // Indique si une dynamite doit être posée pour le déplacement considéré.
 		for (int k=0; k<n && loop<17;k++) { // Pour garantir une proba voulue (pv) de ne pas interrompre un cas encore possible de proba p, il faut une limite de n>=ln(1-pv)/ln(1-p). On a 17 pour p=0.133 et pv=0.9.
 			System.out.println("Fr="+frame+" Pos : "+r+","+c);
 			direc=random.nextInt(2); // Choisit si le prochain deplacement se fera selon une ligne ou une colonne.
 			bord=random.nextInt(10); // Il y a une probabilité de 1/5 d'aller jusqu'à la cloture du niveau. Cela permet de ne pas trop confiner le chemin au milieu de la carte, et de donner davantage de possibilités de résolution au joueur...
 			w[0]=0; frameDepart=frame;
+			rf=r; cf=c;
 			if(pDyna && random.nextInt(n-4)<nbDyna && k<=n-4) // Détermine si l'on va poser une dynamite à ce tour.
 				dropDyna = true;
-			if(exploseMen || stockDyna!=0 && k<=n-3 && random.nextInt(n-k-2)<stockDyna) {
+			if(exploseMen || stockDyna!=0 && k<=n-3 && random.nextInt(n-k-2)<stockDyna) { // On veut exploser un menhir
 				if(exploseMen) carteOrigin[getCoord(r,iiMen,11)][getCoord(c,1-iiMen,19)]-=5; // Dans le cas où le cas précédent n'a pas fonctionné.
 				LinkedList<Integer> menh = new LinkedList<Integer>(); // Recueille les indices ayant des menhirs.
 				for(int ii=-1; ii<=2; ii++) {
 					if(carteOrigin[getCoord(r,ii,11)][getCoord(c,1-ii,19)]%2==1)
 						menh.add(ii);
 				}
-				for(int a=Math.max(0, r-1); a<=Math.min(11, r+1); a++) {
-					for(int b=Math.max(0, c-1); b<=Math.min(19, c+1); b++) {
-						System.out.print(carteOrigin[a][b]+" ");
-					}
-					System.out.println();
-				}
-				for(int a : menh)
-					System.out.print(a);
-				System.out.println();
 				if(menh.size()!=0) {
 					int ii = menh.get(random.nextInt(menh.size()));
 					iiMen=ii;
@@ -931,55 +987,108 @@ public class Niveau {
 					System.out.println("Explo : "+getCoord(r,ii,11)+" , "+getCoord(c,1-ii,19));
 				}
 			}
+			if(poseArc || pArcs && random.nextInt(n-4)<nbArcs) { // On veut poser une paire d'arcs-en-ciel
+				if(poseArc) { // Dans le cas où le cas précédent n'a pas fonctionné.
+					int[] arcPos = rainbows.get(numArcs);
+					carteOrigin[arcPos[0]][arcPos[1]]=0;
+					carteOrigin[arcPos[2]][arcPos[3]]=0;
+				}
+				int dir,rr,cc,nloop=0;
+				int[] wa={0};
+				boolean bon=false;
+				do {
+					wa[0]=0;
+					dir=(exploseMen) ? direc : random.nextInt(2);
+					if(dir==0) {
+						rr=(exploseMen) ? cote*r+random.nextInt((cote==0)?r:12-r) : random.nextInt(12);
+						cc=c;
+						s=Integer.signum(rr-r);
+					} else {
+						rr=r;
+						cc=(exploseMen) ? cote*c+random.nextInt((cote==0)?c:20-c) : random.nextInt(20);
+						s=Integer.signum(cc-c);
+					}
+					if(s!=0 && chemin[rr][cc]==0 && carteOrigin[rr][cc]==0 && passVaches.getOccurences(rr, cc)==null)
+						bon=(dir==0) ? valideCheminCBool(r,c,rr,cc,s,wa) : valideCheminRBool(r,c,rr,cc,s,wa);
+				} while(nloop++<20 && !bon);
+				if(nloop<20) { // On a trouvé un emplacement pour le premier arc.
+					poseArc=true;
+					carteOrigin[rr][cc]=numArcs;
+					int[] arcPos = new int[] {rr,cc,0,0};
+					System.out.println("ARC 1 : "+rr+" , "+cc);
+					direc=dir;
+					cote=(s+1)/2;
+					do { // On cherche l'emplacement du second arc.
+						rr=random.nextInt(12);
+						cc=random.nextInt(20);
+					} while(rr==r && cc==c || chemin[rr][cc]!=0 || carteOrigin[rr][cc]!=0 || passVaches.getOccurences(rr, cc)!=null);
+					carteOrigin[rr][cc]=numArcs;
+					arcPos[2]=rr; arcPos[3]=cc;
+					System.out.println("ARC 2 : "+rr+" , "+cc);
+					rainbows.put(numArcs, arcPos);
+					if(bord<2 || cote==0 && (direc==0 && rr<=1 || direc==1 && cc<=1) || cote==1 && (direc==0 && rr>=10 || direc==1 && cc>=18))
+						bord = cote;
+					rf=rr; cf=cc;
+					if(bord>=2) {
+						if(direc==0)
+							ran=1+cote*rr+random.nextInt((cote==0)?rr-1:10-rr);
+						else
+							ran=1+cote*cc+random.nextInt((cote==0)?cc-1:18-cc);
+					}
+				} else
+					poseArc=false;
+			}
 			if (direc==0) { // SELON LA COLONNE
 				if (bord<2) {
 					ran=bord*11;
 					s=2*bord-1;
-					valideCheminCBool(r,c,ran,c,s,w);
-					if(w[0]!=-1) rf=valideCheminC(r,c,ran,c,s,w[0]);
-					else rf=r;
+					valideCheminCBool(r,c,ran,cf,s,w);
+					if(w[0]!=-1) posf=valideCheminC(r,c,ran,cf,s,w[0]);
+					else posf=new int[] {r,c};
 				} else {
-					if(!exploseMen) ran=1+random.nextInt(10); // on tire une position sur la ligne (hors bords)
-					else ran = 1+cote*r+random.nextInt((cote==0)?r-1:10-r); // On tire une position du côté où le colibri vient de casser le menhir.
-					s=Integer.signum(ran-r); // sens du déplacement selon la ligne s=1 ou -1
-					if(ran==r || Math.abs(carteOrigin[ran+s][c]-7)==1 || chemin[ran+s][c]>6 || !pVaches && (chemin[ran+s][c]>1 || carteOrigin[ran+s][c]==4) || (ran+s==rd && c==cd)) // il faut en particulier vérifier que l'emplacement du menhir d'arrêt (aux coord (ran+s,c)) ne bloque pas le chemin précédemment généré ! Pour cela : si chemin[ran+s][c]==0 c'est bon; si ==1 on met une fleur magique, car elle deviendra menhir après le passage; si >=2 (i.e. le colibri est déjà passé plus de 2 fois sur cette case) ce n'est pas possible, il faut choisir un autre emplacement !
-						rf=r; // Destination (ran,c) non valide
-					else if(chemin[ran+s][c]>1 || carteOrigin[ran+s][c]==4 || passVaches.getOccurences(ran+s, c)!=null || random.nextInt(40-nVaches*3)==0) { // Ajout d'une vache !
+					if(!poseArc) {
+						if(!exploseMen) ran=1+random.nextInt(10); // on tire une position sur la ligne (hors bords)
+						else ran = 1+cote*r+random.nextInt((cote==0)?r-1:10-r); // On tire une position du côté où le colibri vient de casser le menhir.
+						s=Integer.signum(ran-r); // sens du déplacement selon la ligne s=1 ou -1
+					}
+					if((ran==r && cf==c) || Math.abs(carteOrigin[ran+s][cf]-7)==1 || carteOrigin[ran+s][cf]>=10 || chemin[ran+s][cf]>6 || !pVaches && (chemin[ran+s][cf]>1 || carteOrigin[ran+s][cf]==4) || (ran+s==rd && cf==cd)) // il faut en particulier vérifier que l'emplacement du menhir d'arrêt (aux coord (ran+s,c)) ne bloque pas le chemin précédemment généré ! Pour cela : si chemin[ran+s][c]==0 c'est bon; si ==1 on met une fleur magique, car elle deviendra menhir après le passage; si >=2 (i.e. le colibri est déjà passé plus de 2 fois sur cette case) ce n'est pas possible, il faut choisir un autre emplacement !
+						posf=new int[] {r,c}; // Destination (ran,c) non valide
+					else if(chemin[ran+s][cf]>1 || carteOrigin[ran+s][cf]==4 || passVaches.getOccurences(ran+s, cf)!=null || random.nextInt(40-nVaches*3)==0) { // Ajout d'une vache !
 						int tvoy=Math.abs(ran-r)*4/3+2;
 						int frameDeb = ((frame+w[0]+tvoy)/20+1)*20;
 						w[0] += frameDeb-frame-w[0]-tvoy;
 						int wait=w[0];
-						if(valideCheminCBool(r,c,ran,c,s,w)) { // On peut accéder à la destination, on va mettre un vache.
+						if(valideCheminCBool(r,c,ran,cf,s,w)) { // On peut accéder à la destination, on va mettre un vache.
 							int boucles=0;
 							int[] lon={0};
 							list_vache=null;
 							while(list_vache==null && boucles<10) {
-								list_vache = geneVache(ran+s, c, frameDeb+w[0]-wait, lon, ran, c);
+								list_vache = geneVache(ran+s, cf, frameDeb+w[0]-wait, lon, ran, cf);
 								boucles++;
 							}
 							if(list_vache==null)
-								rf=r;
+								posf=new int[] {r,c};
 							else {
-								rf=valideCheminC(r,c,ran,c,s,w[0]);
+								posf=valideCheminC(r,c,ran,cf,s,w[0]);
 								frame--; // Rectification, la détection d'une vache se fait en une frame ou deux de moins qu'un menhir..
 								addAnimal(list_vache,lon[0],passVaches,vaches,20,18,0);
 							}
 						}
 						else { // On s'arrête avant sur un obstacle.
 							w[0]=exploseMen?25:0;
-							if(valideCheminCBool(r,c,ran,c,s,w) || w[0]==-1)
-								rf=r;
+							if(valideCheminCBool(r,c,ran,cf,s,w) || w[0]==-1)
+								posf=new int[] {r,c};
 							else
-								rf=valideCheminC(r,c,ran,c,s,w[0]);
+								posf=valideCheminC(r,c,ran,cf,s,w[0]);
 						}
 					}
 					else {
-						valideCheminCBool(r,c,ran,c,s,w);
-						if(w[0]!=-1) rf=valideCheminC(r,c,ran,c,s,w[0]); // On obtient la destination prévue "ran" sauf si un menhir se trouvait sur le chemin entre (r,c) et (ran,c) : dans ce cas, on obtient la ligne avant le menhir qui nous bloque.
-						else rf=r;
+						valideCheminCBool(r,c,ran,cf,s,w);
+						if(w[0]!=-1) posf=valideCheminC(r,c,ran,cf,s,w[0]); // On obtient la destination prévue "ran" sauf si un menhir se trouvait sur le chemin entre (r,c) et (ran,c) : dans ce cas, on obtient la ligne avant le menhir qui nous bloque.
+						else posf=new int[] {r,c};
 					}
 				}
-				if (rf==r) { // si finalement on a pas bougé, on refait un tour de boucle en plus (ou si une vache nous pousse).
+				if (posf[0]==r && posf[1]==c) { // si finalement on a pas bougé, on refait un tour de boucle en plus (ou si une vache nous pousse).
 					k--;
 					loop++;
 				} else { // sinon, on a donc un mouvement valide de prévu, la nouvelle position du colibri est donc (rf,c)
@@ -998,8 +1107,8 @@ public class Niveau {
 					if(dropDyna) {
 						int a,cp=0;
 						do {
-							a=Math.min(r, rf)+random.nextInt(Math.abs(rf-r)+1);
-						} while((carteOrigin[a][c]==4 || Math.abs(carteOrigin[a][c]-7)==1) && cp++<15);
+							a=Math.min(r, posf[0])+random.nextInt(Math.abs(posf[0]-r)+1);
+						} while((chemin[a][c]==0 || carteOrigin[a][c]==4 || carteOrigin[a][c]>=10 || Math.abs(carteOrigin[a][c]-7)==1) && cp++<15);
 						if(cp<=15) {
 							carteOrigin[a][c]=4;
 							System.out.println("POSE DYNA : "+a+" , "+c);
@@ -1007,9 +1116,16 @@ public class Niveau {
 							stockDyna++;
 						}
 					}
-					r=rf;
+					if(poseArc) {
+						int[] arcPos = rainbows.get(numArcs);
+						if(chemin[arcPos[0]][arcPos[1]]>0) {
+							numArcs+=2;
+							poseArc=false;
+						}
+					}
+					r=posf[0]; c=posf[1];
 					loop=0;
-					if (r==ran && ran!=0 && ran!=11 && passVaches.getOccurences(ran+s, c)==null) {
+					if (r==ran && c==cf && ran!=0 && ran!=11 && passVaches.getOccurences(ran+s, c)==null) {
 						carteOrigin[ran+s][c]=1+2*chemin[ran+s][c]; // On ajoute le menhir d'arrêt, ou bien la fleur magique d'arrêt. (NB : menhirs codés par "1" dans la carte, fleurs par "2", fleurs magiques par "3")
 					}
 				}
@@ -1017,51 +1133,53 @@ public class Niveau {
 				if (bord<2) {
 					ran=bord*19;
 					s=2*bord-1;
-					valideCheminRBool(r,c,r,ran,s,w);
-					if(w[0]!=-1) cf=valideCheminR(r,c,r,ran,s,w[0]);
-					else cf=c;
+					valideCheminRBool(r,c,rf,ran,s,w);
+					if(w[0]!=-1) posf=valideCheminR(r,c,rf,ran,s,w[0]);
+					else posf=new int[] {r,c};
 				} else {
-					if(!exploseMen) ran=random.nextInt(18)+1;
-					else ran = 1+cote*c+random.nextInt((cote==0)?c-1:18-c);
-					s=Integer.signum(ran-c);
-					if(ran==c || Math.abs(carteOrigin[r][ran+s]-7)==1 || chemin[r][ran+s]>6 || !pVaches && (chemin[r][ran+s]>1 || carteOrigin[r][ran+s]==4) || (ran+s==cd && r==rd))
-						cf=c;
-					else if(chemin[r][ran+s]>1 || carteOrigin[r][ran+s]==4 || passVaches.getOccurences(r, ran+s)!=null || random.nextInt(40-nVaches*3)==0) {
+					if(!poseArc) {
+						if(!exploseMen) ran=random.nextInt(18)+1;
+						else ran = 1+cote*c+random.nextInt((cote==0)?c-1:18-c);
+						s=Integer.signum(ran-c);
+					}
+					if((rf==r && ran==c) || Math.abs(carteOrigin[rf][ran+s]-7)==1 || carteOrigin[rf][ran+s]>=10 || chemin[rf][ran+s]>6 || !pVaches && (chemin[rf][ran+s]>1 || carteOrigin[rf][ran+s]==4) || (ran+s==cd && rf==rd))
+						posf=new int[] {r,c};
+					else if(chemin[rf][ran+s]>1 || carteOrigin[rf][ran+s]==4 || passVaches.getOccurences(rf, ran+s)!=null || random.nextInt(40-nVaches*3)==0) {
 						int tvoy=Math.abs(ran-c)*4/3+2;
 						int frameDeb = ((frame+w[0]+tvoy)/20+1)*20;
 						w[0] += frameDeb-frame-w[0]-tvoy;
 						int wait=w[0];
-						if(valideCheminRBool(r,c,r,ran,s,w)) {
+						if(valideCheminRBool(r,c,rf,ran,s,w)) {
 							int boucles=0;
 							int[] lon={0};
 							list_vache=null;
 							while(list_vache==null && boucles<10) {
-								list_vache = geneVache(r, ran+s, frameDeb+w[0]-wait, lon, r, ran);
+								list_vache = geneVache(rf, ran+s, frameDeb+w[0]-wait, lon, rf, ran);
 								boucles++;
 							}
 							if(list_vache==null)
-								cf=c;
+								posf=new int[] {r,c};
 							else {
-								cf=valideCheminR(r,c,r,ran,s,w[0]);
+								posf=valideCheminR(r,c,rf,ran,s,w[0]);
 								frame--;
 								addAnimal(list_vache,lon[0],passVaches,vaches,20,18,0);
 							}
 						}
 						else {
 							w[0]=exploseMen?25:0;
-							if(valideCheminRBool(r,c,r,ran,s,w) || w[0]==-1)
-								cf=c;
+							if(valideCheminRBool(r,c,rf,ran,s,w) || w[0]==-1)
+								posf=new int[] {r,c};
 							else
-								cf=valideCheminR(r,c,r,ran,s,w[0]);
+								posf=valideCheminR(r,c,rf,ran,s,w[0]);
 						}
 					}
 					else {
-						valideCheminRBool(r,c,r,ran,s,w);
-						if(w[0]!=-1) cf=valideCheminR(r,c,r,ran,s,w[0]);
-						else cf=c;
+						valideCheminRBool(r,c,rf,ran,s,w);
+						if(w[0]!=-1) posf=valideCheminR(r,c,rf,ran,s,w[0]);
+						else posf=new int[] {r,c};
 					}
 				}
-				if (cf==c) {
+				if (posf[0]==r && posf[1]==c) {
 					k--;
 					loop++;
 				} else {
@@ -1079,8 +1197,8 @@ public class Niveau {
 					if(dropDyna) {
 						int a,cp=0;
 						do {
-							a=Math.min(c, cf)+random.nextInt(Math.abs(cf-c)+1);
-						} while((carteOrigin[r][a]==4 || Math.abs(carteOrigin[r][a]-7)==1) && cp++<15);
+							a=Math.min(c, posf[1])+random.nextInt(Math.abs(posf[1]-c)+1);
+						} while((chemin[r][a]==0 || carteOrigin[r][a]==4 || carteOrigin[r][a]>=10 || Math.abs(carteOrigin[r][a]-7)==1) && cp++<15);
 						if(cp<=15) {
 							carteOrigin[r][a]=4;
 							System.out.println("POSE DYNA : "+r+" , "+a);
@@ -1088,9 +1206,16 @@ public class Niveau {
 							stockDyna++;
 						}
 					}
-					c=cf;
+					if(poseArc) {
+						int[] arcPos = rainbows.get(numArcs);
+						if(chemin[arcPos[0]][arcPos[1]]>0) {
+							numArcs+=2;
+							poseArc=false;
+						}
+					}
+					c=posf[1]; r=posf[0];
 					loop=0;
-					if (c==ran && ran!=0 && ran!=19 && passVaches.getOccurences(r, ran+s)==null) {
+					if (c==ran && r==rf && ran!=0 && ran!=19 && passVaches.getOccurences(r, ran+s)==null) {
 						carteOrigin[r][ran+s]=1+2*chemin[r][ran+s];
 					}
 				}
@@ -1106,6 +1231,7 @@ public class Niveau {
 				}
 			}
 		}
+		passColibri.addOccurence(rd, cd, 0, 0, 75); // Pour éviter de se faire bouffer dans les 3 premières secondes !
 		if(pChats) { // On ajoute des chats si voulu.
 			for(int i=0; i<nCats; i++) {
 				int lcat=random.nextInt(12), ccat=random.nextInt(20);
@@ -1136,34 +1262,31 @@ public class Niveau {
 	 *  @param var intervalle de variation aléaoire de la longueur du chemin
 	 */
 	public void geneNivRand(int lon, int var){
-		Random r = new Random();
-		seed=r.nextLong();
-		//Rseed=2802182352645819218L;
-		//Rseed=6987252967124016974L;
-		//Rseed=-4840068396029713393L;
-		//Rseed=1398584741789184308L;
-		//Rseed=-291123591663780658L;
-		//Rseed=-227713414109816551L;
+		random = new Random();
+		seed=random.nextLong();
 		System.out.println("SEED : "+seed);
-		r.setSeed(seed);
-		int nbDyna=0, nCats=0;
+		random.setSeed(seed);
+		int nbDyna=0, nCats=0, nbArcs=0;
 		if(pDyna)
-			nbDyna = r.nextInt(1+nDyna*2/3);
+			nbDyna = random.nextInt(1+nDyna*2/3);
 		if(pChats)
-			nCats = r.nextInt(1+nChats*2/3);
-		int longueur = lon+r.nextInt(var)+nbDyna*2;
+			nCats = random.nextInt(1+nChats*2/3);
+		if(pArcs)
+			nbArcs = random.nextInt(1+nArcs*2/3);
+		int longueur = lon+random.nextInt(var)+nbDyna*2;
 		frame = 0; frameMem = 0;
 		step = 0.;
 		v_max = 0.75;
 		acc = 0.1;
 		solution = new int[longueur][3]; //Liste des mouvements à effectuer pour résoudre le niveau
-		db_l = r.nextInt(12);
-		db_c = r.nextInt(20); // on tire un emplacement départ
+		db_l = random.nextInt(12);
+		db_c = random.nextInt(20); // on tire un emplacement départ
 		chemin[db_l][db_c]=1;
 		passColibri = new Passages(20);
 		passVaches = new Passages(20);
 		passChats = new Passages(20);
-		if(!geneChemin(longueur,db_l,db_c,nbDyna,nCats)) { // on génère la carte pour une solution en "longueur" coups !
+		rainbows = new SparseArray<int[]>();
+		if(!geneChemin(longueur,db_l,db_c,nbDyna,nCats,nbArcs)) { // on génère la carte pour une solution en "longueur" coups !
 			init();
 			geneNivRand(lon,var);
 		}
