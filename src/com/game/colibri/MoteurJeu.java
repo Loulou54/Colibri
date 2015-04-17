@@ -266,7 +266,7 @@ public class MoteurJeu {
 		double[] c_co = carte.colibri.getPos();
 		double cx=c_co[0],cy=c_co[1];
 		double[] c_va = va.getPos();
-		double vx=c_va[0],vy=c_va[1];
+		double vx=c_va[0],vy=c_va[1]+0.25; // Décalage de la queue de 0.25.
 		if(Math.abs(vx-cx)<0.75 && Math.abs(vy-cy)<0.75) { // teste si colision
 			mort();
 		}

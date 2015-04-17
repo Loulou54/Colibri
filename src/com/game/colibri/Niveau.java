@@ -861,8 +861,10 @@ public class Niveau {
 				return valideCheminCBool(rd,cdd,rf,cf,s,wait);
 			}
 		}
-		if(passVaches.isColidingWith(i, cd, new Occurence(frame2+6,0,4))) // Permet de détecter si la vache va pousser le colibri à l'arrêt.
+		if(passVaches.isColidingWith(i, cd, new Occurence(frame2+6,0,4)) || passVaches.isColidingWith(rd, cdd, new Occurence(frame+wait[0]/2,0,wait[0]/2+1))) { // Permet de détecter si la vache va pousser le colibri à l'arrivée OU si une autre vache va pousser le colibri avant son départ.
 			wait[0]=-1;
+			return false;
+		}
 		return i==rf && cd==cf;
 	}
 	
@@ -908,8 +910,10 @@ public class Niveau {
 				return valideCheminRBool(rdd,cd,rf,cf,s,wait);
 			}
 		}
-		if(passVaches.isColidingWith(rd, i, new Occurence(frame2+6,0,4))) // Permet de détecter si la vache va pousser le colibri à l'arrêt.
+		if(passVaches.isColidingWith(rd, i, new Occurence(frame2+6,0,4)) || passVaches.isColidingWith(rdd, cd, new Occurence(frame+wait[0]/2,0,wait[0]/2+1))) { // Permet de détecter si la vache va pousser le colibri à l'arrivée OU si une autre vache va pousser le colibri avant son départ.
 			wait[0]=-1;
+			return false;
+		}
 		return rd==rf && i==cf;
 	}
 	
@@ -967,8 +971,11 @@ public class Niveau {
 			rf=r; cf=c;
 			if(pDyna && random.nextInt(n-4)<nbDyna && k<=n-4) // Détermine si l'on va poser une dynamite à ce tour.
 				dropDyna = true;
-			if(exploseMen || stockDyna!=0 && k<=n-3 && random.nextInt(n-k-2)<stockDyna) { // On veut exploser un menhir
-				if(exploseMen) carteOrigin[getCoord(r,iiMen,11)][getCoord(c,1-iiMen,19)]-=5; // Dans le cas où le cas précédent n'a pas fonctionné.
+			if(exploseMen) {
+				carteOrigin[getCoord(r,iiMen,11)][getCoord(c,1-iiMen,19)]-=5; // Dans le cas où le cas précédent n'a pas fonctionné.
+				exploseMen=false;
+			}
+			if(stockDyna!=0 && k<=n-3 && random.nextInt(n-k-2)<stockDyna) { // On veut exploser un menhir
 				LinkedList<Integer> menh = new LinkedList<Integer>(); // Recueille les indices ayant des menhirs.
 				for(int ii=-1; ii<=2; ii++) {
 					if(carteOrigin[getCoord(r,ii,11)][getCoord(c,1-ii,19)]%2==1)
@@ -1264,6 +1271,11 @@ public class Niveau {
 	public void geneNivRand(int lon, int var){
 		random = new Random();
 		seed=random.nextLong();
+		//seed=-5399998471255139353L; // Moteur jeu : arrêt vache après arc.
+		//seed=-282221685533103076L; // Moteur jeu : collision bord de vache.
+		//Rseed=8997004124519835682L; // Déplacement à cheval sur deux cases : bouffé par un chat.
+		//Rseed=8050878243935949672L; // Poussette d'une vache lors d'une attente.
+		//Rseed=2431528410913644445L;
 		System.out.println("SEED : "+seed);
 		random.setSeed(seed);
 		int nbDyna=0, nCats=0, nbArcs=0;
