@@ -1271,8 +1271,9 @@ public class Niveau {
 	public void geneNivRand(int lon, int var){
 		random = new Random();
 		seed=random.nextLong();
-		//seed=-5399998471255139353L; // Moteur jeu : arrêt vache après arc.
-		//seed=-282221685533103076L; // Moteur jeu : collision bord de vache.
+		//Rseed=-1144347916053986903L; // Moteur jeu : arrêt par une vache sur une fleur magique : meurt.
+		//Rseed=-5399998471255139353L; // Moteur jeu : arrêt vache après arc.
+		//Rseed=-282221685533103076L; // Moteur jeu : collision bord de vache.
 		//Rseed=8997004124519835682L; // Déplacement à cheval sur deux cases : bouffé par un chat.
 		//Rseed=8050878243935949672L; // Poussette d'une vache lors d'une attente.
 		//Rseed=2431528410913644445L;

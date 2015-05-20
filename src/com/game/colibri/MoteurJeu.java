@@ -207,10 +207,15 @@ public class MoteurJeu {
 		double[] c_co = carte.colibri.getPos();
 		double cx=c_co[0],cy=c_co[1];
 		double[] c_va = va.getPos();
-		double vx=c_va[0],vy=c_va[1];
-		if(Math.abs(vx-cx)<1 && Math.abs(vy-cy)<1) { // teste si colision
+		double vx0=c_va[0],vy0=c_va[1];
+		if(Math.abs(vx0-cx)<1 && Math.abs(vy0-cy)<1) { // teste si colision
+			double vx = vx0+va.mx*va.step, vy = vy0+va.my*va.step; // On calcule en fonction de la prochaine position de la vache.
+			if(Math.min(Math.abs(vx-cx) , Math.abs(vy-cy)) > 0.94)
+				return;
 			// Choisit de quel côté de la vache il faut replacer le colibri
 			int l=carte.colibri.getRow(), c=carte.colibri.getCol();
+			if(niv.carte[l][c]>=10 && dejaPasse!=niv.carte[l][c] && !(l==va.getRow() && c==va.getCol())) // Pour éviter de se faire bloquer AVANT de passer dans un arc.
+				return;
 			if(carte.n_dyna>0) removeMenhirRouge(lastMove); // On enlève le menhir rouge mais on ne rafraîchit pas.
 			boolean plutotHoriz=1-Math.abs(vx-cx) < 1-Math.abs(vy-cy);
 			boolean clairementSurHoriz=plutotHoriz && 0.75 < Math.abs(vx-cx);
@@ -218,30 +223,30 @@ public class MoteurJeu {
 			boolean vaVite=carte.colibri.step>2*carte.colibri.v_max/3;
 			if(!vaVite && plutotHoriz || vaVite && (clairementSurHoriz || carte.colibri.mx!=0) && !clairementSurVert) { // sur l'horizontale
 				if(cx<vx) {
-					if(c-1<0 || niv.carte[l][c-1]==menhir) cx=Math.max(vx-1,c); // Détecte si le colibri est bloqué par un menhir ou un bord.
-					else cx=vx-1;
+					if(c-1<0 || niv.carte[l][c-1]==menhir && carte.colibri.mx<1) cx=Math.max(vx0-1,c); // Détecte si le colibri est bloqué par un menhir ou un bord.
+					else cx=vx0-1;
 					carte.colibri.mx=Math.min(carte.colibri.mx, 0); // arrête le mouvement du colibri s'il est vers la vache
 				}
 				else {
-					if(c+1>=COL || niv.carte[l][c+1]==menhir) cx=Math.min(vx+1,c);
-					else cx=vx+1;
+					if(c+1>=COL || niv.carte[l][c+1]==menhir && carte.colibri.mx>-1) cx=Math.min(vx0+1,c);
+					else cx=vx0+1;
 					carte.colibri.mx=Math.max(carte.colibri.mx, 0);
 				}
 				carte.colibri.setPos(cx , cy);
-				if(Math.abs(vx-cx)<0.5) mort();
+				if(Math.abs(vx0-cx)<0.5) mort();
 			} else { // sur la verticale
 				if(cy<vy) {
-					if(l-1<0 || niv.carte[l-1][c]==menhir) cy=Math.max(vy-1,l);
-					else cy=vy-1;
+					if(l-1<0 || niv.carte[l-1][c]==menhir && carte.colibri.my<1) cy=Math.max(vy0-1,l);
+					else cy=vy0-1;
 					carte.colibri.my=Math.min(carte.colibri.my, 0);
 				}
 				else {
-					if(l+1>=LIG || niv.carte[l+1][c]==menhir) cy=Math.min(vy+1,l);
-					else cy=vy+1;
+					if(l+1>=LIG || niv.carte[l+1][c]==menhir && carte.colibri.my>-1) cy=Math.min(vy0+1,l);
+					else cy=vy0+1;
 					carte.colibri.my=Math.max(carte.colibri.my, 0);
 				}
 				carte.colibri.setPos(cx , cy);
-				if(Math.abs(vy-cy)<0.5) mort();
+				if(Math.abs(vy0-cy)<0.5) mort();
 			}
 			ramasser(); // On ramasse l'item potentiel
 			int nl=carte.colibri.getRow(), nc=carte.colibri.getCol();
