@@ -271,6 +271,7 @@ public class MenuPrinc extends Activity {
 		avancement=pref.getInt("niveau", 1);
 		experience=pref.getInt("exp", 0);
 		n_niv=avancement;
+		ParamAleat.loadParams(pref);
 		Log.i("Avancement :","Niv "+avancement);
 		Log.i("Experience :","Score :"+experience);
 	}
@@ -290,7 +291,7 @@ public class MenuPrinc extends Activity {
 	 */
 	public void continuer(View v) {
 		opt_reglages.setVisibility(View.INVISIBLE);
-		Jeu.opt.putBoolean("isRandom", false);
+		Jeu.opt.putInt("mode", Niveau.CAMPAGNE);
 		Jeu.opt.putInt("n_niv", Math.min(avancement,Jeu.NIV_MAX));
 		startActivity(new Intent(this, Jeu.class));
 		debut = new GregorianCalendar();
@@ -419,29 +420,31 @@ public class MenuPrinc extends Activity {
 	}
 	
 	public void launchNiv(View v) {
-		Jeu.opt.putBoolean("isRandom", false);
+		Jeu.opt.putInt("mode", Niveau.CAMPAGNE);
 		Jeu.opt.putInt("n_niv", n_niv);
 		startActivity(new Intent(this, Jeu.class));
 		debut = new GregorianCalendar();
 	}
 	
+	public void paramAleat(View v) {
+		ParamAleat pa = new ParamAleat(this,avancement);
+		pa.show(editor); // Si appui sur "OK", lance un niveau aléatoire en mode PERSO.
+	}
+	
 	public void facile(View v) {
-		launchAleat(8,7);
+		launchAleat(Niveau.FACILE);
 	}
 	
 	public void moyen(View v) {
-		launchAleat(15,8);
+		launchAleat(Niveau.MOYEN);
 	}
 
 	public void difficile(View v) {
-		launchAleat(28,11);
+		launchAleat(Niveau.DIFFICILE);
 	}
 	
-	public void launchAleat(int lon, int var) {
-		Jeu.opt = new Bundle();
-		Jeu.opt.putBoolean("isRandom", true);
-		Jeu.opt.putInt("long", lon);
-		Jeu.opt.putInt("vari", var);
+	public void launchAleat(int mode) {
+		Jeu.opt.putInt("mode", mode);
 		startActivity(new Intent(this, Jeu.class));
 		debut = new GregorianCalendar();
 	}

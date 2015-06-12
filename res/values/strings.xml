@@ -33,5 +33,16 @@
 	<string name="defis_joues">Challenges</string>
 	<string name="defis_gagnés">Wins</string>
 	<string name="etat">Play</string>
+	<string name="perso">Custom</string>
+	<string name="paramAleat">Random Map - Parameters</string>
+	<string name="defaut">Default</string>
+	<string name="vaches">Cows</string>
+	<string name="dynamites">Dynamites</string>
+	<string name="chats">Cats</string>
+	<string name="arcs">Rainbows</string>
+	<string name="progression">Campaign progression:</string>
+	<string name="longueur">Length:</string>
+	<string name="base_niveau">Menhirs pattern</string>
+	<string name="param_descript">\u0009The length as well as the number of additional elements increases the difficulty but also the amount of experience earned!</string>
 	
 </resources>

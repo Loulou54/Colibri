@@ -33,5 +33,16 @@
 	<string name="defis_joues">Défis</string>
 	<string name="defis_gagnés">Victoires</string>
 	<string name="etat">Jouer</string>
+	<string name="perso">Personnalisé</string>
+	<string name="paramAleat">Carte Aléatoire - Paramètres</string>
+	<string name="defaut">Par défaut</string>
+	<string name="vaches">Vaches</string>
+	<string name="dynamites">Dynamites</string>
+	<string name="chats">Chats</string>
+	<string name="arcs">Arc-en-ciels</string>
+	<string name="progression">Progression campagne :</string>
+	<string name="longueur">Longueur :</string>
+	<string name="base_niveau">Base en menhirs</string>
+	<string name="param_descript">\u0009La longueur ainsi que le nombre d\'éléments additionnels augmentent la difficulté mais aussi l\'expérience à gagner !</string>
 	
 </resources>

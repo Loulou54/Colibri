@@ -17,11 +17,18 @@ import android.util.SparseArray;
  * déplacement des animaux mouvants (chats et vaches) et solution (optionnelle)
  */
 public class Niveau {
-
+	
+	public final static int CAMPAGNE=0, FACILE=1, MOYEN=2, DIFFICILE=3, PERSO=4;
+	
 	/*
 	 * Définit s'il s'agit d'un niveau aléatoire ou non.
 	 */
 	public boolean isRandom;
+	
+	/*
+	 * L'expérience acquise si on résout le niveau.
+	 */
+	public int experience;
 	
 	/*
 	 * Carte contenant les informations statiques du niveau en
@@ -90,13 +97,29 @@ public class Niveau {
 	
 	/**
 	 * Constructeur d'un niveau aléatoire de paramètres donnés.
-	 * @param lon la longueur minimale du niveau
-	 * @param var la variation aléatoire supplémentaire de longueur
+	 * @param mode le mode de niveau aléatoire (cf: constantes de classe en static)
 	 */
-	public Niveau(int lon, int var) {
+	public Niveau(int mode) {
 		isRandom=true;
 		init();
-		this.geneNivRand(lon, var);
+		int lon, lar, base;
+		switch(mode) {
+		case FACILE:
+			lon=8; lar=5; nVaches=1; nDyna=1; nChats=1; nArcs=1;
+			break;
+		case MOYEN:
+			lon=12; lar=8; nVaches=3; nDyna=3; nChats=2; nArcs=2;
+			break;
+		case DIFFICILE:
+			lon=18; lar=12; nVaches=4; nDyna=4; nChats=3; nArcs=3;
+			break;
+		default:
+			lon = ParamAleat.param[0];
+			lar = lon/2;
+			importParam();
+		}
+		base = 1;
+		this.geneNivRand(lon, lar, base);
 		replay();
 	}
 	
@@ -482,9 +505,15 @@ public class Niveau {
 	public long seed=0;
 	private Random random;
 	private double step,v_max,acc;
-	public int nVaches=5, nDyna=5, nChats=5, nArcs=5; // Paramètres de quantité
-	public boolean pVaches=true, pDyna=true, pChats=true, pArcs=true; // Paramètres de présence
+	public int nVaches=3, nDyna=3, nChats=2, nArcs=2; // Paramètres de quantité, dans [0,6]
 	private SparseArray<int[]> rainbows;
+	
+	private void importParam() {
+		nVaches = Math.max(ParamAleat.param[1],0);
+		nDyna = Math.max(ParamAleat.param[2],0);
+		nChats = Math.max(ParamAleat.param[3],0);
+		nArcs = Math.max(ParamAleat.param[4],0);
+	}
 	
 	private void fillPosAleat(int dist, LinkedList<Integer> pos, int sig) { // Génération des possibilités.
 		int tot = 0;
@@ -944,14 +973,54 @@ public class Niveau {
 	}
 	
 	/**
-	 * 
-	 * @param n
-	 * @param r
-	 * @param c
-	 * @param n_fleur
-	 * @param mvt
+	 * Calcule le temps de voyage (en frames) pour aller de coVarDep à coVarFin, selon coFixe(Dep/Fin).
+	 * Si on passe dans une paire d'arc-en-ciel, numArcs, direc et s doivent être spécifiés. Sinon, numArcs=0.
+	 * @param coVarDep
+	 * @param coFixeDep
+	 * @param coVarFin
+	 * @param coFixeFin
+	 * @param numArcs
+	 * @param direc
+	 * @param s
+	 * @return
 	 */
-	public boolean geneChemin(int n,int r,int c, int nbDyna, int nCats, int nbArcs){
+	private int tempsVoyage(int coVarDep, int coFixeDep, int coVarFin, int coFixeFin, int numArcs, int direc, int s) {
+		if(numArcs!=0) {
+			int[] arcPos = rainbows.get(numArcs);
+			int arc1, arc2;
+			if(coFixeDep==coFixeFin) {
+				if(Math.signum(arcPos[direc]-coVarDep)==s && (Math.signum(arcPos[direc+2]-coVarDep)!=s || Math.abs(arcPos[direc]-coVarDep)<Math.abs(arcPos[direc+2]-coVarDep))) {
+					arc1 = arcPos[direc];
+					arc2 = arcPos[direc+2];
+				} else {
+					arc2 = arcPos[direc];
+					arc1 = arcPos[direc+2];
+				}
+			} else if(coFixeDep==arcPos[1-direc]) {
+				arc1 = arcPos[direc];
+				arc2 = arcPos[direc+2];
+			} else {
+				arc2 = arcPos[direc];
+				arc1 = arcPos[direc+2];
+			}
+			return (Math.abs(coVarFin-arc2)+Math.abs(arc1-coVarDep))*4/3+2;
+		} else {
+			return Math.abs(coVarFin-coVarDep)*4/3+2;
+		}
+	}
+	
+	/**
+	 * Fonction principale de génération du niveau aléatoire.
+	 * @param n le nombre de mouvements
+	 * @param r la ligne de départ
+	 * @param c la colonne de départ
+	 * @param nbVaches le nombre de vaches
+	 * @param nbDyna le nombre de dynamites
+	 * @param nCats le nombre de chats
+	 * @param nbArcs le nombre d'arc-en-ciels
+	 * @return true si la génération a réussi ; false sinon
+	 */
+	public boolean geneChemin(int n,int r,int c, int nbVaches, int nbDyna, int nCats, int nbArcs){
 		int rd=r, cd=c;
 		int direc, bord, ran=0, s=1;
 		int rf,cf;
@@ -969,8 +1038,10 @@ public class Niveau {
 			bord=random.nextInt(10); // Il y a une probabilité de 1/5 d'aller jusqu'à la cloture du niveau. Cela permet de ne pas trop confiner le chemin au milieu de la carte, et de donner davantage de possibilités de résolution au joueur...
 			w[0]=0; frameDepart=frame;
 			rf=r; cf=c;
-			if(pDyna && random.nextInt(n-4)<nbDyna && k<=n-4) // Détermine si l'on va poser une dynamite à ce tour.
+			if(nbDyna>0 && k<n-4 && random.nextInt(n-k-4)<nbDyna) { // Détermine si l'on va poser une dynamite à ce tour.
 				dropDyna = true;
+				nbDyna--;
+			}
 			if(exploseMen) {
 				carteOrigin[getCoord(r,iiMen,11)][getCoord(c,1-iiMen,19)]-=5; // Dans le cas où le cas précédent n'a pas fonctionné.
 				exploseMen=false;
@@ -994,11 +1065,13 @@ public class Niveau {
 					System.out.println("Explo : "+getCoord(r,ii,11)+" , "+getCoord(c,1-ii,19));
 				}
 			}
-			if(poseArc || pArcs && random.nextInt(n-4)<nbArcs) { // On veut poser une paire d'arcs-en-ciel
+			if(poseArc || nbArcs>0 && k<n-4 && random.nextInt(n-k-4)<nbArcs) { // On veut poser une paire d'arcs-en-ciel
 				if(poseArc) { // Dans le cas où le cas précédent n'a pas fonctionné.
 					int[] arcPos = rainbows.get(numArcs);
 					carteOrigin[arcPos[0]][arcPos[1]]=0;
 					carteOrigin[arcPos[2]][arcPos[3]]=0;
+				} else {
+					nbArcs--;
 				}
 				int dir,rr,cc,nloop=0;
 				int[] wa={0};
@@ -1058,35 +1131,41 @@ public class Niveau {
 						else ran = 1+cote*r+random.nextInt((cote==0)?r-1:10-r); // On tire une position du côté où le colibri vient de casser le menhir.
 						s=Integer.signum(ran-r); // sens du déplacement selon la ligne s=1 ou -1
 					}
-					if((ran==r && cf==c) || Math.abs(carteOrigin[ran+s][cf]-7)==1 || carteOrigin[ran+s][cf]>=10 || chemin[ran+s][cf]>6 || !pVaches && (chemin[ran+s][cf]>1 || carteOrigin[ran+s][cf]==4) || (ran+s==rd && cf==cd)) // il faut en particulier vérifier que l'emplacement du menhir d'arrêt (aux coord (ran+s,c)) ne bloque pas le chemin précédemment généré ! Pour cela : si chemin[ran+s][c]==0 c'est bon; si ==1 on met une fleur magique, car elle deviendra menhir après le passage; si >=2 (i.e. le colibri est déjà passé plus de 2 fois sur cette case) ce n'est pas possible, il faut choisir un autre emplacement !
+					if((ran==r && cf==c) || Math.abs(carteOrigin[ran+s][cf]-7)==1 || carteOrigin[ran+s][cf]>=10 || chemin[ran+s][cf]>6 || (ran+s==rd && cf==cd)) // il faut en particulier vérifier que l'emplacement du menhir d'arrêt (aux coord (ran+s,c)) ne bloque pas le chemin précédemment généré ! Pour cela : si chemin[ran+s][c]==0 c'est bon; si ==1 on met une fleur magique, car elle deviendra menhir après le passage; si >=2 (i.e. le colibri est déjà passé plus de 2 fois sur cette case) ce n'est pas possible, il faut choisir un autre emplacement !
 						posf=new int[] {r,c}; // Destination (ran,c) non valide
-					else if(chemin[ran+s][cf]>1 || carteOrigin[ran+s][cf]==4 || passVaches.getOccurences(ran+s, cf)!=null || random.nextInt(40-nVaches*3)==0) { // Ajout d'une vache !
-						int tvoy=Math.abs(ran-r)*4/3+2;
-						int frameDeb = ((frame+w[0]+tvoy)/20+1)*20;
-						w[0] += frameDeb-frame-w[0]-tvoy;
-						int wait=w[0];
-						if(valideCheminCBool(r,c,ran,cf,s,w)) { // On peut accéder à la destination, on va mettre un vache.
-							int boucles=0;
-							int[] lon={0};
-							list_vache=null;
-							while(list_vache==null && boucles<10) {
-								list_vache = geneVache(ran+s, cf, frameDeb+w[0]-wait, lon, ran, cf);
-								boucles++;
+					else if(chemin[ran+s][cf]>1 || carteOrigin[ran+s][cf]==4 || passVaches.getOccurences(ran+s, cf)!=null || nbVaches>0 && random.nextInt(n-k)<nbVaches) { // Ajout d'une vache !
+						if(nbVaches>0) {
+							nbVaches--;
+							//int tvoy=Math.abs(ran-r)*4/3+2;
+							int tvoy=tempsVoyage(r,c,ran,cf,poseArc ? numArcs : 0,direc,s);
+							int frameDeb = ((frame+w[0]+tvoy)/20+1)*20;
+							w[0] += frameDeb-frame-w[0]-tvoy;
+							int wait=w[0];
+							if(valideCheminCBool(r,c,ran,cf,s,w)) { // On peut accéder à la destination, on va mettre un vache.
+								int boucles=0;
+								int[] lon={0};
+								list_vache=null;
+								while(list_vache==null && boucles<10) {
+									list_vache = geneVache(ran+s, cf, frameDeb+w[0]-wait, lon, ran, cf);
+									boucles++;
+								}
+								if(list_vache==null)
+									posf=new int[] {r,c};
+								else {
+									posf=valideCheminC(r,c,ran,cf,s,w[0]);
+									frame--; // Rectification, la détection d'une vache se fait en une frame ou deux de moins qu'un menhir..
+									addAnimal(list_vache,lon[0],passVaches,vaches,20,18,0);
+								}
 							}
-							if(list_vache==null)
-								posf=new int[] {r,c};
-							else {
-								posf=valideCheminC(r,c,ran,cf,s,w[0]);
-								frame--; // Rectification, la détection d'une vache se fait en une frame ou deux de moins qu'un menhir..
-								addAnimal(list_vache,lon[0],passVaches,vaches,20,18,0);
+							else { // On s'arrête avant sur un obstacle.
+								w[0]=exploseMen?25:0;
+								if(valideCheminCBool(r,c,ran,cf,s,w) || w[0]==-1)
+									posf=new int[] {r,c};
+								else
+									posf=valideCheminC(r,c,ran,cf,s,w[0]);
 							}
-						}
-						else { // On s'arrête avant sur un obstacle.
-							w[0]=exploseMen?25:0;
-							if(valideCheminCBool(r,c,ran,cf,s,w) || w[0]==-1)
-								posf=new int[] {r,c};
-							else
-								posf=valideCheminC(r,c,ran,cf,s,w[0]);
+						} else { // pVaches==false
+							posf=new int[] {r,c};
 						}
 					}
 					else {
@@ -1149,35 +1228,41 @@ public class Niveau {
 						else ran = 1+cote*c+random.nextInt((cote==0)?c-1:18-c);
 						s=Integer.signum(ran-c);
 					}
-					if((rf==r && ran==c) || Math.abs(carteOrigin[rf][ran+s]-7)==1 || carteOrigin[rf][ran+s]>=10 || chemin[rf][ran+s]>6 || !pVaches && (chemin[rf][ran+s]>1 || carteOrigin[rf][ran+s]==4) || (ran+s==cd && rf==rd))
+					if((rf==r && ran==c) || Math.abs(carteOrigin[rf][ran+s]-7)==1 || carteOrigin[rf][ran+s]>=10 || chemin[rf][ran+s]>6 || (ran+s==cd && rf==rd))
 						posf=new int[] {r,c};
-					else if(chemin[rf][ran+s]>1 || carteOrigin[rf][ran+s]==4 || passVaches.getOccurences(rf, ran+s)!=null || random.nextInt(40-nVaches*3)==0) {
-						int tvoy=Math.abs(ran-c)*4/3+2;
-						int frameDeb = ((frame+w[0]+tvoy)/20+1)*20;
-						w[0] += frameDeb-frame-w[0]-tvoy;
-						int wait=w[0];
-						if(valideCheminRBool(r,c,rf,ran,s,w)) {
-							int boucles=0;
-							int[] lon={0};
-							list_vache=null;
-							while(list_vache==null && boucles<10) {
-								list_vache = geneVache(rf, ran+s, frameDeb+w[0]-wait, lon, rf, ran);
-								boucles++;
+					else if(chemin[rf][ran+s]>1 || carteOrigin[rf][ran+s]==4 || passVaches.getOccurences(rf, ran+s)!=null || nbVaches>0 && random.nextInt(n-k)<nbVaches) {
+						if(nbVaches>0) {
+							nbVaches--;
+							//int tvoy=Math.abs(ran-c)*4/3+2;
+							int tvoy=tempsVoyage(c,r,ran,rf,poseArc ? numArcs : 0,direc,s);
+							int frameDeb = ((frame+w[0]+tvoy)/20+1)*20;
+							w[0] += frameDeb-frame-w[0]-tvoy;
+							int wait=w[0];
+							if(valideCheminRBool(r,c,rf,ran,s,w)) {
+								int boucles=0;
+								int[] lon={0};
+								list_vache=null;
+								while(list_vache==null && boucles<10) {
+									list_vache = geneVache(rf, ran+s, frameDeb+w[0]-wait, lon, rf, ran);
+									boucles++;
+								}
+								if(list_vache==null)
+									posf=new int[] {r,c};
+								else {
+									posf=valideCheminR(r,c,rf,ran,s,w[0]);
+									frame--;
+									addAnimal(list_vache,lon[0],passVaches,vaches,20,18,0);
+								}
 							}
-							if(list_vache==null)
-								posf=new int[] {r,c};
 							else {
-								posf=valideCheminR(r,c,rf,ran,s,w[0]);
-								frame--;
-								addAnimal(list_vache,lon[0],passVaches,vaches,20,18,0);
+								w[0]=exploseMen?25:0;
+								if(valideCheminRBool(r,c,rf,ran,s,w) || w[0]==-1)
+									posf=new int[] {r,c};
+								else
+									posf=valideCheminR(r,c,rf,ran,s,w[0]);
 							}
-						}
-						else {
-							w[0]=exploseMen?25:0;
-							if(valideCheminRBool(r,c,rf,ran,s,w) || w[0]==-1)
-								posf=new int[] {r,c};
-							else
-								posf=valideCheminR(r,c,rf,ran,s,w[0]);
+						} else {
+							posf=new int[] {r,c};
 						}
 					}
 					else {
@@ -1230,7 +1315,7 @@ public class Niveau {
 		}
 		if(loop!=0)
 			return false;
-		if(nbDyna!=0) { // On change les menhirs détruits (6) ou (8) en menhirs (1) ou fleurs magiques (3)
+		if(nDyna!=0) { // On change les menhirs détruits (6) ou (8) en menhirs (1) ou fleurs magiques (3)
 			for(int a=0; a<12; a++) {
 				for(int b=0; b<20; b++) {
 					if(Math.abs(carteOrigin[a][b]-7)==1)
@@ -1239,7 +1324,7 @@ public class Niveau {
 			}
 		}
 		passColibri.addOccurence(rd, cd, 0, 0, 75); // Pour éviter de se faire bouffer dans les 3 premières secondes !
-		if(pChats) { // On ajoute des chats si voulu.
+		if(nChats!=0) { // On ajoute des chats si voulu.
 			for(int i=0; i<nCats; i++) {
 				int lcat=random.nextInt(12), ccat=random.nextInt(20);
 				while(carteOrigin[lcat][ccat]%2==1) {
@@ -1267,8 +1352,9 @@ public class Niveau {
 	 * Génère un niveau aléatoire ! La longueur de la solution du niveau sera : lon+rand[0:var].
 	 *  @param lon longueur minimale de la solution générée
 	 *  @param var intervalle de variation aléaoire de la longueur du chemin
+	 *  @param base indice indiquant si l'on utilise le générateur de base en menhirs
 	 */
-	public void geneNivRand(int lon, int var){
+	public void geneNivRand(int lon, int var, int base){
 		random = new Random();
 		seed=random.nextLong();
 		//Rseed=-1144347916053986903L; // Moteur jeu : arrêt par une vache sur une fleur magique : meurt.
@@ -1277,15 +1363,14 @@ public class Niveau {
 		//Rseed=8997004124519835682L; // Déplacement à cheval sur deux cases : bouffé par un chat.
 		//Rseed=8050878243935949672L; // Poussette d'une vache lors d'une attente.
 		//Rseed=2431528410913644445L;
+		//Rseed = -660314827448092767L; // (Intermédiaire) Si on pose un arc en même temps qu'une vache, prendre en compte tout le trajet.
 		System.out.println("SEED : "+seed);
 		random.setSeed(seed);
-		int nbDyna=0, nCats=0, nbArcs=0;
-		if(pDyna)
-			nbDyna = random.nextInt(1+nDyna*2/3);
-		if(pChats)
-			nCats = random.nextInt(1+nChats*2/3);
-		if(pArcs)
-			nbArcs = random.nextInt(1+nArcs*2/3);
+		int nbVaches, nbDyna, nCats, nbArcs;
+		nbVaches = random.nextInt(1+nVaches);
+		nbDyna = random.nextInt(1+nDyna);
+		nCats = random.nextInt(1+nChats);
+		nbArcs = random.nextInt(1+nArcs);
 		int longueur = lon+random.nextInt(var)+nbDyna*2;
 		frame = 0; frameMem = 0;
 		step = 0.;
@@ -1299,10 +1384,11 @@ public class Niveau {
 		passVaches = new Passages(20);
 		passChats = new Passages(20);
 		rainbows = new SparseArray<int[]>();
-		if(!geneChemin(longueur,db_l,db_c,nbDyna,nCats,nbArcs)) { // on génère la carte pour une solution en "longueur" coups !
+		if(!geneChemin(longueur,db_l,db_c,nbVaches,nbDyna,nCats,nbArcs)) { // on génère la carte pour une solution en "longueur" coups !
 			init();
-			geneNivRand(lon,var);
+			geneNivRand(lon,var,base);
 		}
+		experience = solution.length*(10+solution.length/4)+vaches.size()*20+nbDyna*15+chats.size()*40+nbArcs*30;
 	}
 
 }

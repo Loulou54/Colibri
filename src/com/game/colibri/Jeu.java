@@ -152,11 +152,11 @@ public class Jeu extends Activity {
 				String tps2=multi.temps2/1000+"."+(multi.temps2%1000)/10;
 				int exp1,exp2;
 				if(multi.temps1 > multi.temps2) {
-					exp1=play.niv.solution.length*5;
-					exp2=play.niv.solution.length*20;
+					exp1=play.niv.experience/2;
+					exp2=play.niv.experience*2;
 				} else {
-					exp1=play.niv.solution.length*20;
-					exp2=play.niv.solution.length*5;
+					exp1=play.niv.experience*2;
+					exp2=play.niv.experience/2;
 				}
 				multi.finDefi(exp1,exp2);
 				txt.setText(getString(R.string.temps)+" : "+tps1+"  vs  "+tps2
@@ -168,14 +168,14 @@ public class Jeu extends Activity {
 		else {
 			int exp=0;
 			if(!solUsed) {
-				if(opt.getBoolean("isRandom")) {
-					exp=100+play.niv.solution.length*10;
+				if(opt.getInt("mode",0)>0) {
+					exp=play.niv.experience;
 				} else {
 					if(n_niv==menu.avancement) {
 						menu.avancement++;
-						exp=100+n_niv*40;
+						exp=n_niv*(50+n_niv/4);
 					} else
-						exp=n_niv*10;
+						exp=n_niv*(10+n_niv/8);
 				}
 				menu.experience+=exp;
 				menu.saveData(); // On sauvegarde la progression.
@@ -241,8 +241,8 @@ public class Jeu extends Activity {
 		if(replay) {
 			niv.replay();
 		} else {
-			if(opt.getBoolean("isRandom")) {
-				niv = new Niveau(opt.getInt("long"),opt.getInt("vari"));
+			if(opt.getInt("mode", 0)>0) {
+				niv = new Niveau(opt.getInt("mode"));
 			} else {
 				try { // On ouvre le Niveau index_niv.
 					niv = new Niveau(this.getAssets().open("niveaux/niveau"+n_niv+".txt"));
@@ -253,7 +253,7 @@ public class Jeu extends Activity {
 		}
 		solUsed=false;
 		Button so=(Button) findViewById(R.id.but4);
-		if(opt.getBoolean("isRandom") && multi==null) { // Pour niveaux : niv.solution!=null && n_niv<menu.avancement
+		if(opt.getInt("mode", 0)>0 && multi==null) { // Pour niveaux : niv.solution!=null && n_niv<menu.avancement
 			so.setVisibility(View.VISIBLE);
 		} else {
 			so.setVisibility(View.INVISIBLE);
@@ -304,7 +304,7 @@ public class Jeu extends Activity {
 			quitter(v);
 			return;
 		}
-		if(!opt.getBoolean("isRandom")) n_niv++;
+		if(opt.getInt("mode", 0)==Niveau.CAMPAGNE) n_niv++;
 		launch_niv(false);
 	}
 	

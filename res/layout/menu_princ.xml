@@ -52,8 +52,9 @@
         android:id="@+id/opt_aleat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/bout2"
-        android:layout_below="@+id/bout2"
+        android:layout_alignLeft="@+id/bout1"
+        android:layout_below="@+id/bout1"
+        android:layout_marginTop="10dp"
         android:orientation="vertical"
         android:visibility="invisible" >
 	    <Button
@@ -91,6 +92,18 @@
 	        android:text="@string/dif"
 	        android:textColor="@android:color/white"
 	        android:onClick="difficile"
+	        android:textSize="14sp" />
+	    <Button
+	        android:id="@+id/perso"
+	        android:layout_width="match_parent"
+        	android:layout_height="fill_parent"
+        	android:layout_weight="1"
+	        android:layout_marginTop="6dp"
+	        android:background="@drawable/boutons2"
+	        android:gravity="center"
+	        android:text="@string/perso"
+	        android:textColor="@android:color/white"
+	        android:onClick="paramAleat"
 	        android:textSize="14sp" />
 	</LinearLayout>
     

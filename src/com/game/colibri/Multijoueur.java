@@ -1,6 +1,7 @@
 package com.game.colibri;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -73,7 +74,7 @@ public class Multijoueur extends Activity {
 		Jeu.multi=this;
 		temps1=0;
 		temps2=0;
-		menu.launchAleat(8,26);
+		menu.launchAleat((new Random()).nextInt(3)+1);
 	}
 	
 	public void finDefi(int exp1, int exp2) {
