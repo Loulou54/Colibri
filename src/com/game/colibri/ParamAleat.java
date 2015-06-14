@@ -60,7 +60,9 @@ public class ParamAleat {
 		final SeekBar sb = (SeekBar) parent.findViewById(R.id.long_seekbar);
 		final CheckBox cb = (CheckBox) parent.findViewById(R.id.base_checkbox);
 		sb.setProgress(param[0]-5);
+		cb.setChecked(param[5]==1);
 		tv.setText(menu.getString(R.string.longueur)+" "+(param[0]+param[0]/4)+" ± "+(param[0]/4));
+		tp.updateExp(parent);
 		sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {}
@@ -147,6 +149,9 @@ public class ParamAleat {
 			} else {
 				CheckBox cb = (CheckBox) elem.findViewById(R.id.checkBoxParam);
 				SeekBar sb = (SeekBar) elem.findViewById(R.id.seekBarParam);
+				cb.setChecked(param[i]>0);
+				sb.setEnabled(param[i]>0);
+				sb.setProgress(Math.abs(param[i])-1);
 				cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 					@Override
 					public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -166,9 +171,6 @@ public class ParamAleat {
 						tp.updateExp(parent);
 					}
 				});
-				cb.setChecked(param[i]>0);
-				sb.setEnabled(param[i]>0);
-				sb.setProgress(Math.abs(param[i])-1);
 			}
 			parent.addView(elem, i);
 		}

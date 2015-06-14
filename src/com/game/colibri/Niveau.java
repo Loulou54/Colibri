@@ -105,20 +105,20 @@ public class Niveau {
 		int lon, lar, base;
 		switch(mode) {
 		case FACILE:
-			lon=8; lar=5; nVaches=1; nDyna=1; nChats=1; nArcs=1;
+			lon=8; lar=5; nVaches=1; nDyna=1; nChats=1; nArcs=1; base=1;
 			break;
 		case MOYEN:
-			lon=12; lar=8; nVaches=3; nDyna=3; nChats=2; nArcs=2;
+			lon=12; lar=8; nVaches=3; nDyna=3; nChats=2; nArcs=2; base=1;
 			break;
 		case DIFFICILE:
-			lon=18; lar=12; nVaches=4; nDyna=4; nChats=3; nArcs=3;
+			lon=18; lar=12; nVaches=4; nDyna=4; nChats=3; nArcs=3; base=1;
 			break;
 		default:
 			lon = ParamAleat.param[0];
 			lar = lon/2;
 			importParam();
+			base = ParamAleat.param[5];
 		}
-		base = 1;
 		this.geneNivRand(lon, lar, base);
 		replay();
 	}
@@ -973,6 +973,29 @@ public class Niveau {
 	}
 	
 	/**
+	 * Renvoie la position (ligne OU colonne) du premier arc rencontré en se déplaçant selon direc dans
+	 * le sens s.
+	 * @param rd
+	 * @param cd
+	 * @param rf
+	 * @param cf
+	 * @param direc
+	 * @param s
+	 * @return
+	 */
+	private int getNearestArc(int rd, int cd, int rf, int cf, int direc, int s) {
+		if(direc==0) { // Selon la colonne
+			int rr;
+			for(rr=rd; carteOrigin[rr][cd]<10 && (rr!=rf || cd!=cf); rr+=s) {}
+			return rr;
+		} else { // Selon la ligne
+			int cc;
+			for(cc=cd; carteOrigin[rd][cc]<10 && (rd!=rf || cc!=cf); cc+=s) {}
+			return cc;
+		}
+	}
+	
+	/**
 	 * Calcule le temps de voyage (en frames) pour aller de coVarDep à coVarFin, selon coFixe(Dep/Fin).
 	 * Si on passe dans une paire d'arc-en-ciel, numArcs, direc et s doivent être spécifiés. Sinon, numArcs=0.
 	 * @param coVarDep
@@ -1018,9 +1041,10 @@ public class Niveau {
 	 * @param nbDyna le nombre de dynamites
 	 * @param nCats le nombre de chats
 	 * @param nbArcs le nombre d'arc-en-ciels
+	 * @param numArcs le numéro de la prochaine paire d'arc-en-ciels à poser.
 	 * @return true si la génération a réussi ; false sinon
 	 */
-	public boolean geneChemin(int n,int r,int c, int nbVaches, int nbDyna, int nCats, int nbArcs){
+	public boolean geneChemin(int n,int r,int c, int nbVaches, int nbDyna, int nCats, int nbArcs, int numArcs){
 		int rd=r, cd=c;
 		int direc, bord, ran=0, s=1;
 		int rf,cf;
@@ -1030,7 +1054,6 @@ public class Niveau {
 		int frameDepart;
 		int[][] list_vache;
 		int stockDyna=0, cote=0, iiMen=0; // Le nombre de dyna à poser ; le nombre de dyna posée mais pas utilisée ; le cote du menhir explosé lorsqu'une dyna est utilisée.
-		int numArcs=10; // Le numéro de la prochaine paire d'arc-en-ciels à poser.
 		boolean poseArc=false, dropDyna=false, exploseMen=false; // Indique si une dynamite doit être posée pour le déplacement considéré.
 		for (int k=0; k<n && loop<17;k++) { // Pour garantir une proba voulue (pv) de ne pas interrompre un cas encore possible de proba p, il faut une limite de n>=ln(1-pv)/ln(1-p). On a 17 pour p=0.133 et pv=0.9.
 			System.out.println("Fr="+frame+" Pos : "+r+","+c);
@@ -1191,13 +1214,24 @@ public class Niveau {
 					solution[k][1]=s;
 					solution[k][2]=(w[0]==0) ? 0 : frameDepart+w[0];
 					if(dropDyna) {
-						int a,cp=0;
+						int a,b,cp=0;
+						int ligArc1 = getNearestArc(r, c, posf[0], posf[1], direc, s);
+						int ligArc2 = getNearestArc(posf[0], posf[1], r, c, direc, -s);
+						int d1 = Math.abs(ligArc1-r)+1;
+						int d2 = Math.abs(posf[0]-ligArc2)+1;
 						do {
-							a=Math.min(r, posf[0])+random.nextInt(Math.abs(posf[0]-r)+1);
-						} while((chemin[a][c]==0 || carteOrigin[a][c]==4 || carteOrigin[a][c]>=10 || Math.abs(carteOrigin[a][c]-7)==1) && cp++<15);
+							// a=Math.min(r, posf[0])+random.nextInt(Math.abs(posf[0]-r)+1);
+							if(random.nextInt(d1+d2)<d1) {
+								a = Math.min(r, ligArc1)+random.nextInt(d1);
+								b = c;
+							} else {
+								a = Math.min(posf[0], ligArc2)+random.nextInt(d2);
+								b = posf[1];
+							}
+						} while((chemin[a][b]==0 || carteOrigin[a][b]==4 || carteOrigin[a][b]>=10 || Math.abs(carteOrigin[a][b]-7)==1) && cp++<15);
 						if(cp<=15) {
-							carteOrigin[a][c]=4;
-							System.out.println("POSE DYNA : "+a+" , "+c);
+							carteOrigin[a][b]=4;
+							System.out.println("POSE DYNA : "+a+" , "+b);
 							dropDyna=false;
 							stockDyna++;
 						}
@@ -1287,13 +1321,24 @@ public class Niveau {
 					solution[k][1]=0;
 					solution[k][2]=(w[0]==0) ? 0 : frameDepart+w[0];
 					if(dropDyna) {
-						int a,cp=0;
+						int a,b,cp=0;
+						int colArc1 = getNearestArc(r, c, posf[0], posf[1], direc, s);
+						int colArc2 = getNearestArc(posf[0], posf[1], r, c, direc, -s);
+						int d1 = Math.abs(colArc1-c)+1;
+						int d2 = Math.abs(posf[1]-colArc2)+1;
 						do {
-							a=Math.min(c, posf[1])+random.nextInt(Math.abs(posf[1]-c)+1);
-						} while((chemin[r][a]==0 || carteOrigin[r][a]==4 || carteOrigin[r][a]>=10 || Math.abs(carteOrigin[r][a]-7)==1) && cp++<15);
+							//a=Math.min(c, posf[1])+random.nextInt(Math.abs(posf[1]-c)+1);
+							if(random.nextInt(d1+d2)<d1) {
+								a = r;
+								b = Math.min(c, colArc1)+random.nextInt(d1);
+							} else {
+								a = posf[0];
+								b = Math.min(posf[1], colArc2)+random.nextInt(d2);
+							}
+						} while((chemin[a][b]==0 || carteOrigin[a][b]==4 || carteOrigin[a][b]>=10 || Math.abs(carteOrigin[a][b]-7)==1) && cp++<15);
 						if(cp<=15) {
-							carteOrigin[r][a]=4;
-							System.out.println("POSE DYNA : "+r+" , "+a);
+							carteOrigin[a][b]=4;
+							System.out.println("POSE DYNA : "+a+" , "+b);
 							dropDyna=false;
 							stockDyna++;
 						}
@@ -1315,6 +1360,8 @@ public class Niveau {
 		}
 		if(loop!=0)
 			return false;
+		if(carteOrigin[r][c]==0)
+			carteOrigin[r][c]=2;
 		if(nDyna!=0) { // On change les menhirs détruits (6) ou (8) en menhirs (1) ou fleurs magiques (3)
 			for(int a=0; a<12; a++) {
 				for(int b=0; b<20; b++) {
@@ -1348,6 +1395,17 @@ public class Niveau {
 		return true;
 	}
 	
+	private int casesParcourues() {
+		int cases=0;
+		for(int i=0; i<chemin.length; i++) {
+			for(int j=0; j<chemin[0].length; j++) {
+				if(chemin[i][j]!=0)
+					cases++;
+			}
+		}
+		return cases;
+	}
+	
 	/**
 	 * Génère un niveau aléatoire ! La longueur de la solution du niveau sera : lon+rand[0:var].
 	 *  @param lon longueur minimale de la solution générée
@@ -1357,13 +1415,6 @@ public class Niveau {
 	public void geneNivRand(int lon, int var, int base){
 		random = new Random();
 		seed=random.nextLong();
-		//Rseed=-1144347916053986903L; // Moteur jeu : arrêt par une vache sur une fleur magique : meurt.
-		//Rseed=-5399998471255139353L; // Moteur jeu : arrêt vache après arc.
-		//Rseed=-282221685533103076L; // Moteur jeu : collision bord de vache.
-		//Rseed=8997004124519835682L; // Déplacement à cheval sur deux cases : bouffé par un chat.
-		//Rseed=8050878243935949672L; // Poussette d'une vache lors d'une attente.
-		//Rseed=2431528410913644445L;
-		//Rseed = -660314827448092767L; // (Intermédiaire) Si on pose un arc en même temps qu'une vache, prendre en compte tout le trajet.
 		System.out.println("SEED : "+seed);
 		random.setSeed(seed);
 		int nbVaches, nbDyna, nCats, nbArcs;
@@ -1377,14 +1428,27 @@ public class Niveau {
 		v_max = 0.75;
 		acc = 0.1;
 		solution = new int[longueur][3]; //Liste des mouvements à effectuer pour résoudre le niveau
-		db_l = random.nextInt(12);
-		db_c = random.nextInt(20); // on tire un emplacement départ
-		chemin[db_l][db_c]=1;
 		passColibri = new Passages(20);
 		passVaches = new Passages(20);
 		passChats = new Passages(20);
 		rainbows = new SparseArray<int[]>();
-		if(!geneChemin(longueur,db_l,db_c,nbVaches,nbDyna,nCats,nbArcs)) { // on génère la carte pour une solution en "longueur" coups !
+		int numArcs;
+		if(base>0) {
+			BaseNiveau bn = new BaseNiveau(random, carteOrigin, rainbows, nbArcs);
+			int[] res = bn.generate(random.nextInt(5),random.nextInt(3),random.nextInt(3),1+random.nextInt(4));
+			//System.out.println(bn.toString());
+			db_l = res[0];
+			db_c = res[1];
+			numArcs = res[2];
+			nbArcs = nbArcs-rainbows.size();
+		} else {
+			db_l = random.nextInt(12);
+			db_c = random.nextInt(20); // on tire un emplacement départ
+			numArcs = 10;
+		}
+		chemin[db_l][db_c]=1;
+		if(!geneChemin(longueur,db_l,db_c,nbVaches,nbDyna,nCats,nbArcs,numArcs) || casesParcourues()<15) { // on génère la carte pour une solution en "longueur" coups !
+			// Si la génération s'est retrouvée dans une impasse ou si le niveau généré est trop simple (coincé dans un secteur)
 			init();
 			geneNivRand(lon,var,base);
 		}
