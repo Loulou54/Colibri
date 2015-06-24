@@ -2,11 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/fin"
-    android:layout_alignParentLeft="true"
-    android:layout_alignParentTop="true"
-    android:background="@color/cyan"
-    android:visibility="invisible" >
+    android:background="@color/cyan" >
 
     <TextView
         android:id="@+id/fin_j2_txt"

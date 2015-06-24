@@ -1,7 +1,6 @@
 package com.game.colibri;
 
 import java.io.IOException;
-import java.util.GregorianCalendar;
 
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -47,7 +46,6 @@ public class MenuPrinc extends Activity {
 	private LinearLayout opt_reglages;
 	private float initialX;
 	private double[][] points = new double[][] {{0.07625, 0.8145833333333333}, {0.18875, 0.7645833333333333}, {0.31625, 0.7354166666666667}, {0.24875, 0.8208333333333333}, {0.1125, 0.94375}, {0.25, 0.9458333333333333}, {0.405, 0.9208333333333333}, {0.52, 0.9416666666666667}, {0.6275, 0.9333333333333333}, {0.765, 0.9354166666666667}, {0.765, 0.8166666666666667}, {0.83, 0.74375}};
-	private GregorianCalendar debut;
 	
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -294,7 +292,6 @@ public class MenuPrinc extends Activity {
 		Jeu.opt.putInt("mode", Niveau.CAMPAGNE);
 		Jeu.opt.putInt("n_niv", Math.min(avancement,Jeu.NIV_MAX));
 		startActivity(new Intent(this, Jeu.class));
-		debut = new GregorianCalendar();
 	}
 	
 	public void campagne(View v) {
@@ -355,12 +352,12 @@ public class MenuPrinc extends Activity {
 			carte.setVisibility(View.VISIBLE);
 		}
 		n_niv=n;
+		((TextView) findViewById(R.id.n_niv)).setText(n_niv+" / "+Jeu.NIV_MAX);
 		Niveau niv;
 		try {
 			niv = new Niveau(MenuPrinc.this.getAssets().open("niveaux/niveau"+n_niv+".txt"));
 			carte.loadNiveau(niv);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -368,7 +365,8 @@ public class MenuPrinc extends Activity {
 	
 	private void deplaceColibri(double[] co, boolean regardeVersDroite) {
 		Colibri coli = (Colibri) findViewById(R.id.coli);
-		coli.setPosFinAnim(); // Au cas où l'animation n'était pas terminée.
+		if(coli.getAnimation()!=null && !coli.getAnimation().hasEnded()) // Au cas où l'animation n'était pas terminée.
+			coli.setPosFinAnim();
 		RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) coli.getLayoutParams();
 		int xf=(int) (ww*co[0])-params.width/2, yf=(int) (wh*co[1])-3*params.height/4;
 	    TranslateAnimation anim = new TranslateAnimation(0,xf-params.leftMargin,0,yf-params.topMargin);
@@ -423,7 +421,6 @@ public class MenuPrinc extends Activity {
 		Jeu.opt.putInt("mode", Niveau.CAMPAGNE);
 		Jeu.opt.putInt("n_niv", n_niv);
 		startActivity(new Intent(this, Jeu.class));
-		debut = new GregorianCalendar();
 	}
 	
 	public void paramAleat(View v) {
@@ -446,7 +443,6 @@ public class MenuPrinc extends Activity {
 	public void launchAleat(int mode) {
 		Jeu.opt.putInt("mode", mode);
 		startActivity(new Intent(this, Jeu.class));
-		debut = new GregorianCalendar();
 	}
 	
 	public void multijoueur(View v) {
@@ -508,13 +504,5 @@ public class MenuPrinc extends Activity {
 			boucle.pause();
 		else
 			intro.pause();
-	}
-	
-	public GregorianCalendar getDebut() {
-		return debut;
-	}
-	
-	public void setDebut(GregorianCalendar debut){
-		this.debut = debut;
 	}
 }

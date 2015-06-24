@@ -53,9 +53,9 @@ public abstract class Animal extends ImageView {
 	
 	
 	/**
-	 * Met a jour la postion en cases.
-	 * 		@param x la nouvelle  abcisse 
-	 * 		@param y le nouveau ordonné 
+	 * Met a jour la position en cases.
+	 * 		@param x 
+	 * 		@param y
 	 */
 	public void setPos(double x, double y) {
 		xx=x; yy=y;

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="20dp"
+    android:layout_marginBottom="20dp"
+    android:layout_marginLeft="40dp"
+    android:layout_marginRight="40dp"
+    android:background="@drawable/shape_pause" >
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"
+        android:text="@string/pause"
+        android:textColor="@color/saumon"
+        android:textSize="32sp"
+        android:fontFamily="serif"
+        android:textStyle="bold"
+        android:shadowColor="@color/choco"
+        android:shadowDy="4"
+        android:shadowRadius="3" />
+    
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignTop="@+id/but1"
+        android:layout_toLeftOf="@+id/but1"
+        android:background="@drawable/dessin_pause"
+        android:contentDescription="@string/app_name" />
+    
+    <Button
+        android:id="@+id/but1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/textView1"
+        android:layout_marginRight="14dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/boutons2"
+        android:gravity="center"
+        android:onClick="reprendre"
+        android:text="@string/reprendre"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+    
+    <Button
+        android:id="@+id/but2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/but1"
+        android:layout_below="@+id/but1"
+        android:layout_marginTop="6dp"
+        android:layout_gravity="center"
+        android:background="@drawable/boutons2"
+        android:gravity="center"
+        android:onClick="recommencer"
+        android:text="@string/recommencer"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/but3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/but2"
+        android:layout_below="@+id/but2"
+        android:layout_marginTop="6dp"
+        android:layout_gravity="center"
+        android:background="@drawable/boutons2"
+        android:gravity="center"
+        android:onClick="solution"
+        android:text="@string/solution"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/but4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/but3"
+        android:layout_below="@+id/but3"
+        android:layout_marginTop="6dp"
+        android:layout_gravity="center"
+        android:background="@drawable/boutons2"
+        android:gravity="center"
+        android:onClick="quitter"
+        android:text="@string/sortir"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+
+</RelativeLayout>

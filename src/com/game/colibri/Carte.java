@@ -1,10 +1,13 @@
 package com.game.colibri;
 
 import java.util.LinkedList;
+import java.util.Random;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.AttributeSet;
@@ -38,6 +41,7 @@ public class Carte extends RelativeLayout {
 	public LinkedList<Chat> chats = new LinkedList<Chat>(); // La liste des chats du niveau
 	public LinkedList<View> explo = new LinkedList<View>(); // La liste des explosions
 	public SparseArray<int[]> rainbows = new SparseArray<int[]>();
+	private int[] colors = new int[] {0x60FFFACD, 0x60E0FFFF, 0x60FFE4E1, 0x60E6E6FA, 0x60FF3030, 0x60FFBBFF, 0x607FFF00};
 	public View mort,sang,fond;
 	
     /**
@@ -77,11 +81,29 @@ public class Carte extends RelativeLayout {
     	menhir_rouge0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.menhir_rouge)).getBitmap();
     	rainbow0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.rainbow)).getBitmap();
     	// Définition du fond qui comporte la carte statique.
+    	final Paint mPaint = new Paint();
+    	mPaint.setStyle(Paint.Style.STROKE);
+    	mPaint.setStrokeJoin(Paint.Join.ROUND);
+    	mPaint.setStrokeCap(Paint.Cap.ROUND);
+    	mPaint.setStrokeWidth(5);
     			fond=new View(this.getContext()) {
     	    		// Dessin du canvas : événement déclenché par fond.invalidate()
     	    	    @Override
     	    	    protected void onDraw(Canvas can) {
     	    	    	if (niv!=null) {
+    	    	    		mPaint.setColor(0x708B4500);
+    	    	    		for(Vache v : vaches) {
+    	    	    			for(int i=1; i<=3; i++) {
+    	    	    				mPaint.setStrokeWidth((float) ((0.4-i*0.1)*cw));
+    	    	    				can.drawPath(v.path, mPaint);
+    	    	    			}
+    	    	    		}
+    	    	    		for(Chat c : chats) {
+    	    	    			for(int i=1; i<=3; i++) {
+    	    	    				mPaint.setStrokeWidth((float) ((0.4-i*0.1)*cw));
+    	    	    				can.drawPath(c.path, mPaint);
+    	    	    			}
+    	    	    		}
     	    		    	for (int l=0; l<LIG; l++) {
     	    		    		for (int c=0; c<COL; c++) {
     	    		    			if (niv.carte[l][c]==1)
@@ -94,8 +116,14 @@ public class Carte extends RelativeLayout {
     	    		    				can.drawBitmap(dyna, (int)(c*cw), (int)(l*ch), null);
     	    		    			else if (niv.carte[l][c]==5)
     	    		    				can.drawBitmap(menhir_rouge, (int)(c*cw-cw/8), (int)(l*ch), null);
-    	    		    			else if (niv.carte[l][c]>=10)
+    	    		    			else if (niv.carte[l][c]>=10) {
+    	    		    				mPaint.setColor(colors[niv.carte[l][c]%colors.length]);
+    	    		    				for(int i=1; i<=4; i++) {
+    	    	    	    				mPaint.setStrokeWidth((float) ((0.8-i*0.15)*cw));
+    	    	    	    				can.drawPoint((float) (cw*(c+0.5)), (float) (ch*(l+0.7)), mPaint);
+    	    		    				}
     	    		    				can.drawBitmap(rainbow, (int)(c*cw-cw/4), (int)(l*ch), null);
+    	    		    			}
     	    		    		}
     	    		    	}
     	    	    	}
@@ -123,6 +151,10 @@ public class Carte extends RelativeLayout {
 		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ww,wh);
 	    fond.setLayoutParams(params);
 	    
+	    Random ran = new Random();
+	    for(int i=0; i<colors.length; i++) {
+	    	colors[i] = Color.argb(0x40, 56+ran.nextInt(200), 56+ran.nextInt(200), 56+ran.nextInt(200));
+	    }
     	n_dyna=0;
     	n_fleur=0;
     	index_dyna=0;

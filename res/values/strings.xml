@@ -44,5 +44,13 @@
 	<string name="longueur">Length:</string>
 	<string name="base_niveau">Menhirs pattern</string>
 	<string name="param_descript">\u0009The length as well as the number of additional elements increases the difficulty but also the amount of experience earned!</string>
+	<string name="did_he_dieded">Oops!</string>
+	<string name="oui">Yes</string>
+	<string name="non">No</string>
+	<string name="aide">Help</string>
+	<string name="bloque">You didn\'t unlock the next level yet!</string>
+	<string name="solution_bloque">You didn\'t unlock the solution of this level yet!</string>
+	<string name="aleatoire">Random</string>
+	<string name="choix_campagne">Select a level: flower = not solved yet</string>
 	
 </resources>

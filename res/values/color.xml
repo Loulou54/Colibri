@@ -2,11 +2,14 @@
 <resources>
     <color name="red">#ff0808</color>
     <color name="cyan">#70D1EEEE</color>
+    <color name="cyan_opaque">#20EEEE</color>
     <color name="orange">#FF8C00</color>
     <color name="choco">#AA8B4513</color>
     <color name="rose_doux">#EED2EE</color>
     <color name="noir">#000000</color>
     <color name="bleu">#0000FF</color>
     <color name="saumon">#FF7256</color>
+    <color name="vert_fonce">#ff669900</color>
+    <color name="vert_clair">#ccaacc00</color>
     
 </resources>

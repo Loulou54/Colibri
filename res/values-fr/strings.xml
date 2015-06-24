@@ -44,5 +44,13 @@
 	<string name="longueur">Longueur :</string>
 	<string name="base_niveau">Base en menhirs</string>
 	<string name="param_descript">\u0009La longueur ainsi que le nombre d\'éléments additionnels augmentent la difficulté mais aussi l\'expérience à gagner !</string>
+	<string name="did_he_dieded">Oups !</string>
+	<string name="oui">Oui</string>
+	<string name="non">Non</string>
+	<string name="aide">Aide</string>
+	<string name="bloque">Vous n\'avez pas encore débloqué le prochain niveau !</string>
+	<string name="solution_bloque">Vous n\'avez pas encore débloqué la solution de ce niveau !</string>
+	<string name="aleatoire">Aléatoire</string>
+	<string name="choix_campagne">Sélectionnez un niveau : fleur = non résolu</string>
 	
 </resources>

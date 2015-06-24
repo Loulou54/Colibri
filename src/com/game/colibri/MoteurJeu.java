@@ -20,23 +20,25 @@ import android.view.animation.Animation.AnimationListener;
  */
 public class MoteurJeu {
 	
-	public static int frame;
+	public int frame, total_frames;
 	private Carte carte;
 	public Niveau niv;
 	private Jeu jeu;
 	public boolean isRunning=false;
 	private int dejaPasse=0;
+	private int wait = 0;
+	private int directionDyna = 0;
 	private LinkedList <int[]> buf; // la file d'attente des touches
 	private int[] lastMove=new int[] {0,0};
 	private int[][] trace_diff; // Contient le différentiel de position lors des ACTION_MOVE.
 	private static int SEUIL=15; // seuil de vitesse de glissement du doigt sur l'écran.
-	private static final int PERIODE=1000/25; // pour 25 frames par secondes
-	public static int menhir=1;
-	public static int fleur=2;
-	public static int fleurm=3;
-	public static int dyna=4;
-	public static int menhir_rouge=5; // Menhir sur lequel on déposerait une dynamite.
-	public static char vide=0;
+	public static int PERIODE=1000/25; // pour 25 frames par secondes
+	public static final int MENHIR=1;
+	public static final int FLEUR=2;
+	public static final int FLEURM=3;
+	public static final int DYNA=4;
+	public static final int MENHIR_ROUGE=5; // Menhir sur lequel on déposerait une dynamite.
+	public static final char VIDE=0;
 	public static final int UP=1,RIGHT=2,LEFT=3,DOWN=4;
 	
 	private static final int LIG=12, COL=20; // Dimensions de la grille
@@ -73,17 +75,19 @@ public class MoteurJeu {
 		carte = c;
 		jeu=activ;
 		buf = new LinkedList<int[]>();
-		trace_diff=new int[2][2];
+		trace_diff=new int[3][2];
 		SEUIL = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 15, activ.getResources().getDisplayMetrics());
 	}
 	
 	/**
 	 *  Initialise les variables du moteur de jeu (buffer, niv, ...) : appelé après chaque appel de carte.loadNiveau
 	 */
-	public void init() {
+	public void init(boolean replay) {
 		niv=carte.niv; // pour avoir une référence locale vers le niveau en cours et un nom moins long
 		buf.clear();
+		total_frames = replay ? total_frames+frame : 0;
 		frame=0;
+		wait=0;
 	}
 	
 	/**
@@ -149,6 +153,7 @@ public class MoteurJeu {
 	 */
 	private void move() {
 		frame++;
+		jeu.updateMenuLateral();
 		if (carte.colibri.mx==0 & carte.colibri.my==0) { // Le colibri est à l'arrêt
 			if (buf.size()>0) {
 				int[] mov=buf.getFirst();
@@ -175,13 +180,13 @@ public class MoteurJeu {
 			int c=carte.colibri.getCol(); //  colone du colibri
 			// On détecte si l'on arrive contre un obstacle
 			boolean outOfMap=l+ml<0 || l+ml>=LIG || c+mc<0 || c+mc>=COL;
-			if(outOfMap || niv.carte[l+ml][c+mc]==menhir){
+			if(outOfMap || niv.carte[l+ml][c+mc]==MENHIR){
 				carte.colibri.mx=0;
 				carte.colibri.my=0;
 				carte.colibri.setPos(c, l);
 				System.out.println("Frame : "+frame+" Pos : "+l+","+c);
 				if(!outOfMap && carte.n_dyna>0) {
-					niv.carte[l+ml][c+mc]=menhir_rouge;
+					niv.carte[l+ml][c+mc]=MENHIR_ROUGE;
 					carte.fond.invalidate();
 				}
 			}
@@ -223,12 +228,12 @@ public class MoteurJeu {
 			boolean vaVite=carte.colibri.step>2*carte.colibri.v_max/3;
 			if(!vaVite && plutotHoriz || vaVite && (clairementSurHoriz || carte.colibri.mx!=0) && !clairementSurVert) { // sur l'horizontale
 				if(cx<vx) {
-					if(c-1<0 || niv.carte[l][c-1]==menhir && carte.colibri.mx<1) cx=Math.max(vx0-1,c); // Détecte si le colibri est bloqué par un menhir ou un bord.
+					if(c-1<0 || niv.carte[l][c-1]==MENHIR && carte.colibri.mx<1) cx=Math.max(vx0-1,c); // Détecte si le colibri est bloqué par un menhir ou un bord.
 					else cx=vx0-1;
 					carte.colibri.mx=Math.min(carte.colibri.mx, 0); // arrête le mouvement du colibri s'il est vers la vache
 				}
 				else {
-					if(c+1>=COL || niv.carte[l][c+1]==menhir && carte.colibri.mx>-1) cx=Math.min(vx0+1,c);
+					if(c+1>=COL || niv.carte[l][c+1]==MENHIR && carte.colibri.mx>-1) cx=Math.min(vx0+1,c);
 					else cx=vx0+1;
 					carte.colibri.mx=Math.max(carte.colibri.mx, 0);
 				}
@@ -236,12 +241,12 @@ public class MoteurJeu {
 				if(Math.abs(vx0-cx)<0.5) mort();
 			} else { // sur la verticale
 				if(cy<vy) {
-					if(l-1<0 || niv.carte[l-1][c]==menhir && carte.colibri.my<1) cy=Math.max(vy0-1,l);
+					if(l-1<0 || niv.carte[l-1][c]==MENHIR && carte.colibri.my<1) cy=Math.max(vy0-1,l);
 					else cy=vy0-1;
 					carte.colibri.my=Math.min(carte.colibri.my, 0);
 				}
 				else {
-					if(l+1>=LIG || niv.carte[l+1][c]==menhir && carte.colibri.my>-1) cy=Math.min(vy0+1,l);
+					if(l+1>=LIG || niv.carte[l+1][c]==MENHIR && carte.colibri.my>-1) cy=Math.min(vy0+1,l);
 					else cy=vy0+1;
 					carte.colibri.my=Math.max(carte.colibri.my, 0);
 				}
@@ -253,8 +258,8 @@ public class MoteurJeu {
 			// Si le colibri a été poussé sur une autre case, il faut changer le menhir rouge de sélection !
 			if(carte.n_dyna>0 && carte.colibri.mx+carte.colibri.my==0) {
 				int ml=lastMove[1], mc=lastMove[0];
-				if(nl+ml>=0 && nl+ml<LIG && nc+mc>=0 && nc+mc<COL && niv.carte[nl+ml][nc+mc]==menhir) {
-					niv.carte[nl+ml][nc+mc]=menhir_rouge;
+				if(nl+ml>=0 && nl+ml<LIG && nc+mc>=0 && nc+mc<COL && niv.carte[nl+ml][nc+mc]==MENHIR) {
+					niv.carte[nl+ml][nc+mc]=MENHIR_ROUGE;
 				}
 				if(nl!=l || nc!=c)
 					carte.fond.invalidate();
@@ -284,16 +289,16 @@ public class MoteurJeu {
 	 */
 	private void ramasser() {
 		int l=carte.colibri.getRow(), c=carte.colibri.getCol();
-		if(niv.carte[l][c]==fleur) {
-			niv.carte[l][c]=vide;
+		if(niv.carte[l][c]==FLEUR) {
+			niv.carte[l][c]=VIDE;
 			carte.n_fleur--;
 			carte.fond.invalidate();
-		} else if(niv.carte[l][c]==fleurm) {
-			niv.carte[l][c]=menhir;
+		} else if(niv.carte[l][c]==FLEURM) {
+			niv.carte[l][c]=MENHIR;
 			carte.n_fleur--;
 			carte.fond.invalidate();
-		} else if(niv.carte[l][c]==dyna) {
-			niv.carte[l][c]=vide;
+		} else if(niv.carte[l][c]==DYNA) {
+			niv.carte[l][c]=VIDE;
 			carte.n_dyna++;
 			jeu.bout_dyna.setText(Integer.toString(carte.n_dyna));
 			if(carte.n_dyna==1) jeu.showDyna();
@@ -310,7 +315,7 @@ public class MoteurJeu {
 			dejaPasse=niv.carte[l][c];
 		} else
 			dejaPasse=0;
-		if(carte.n_fleur==0) jeu.gagne();
+		if(carte.n_fleur==0) jeu.gagne((total_frames+frame)*PERIODE);
 	}
 	
 	/**
@@ -320,8 +325,8 @@ public class MoteurJeu {
 		int l=carte.colibri.getRow();
 		int c=carte.colibri.getCol();
 		int ml=lastMove[1], mc=lastMove[0];
-		if(l+ml>=0 && l+ml<LIG && c+mc>=0 && c+mc<COL && niv.carte[l+ml][c+mc]==menhir_rouge) {
-			niv.carte[l+ml][c+mc]=menhir;
+		if(l+ml>=0 && l+ml<LIG && c+mc>=0 && c+mc<COL && niv.carte[l+ml][c+mc]==MENHIR_ROUGE) {
+			niv.carte[l+ml][c+mc]=MENHIR;
 			if(ml!=mov[1] || mc!=mov[0]) carte.fond.invalidate();
 		}
 	}
@@ -333,7 +338,15 @@ public class MoteurJeu {
 		int l=carte.colibri.getRow();
 		int c=carte.colibri.getCol();
 		int ml=lastMove[1], mc=lastMove[0];
-		if(l+ml>=0 && l+ml<LIG && c+mc>=0 && c+mc<COL && niv.carte[l+ml][c+mc]==menhir && ml+mc!=0) {
+		if(l+ml>=0 && l+ml<LIG && c+mc>=0 && c+mc<COL && niv.carte[l+ml][c+mc]==MENHIR && ml+mc!=0) {
+			if(buf.size()!=0) {
+				int[] next = buf.getFirst();
+				if(next[0]==mc && next[1]==ml)
+					next[2] = frame+25;
+			} else {
+				directionDyna = getDirection(mc,ml);
+				wait = frame+25;
+			}
 			carte.n_dyna--;
 			carte.animBoom(l+ml,c+mc); // Gère l'animation de l'explosion.
 			jeu.bout_dyna.setText(Integer.toString(carte.n_dyna));
@@ -349,15 +362,16 @@ public class MoteurJeu {
 	 * Appelé à la fin de l'explosion d'un menhir. Enlève le menhir de la carte et la View explo.
 	 */
 	private void finExplosion(int l, int c) {
-		niv.carte[l][c]=vide;
+		niv.carte[l][c]=VIDE;
 		carte.fond.invalidate();
 	}
 	
 	/**
-	 * Deplace le colibri vers la position demandée 
-	 * 		@param ev  evenement declencheur du mouvement  
+	 * Appelée par l'activité Jeu. Prends en charge le toucher de l'écran tactile.
+	 * @param ev le MotionEvent
+	 * @return 0:cache le menu latéral ; 1:montre le menu latéral ; 2:ne fais rien
 	 */
-	public void onTouch(MotionEvent ev) {
+	public int onTouch(MotionEvent ev) {
 		//carte.colibri.setPos((int) ev.getX(), (int) ev.getY()); // Petit exemple
 		int x=(int) ev.getX();
 		int y=(int) ev.getY();
@@ -378,20 +392,29 @@ public class MoteurJeu {
 		if (ev.getAction()==MotionEvent.ACTION_DOWN) {
 			trace_diff[1][0]=x;
 			trace_diff[1][1]=y;
+			trace_diff[2][0]=x; // début du toucher
+			trace_diff[2][1]=y;
+			return 2;
 		}
 		else if (ev.getAction()==MotionEvent.ACTION_MOVE) {
 			trace_diff[0][0]=trace_diff[1][0];
 			trace_diff[0][1]=trace_diff[1][1];
 			trace_diff[1][0]=x;
 			trace_diff[1][1]=y;
-			swipe_dir();
+			return swipe_dir();
 		}
+		else if (ev.getAction()==MotionEvent.ACTION_UP) {
+			int mx=x-trace_diff[2][0] , my=y-trace_diff[2][1];
+			if(mx*mx+my*my<SEUIL*SEUIL)
+				return 1;
+		}
+		return 2;
 	}
 	
 	/**
 	 * Gère la commande du colibri par swipe sur l'écran tactile.
 	 */
-	private void swipe_dir() {
+	private int swipe_dir() {
 		int mx=trace_diff[1][0]-trace_diff[0][0] , my=trace_diff[1][1]-trace_diff[0][1];
 		if(mx*mx+my*my>SEUIL*SEUIL) {
 			if(Math.abs(mx)>Math.abs(my)) {
@@ -401,7 +424,9 @@ public class MoteurJeu {
 				if(my>0) direction(DOWN);
 				else direction(UP);
 			}
+			return 0;
 		}
+		return 2;
 	}
 	
 	/**
@@ -412,19 +437,43 @@ public class MoteurJeu {
 		int[] mvt;
 		if(buf.size()==0) mvt=new int[3];
 		else mvt=buf.getLast();
+		System.out.println("direc : "+wait+" "+directionDyna+" "+dir);
+		if(wait!=0 && dir!=directionDyna)
+			wait=0;
 		switch (dir) {
 		case UP:
-			if(mvt[1]!=-1) buf.add(new int[]{0,-1,0});
+			if(mvt[1]!=-1) buf.add(new int[]{0,-1,wait});
 			break;
 		case RIGHT:
-			if(mvt[0]!=1) buf.add(new int[]{1,0,0});
+			if(mvt[0]!=1) buf.add(new int[]{1,0,wait});
 			break;
 		case LEFT:
-			if(mvt[0]!=-1) buf.add(new int[]{-1,0,0});
+			if(mvt[0]!=-1) buf.add(new int[]{-1,0,wait});
 			break;
 		case DOWN:
-			if(mvt[1]!=1) buf.add(new int[]{0,1,0});
+			if(mvt[1]!=1) buf.add(new int[]{0,1,wait});
 			break;
+		}
+		wait=0;
+	}
+	
+	/**
+	 * Donne l'indice de direction d'un déplacement {mc,ml}. (Réciproque de direction(dir))
+	 * @param ml -1,0,1 selon les lignes
+	 * @param mc -1,0,1 selon les colonnes
+	 * @return int : UP, RIGHT, LEFT, DOWN
+	 */
+	private int getDirection(int mc, int ml) {
+		if(mc==0) {
+			if(ml==1)
+				return DOWN;
+			else
+				return UP;
+		} else {
+			if(mc==1)
+				return RIGHT;
+			else
+				return LEFT;
 		}
 	}
 	

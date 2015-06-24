@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/menu_lateral"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:minWidth="100dp"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/campagne"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:shadowColor="@color/choco"
+        android:shadowRadius="3"
+        android:shadowDx="1"
+        android:shadowDy="2" />
+
+    <TextView
+        android:id="@+id/niveau_courant"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/etat"
+        android:textColor="@color/cyan_opaque" />
+    
+    <TextView
+        android:id="@+id/temps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@color/orange"
+        android:text="@string/etat"
+        android:textStyle="bold" />
+
+    <ImageButton
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:alpha="0.6"
+        android:contentDescription="@string/recommencer"
+        android:src="@drawable/repeat"
+        android:onClick="recommencer" />
+    
+    <ImageButton
+        android:id="@+id/av_rapide"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:alpha="0.6"
+        android:contentDescription="@string/temps"
+        android:src="@drawable/fw" />
+    
+    <ImageButton
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:alpha="0.6"
+        android:contentDescription="@string/solution"
+        android:src="@drawable/ampoule"
+        android:onClick="solution" />
+    
+    <ImageButton
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:alpha="0.6"
+        android:contentDescription="@string/solution"
+        android:src="@drawable/next"
+        android:onClick="suivant" />
+
+</LinearLayout>
