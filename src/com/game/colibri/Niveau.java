@@ -99,7 +99,7 @@ public class Niveau {
 	 * Constructeur d'un niveau aléatoire de paramètres donnés.
 	 * @param mode le mode de niveau aléatoire (cf: constantes de classe en static)
 	 */
-	public Niveau(int mode) {
+	public Niveau(int mode, int avancement) {
 		isRandom=true;
 		init();
 		int lon, lar, base;
@@ -119,6 +119,10 @@ public class Niveau {
 			importParam();
 			base = ParamAleat.param[5];
 		}
+		if(avancement<9) nVaches=0;
+		if(avancement<16) nDyna=0;
+		if(avancement<21) nChats=0;
+		if(avancement<23) nArcs=0;
 		this.geneNivRand(lon, lar, base);
 		replay();
 	}

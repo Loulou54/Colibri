@@ -1,9 +1,17 @@
 package com.game.colibri;
 
 import java.io.IOException;
+import java.util.Locale;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -26,6 +34,7 @@ public class Jeu extends Activity {
 	public static MenuPrinc menu;
 	public static Multijoueur multi = null;
 	public static final int NIV_MAX=36;
+	public static String startMsg = null; // Message avant le lancement du jeu
 	
 	public Niveau niv;
 	public Carte carte;
@@ -35,7 +44,7 @@ public class Jeu extends Activity {
 	public View perdu; 
 	public View gagne; 
 	public Button bout_dyna;
-	private boolean brandNew=true, solUsed=false, solvedBySol=false, solved=false, music=false;
+	private boolean brandNew=true, solUsed=false, solvedBySol=false, solved=false, music=false, popup=false;
 	public int n_niv;
 	
 	/* (non-Javadoc)
@@ -90,8 +99,9 @@ public class Jeu extends Activity {
 					play.pause();
 					pause.setVisibility(View.VISIBLE);
 				}
-				if(music)
+				if(music && !popup)
 					MenuPrinc.stopMusic();
+				popup=false;
 			} else {
 				if(music)
 					MenuPrinc.startMusic();
@@ -120,9 +130,7 @@ public class Jeu extends Activity {
 				play.direction(MoteurJeu.LEFT);
 			} else if(keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
 				play.direction(MoteurJeu.DOWN);
-			} else if((keyCode == KeyEvent.KEYCODE_MENU || keyCode == KeyEvent.KEYCODE_ESCAPE) && niv.solution!=null && n_niv<menu.avancement && multi==null) { // Solution !
-				solution(null);
-			} else if(keyCode == KeyEvent.KEYCODE_BACK) {
+			} else if(keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU || keyCode == KeyEvent.KEYCODE_ESCAPE) {
 				play.pause();
 				menuLateral(0,null);
 				pause.setVisibility(View.VISIBLE);
@@ -185,36 +193,52 @@ public class Jeu extends Activity {
 			recommencer(null);
 			return;
 		}
+		gagne.setVisibility(View.VISIBLE);
 		play.pause();
 		play.frame = 0;
 		play.total_frames = 0;
 		if(carte.n_dyna>0) hideDyna();
 		menuLateral(0,null);
+		TextView txt = (TextView) findViewById(R.id.resultats);
 		if (multi != null) { // Mode multijoueur
-			if (multi.temps1 == 0) {
+			if(multi.temps1 == 0) { // Le joueur 1 vient de terminer
 				multi.temps1 = temps_total_ms;
-				ViewStub gagneMulti = (ViewStub)findViewById(R.id.gain);
-				gagneMulti.setVisibility(View.VISIBLE);
-			}
-			else {
+				multi.penalite1 = (solUsed) ? niv.solution.length*500 : 0;
+			} else if(multi.temps2 == 0 && solved) { // j1 a recommencé
+				temps_total_ms = multi.temps1;
+				solUsed = (multi.penalite1!=0);
+			} else if(multi.temps2 == 0) { // Le joueur 2 vient de terminer
 				multi.temps2 = temps_total_ms;
-				ViewStub gagneMulti2 = (ViewStub)findViewById(R.id.fin);
-				TextView txt = (TextView) findViewById(R.id.multi_res);
-				int exp1,exp2;
-				if(multi.temps1 > multi.temps2) {
-					exp1=play.niv.experience/2;
-					exp2=play.niv.experience*2;
+				multi.penalite2 = (solUsed) ? niv.solution.length*500 : 0;
+				int exp1=0,exp2=0;
+				System.out.println(multi.temps1+" ; "+multi.temps2);
+				if(multi.temps1==multi.temps2) {
+					multi.gagne = 0;
+					if(multi.temps1!=Integer.MAX_VALUE) { // Égalité !
+						exp1 = play.niv.experience*2;
+						exp2 = play.niv.experience*2;
+					}
+				} else if(multi.temps1+multi.penalite1 > multi.temps2+multi.penalite2 && multi.temps2!=Integer.MAX_VALUE || multi.temps1==Integer.MAX_VALUE) {
+					multi.gagne = 2;
+					exp1=(multi.temps1==Integer.MAX_VALUE) ? 0 : play.niv.experience;
+					exp2=(multi.temps2==Integer.MAX_VALUE) ? 0 : play.niv.experience*2;
 				} else {
-					exp1=play.niv.experience*2;
-					exp2=play.niv.experience/2;
+					multi.gagne = 1;
+					exp1=(multi.temps1==Integer.MAX_VALUE) ? 0 : play.niv.experience*2;
+					exp2=(multi.temps2==Integer.MAX_VALUE) ? 0 : play.niv.experience;
 				}
 				multi.finDefi(exp1,exp2);
-				txt.setText(getString(R.string.temps)+" : "+String.format("%d.%02d s", multi.temps1/1000, (multi.temps1%1000)/10)
-						+"  vs  "+String.format("%d.%02d s", multi.temps2/1000, (multi.temps2%1000)/10)
-						+"\n"+getString(R.string.exp)+" : + "+exp1+"  -=-  + "+exp2
-						+"\n"+getString(R.string.score)+" "+(multi.j.getDefis()-multi.j.getWin())+"  -=-  "+multi.j.getWin());
-				gagneMulti2.setVisibility(View.VISIBLE);
+			} else { // j2 a recommencé
+				temps_total_ms = multi.temps2;
+				solUsed = (multi.penalite2!=0);
 			}
+			String s;
+			if(temps_total_ms==Integer.MAX_VALUE)
+				s=getString(R.string.forfait)+" !";
+			else
+				s=getString(R.string.temps)+" : "+getFormattedTime(temps_total_ms)
+						+"\n"+getString(R.string.aide)+" : "+(solUsed ? getString(R.string.oui) : getString(R.string.non));
+			txt.setText(s+(multi.temps2==0 ? "\n"+getString(R.string.joueur_suivant) : "\n"+getString(R.string.resultats)));
 		}
 		else {
 			int exp=0;
@@ -231,25 +255,15 @@ public class Jeu extends Activity {
 				menu.experience+=exp;
 				menu.saveData(); // On sauvegarde la progression.
 			}
-			gagne.setVisibility(View.VISIBLE);
-			TextView txt = (TextView) findViewById(R.id.resultats);
-			txt.setText(getString(R.string.temps)+" : "+String.format("%d.%02d s", temps_total_ms/1000, (temps_total_ms%1000)/10)
+			txt.setText(getString(R.string.temps)+" : "+getFormattedTime(temps_total_ms)
 					+"\n"+getString(R.string.exp)+" : + "+exp
 					+"\n"+getString(R.string.aide)+" : "+(solUsed ? getString(R.string.oui) : getString(R.string.non)));
 		}
 		solved = true;
 	}
 	
-	public void secondJoueur(View v) {
-		ViewStub gagneMulti = (ViewStub)findViewById(R.id.gain);
-		gagneMulti.setVisibility(View.GONE);
-		recommencer(v);
-	}
-	
-	public void fin(View v){
-		music=false;
-		multi=null;
-		this.finish();
+	public static String getFormattedTime(int time) {
+		return String.format(Locale.FRANCE, "%d min %d.%02d s", time/60000, (time%60000)/1000, (time%1000)/10);
 	}
 	
 	/**
@@ -321,7 +335,7 @@ public class Jeu extends Activity {
 			solved = false;
 			solUsed = false;
 			if(opt.getInt("mode", 0)>0) {
-				niv = new Niveau(opt.getInt("mode"));
+				niv = new Niveau(opt.getInt("mode"), menu.avancement);
 			} else {
 				try { // On ouvre le Niveau index_niv.
 					niv = new Niveau(this.getAssets().open("niveaux/niveau"+n_niv+".txt"));
@@ -331,18 +345,21 @@ public class Jeu extends Activity {
 			}
 		}
 		solvedBySol = false;
-		/*TODO: Affichage ou non de l'option de solution.
-		Button so=(Button) findViewById(R.id.but4);
-		if(opt.getInt("mode", 0)>0 && multi==null) { // Pour niveaux : niv.solution!=null && n_niv<menu.avancement
-			so.setVisibility(View.VISIBLE);
-		} else {
-			so.setVisibility(View.GONE);
-		}
-		*/
 		setMenuLateral();
 		carte.loadNiveau(niv);
 		play.init(replay);
-		play.start();
+		if(startMsg!=null) { // Affichage d'un message avant le démarrage du jeu.
+			Toast.makeText(this, startMsg, Toast.LENGTH_SHORT).show();
+			startMsg = null;
+			final Handler handler = new Handler();
+			handler.postDelayed(new Runnable() {
+			  @Override
+			  public void run() {
+			    play.start();
+			  }
+			}, 2000);
+		} else
+			play.start();
 	}
 	
 	/*
@@ -370,6 +387,8 @@ public class Jeu extends Activity {
 	}
 	
 	public void solution(View v) {
+		if(niv.solution==null) // il n'y a pas de solution
+			return;
 		if(opt.getInt("mode", 0)==Niveau.CAMPAGNE && n_niv==menu.avancement) {
 			Toast.makeText(this, R.string.solution_bloque, Toast.LENGTH_SHORT).show();
 			return;
@@ -380,22 +399,73 @@ public class Jeu extends Activity {
     	play.solution();
 	}
 	
+	@SuppressLint("InlinedApi")
 	public void suivant(View v) {
 		gagne.setVisibility(View.GONE);
+		if(bout_dyna.getVisibility()==View.VISIBLE) hideDyna();
 		if(play.isRunning)
 			play.pause();
 		if(opt.getInt("mode", 0)==Niveau.CAMPAGNE) {
 			if(n_niv==NIV_MAX) {
 				quitter(v);
+				if(menu.screen==0)
+					menu.findViewById(R.id.coupe).setVisibility(View.VISIBLE);
+				menu.finCampagne(v);
 				return;
 			}
 			if(n_niv<menu.avancement)
 				n_niv++;
 			else {
 				Toast.makeText(this, R.string.bloque, Toast.LENGTH_SHORT).show();
+				play.start();
 				return;
 			}
+		} else if(multi!=null) {
+			if(multi.temps1==0 || multi.temps2==0 && !solved) { // j1 ou j2 appui bouton Suivant => Forfait
+				play.start(); // Pour que le menu pause se déclenche ensuite.
+				DialogInterface.OnClickListener check = new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						pause.setVisibility(View.GONE);
+						solvedBySol=false;
+						gagne(Integer.MAX_VALUE);
+					}
+				};
+				AlertDialog.Builder forfait;
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+					forfait = new AlertDialog.Builder(new ContextThemeWrapper(this, android.R.style.Theme_Holo_Light_Dialog));
+				} else {
+					forfait = new AlertDialog.Builder(this);
+				}
+				forfait.setTitle(R.string.forfait);
+				forfait.setMessage(R.string.forfait_msg);
+				forfait.setPositiveButton(R.string.accept, check);
+				forfait.setNegativeButton(R.string.annuler, null);
+				popup = true;
+				forfait.show();
+			} else if(multi.temps2==0) {
+				if(v.getId()==R.id.continuer) { // j1 a appuyé sur continuer
+					solved = false;
+					solUsed = false;
+					startMsg = getString(R.string.c_est_parti)+" "+getString(R.string.joueur)+" 2 ! ("+multi.j.getPseudo()+")";
+					recommencer(v);
+				} else // j1 a recommencé et appuyé sur Suivant
+					gagne(10);
+			} else {
+				if(v.getId()==R.id.continuer) // j2 a appuyé sur continuer
+					finDefi();
+				else // j2 a recommencé et appuyé sur Suivant
+					gagne(10);
+			}
+			return;
 		}
 		launch_niv(false);
+	}
+	
+	private void finDefi() {
+		Resultats.jeu = this;
+		Resultats.multi = multi;
+		popup = true;
+		startActivity(new Intent(this, Resultats.class));
 	}
 }

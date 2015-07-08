@@ -23,6 +23,7 @@ import android.widget.ViewFlipper;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager.NameNotFoundException;
 
 /**
  * Menu principal : activité lancée au démarage.
@@ -35,8 +36,9 @@ public class MenuPrinc extends Activity {
 	public int avancement; // Progression du joueur dans les niveaux campagne.
 	private int n_niv; // Niveau sélectionné dans Campagne
 	public int experience; // L'expérience du joueur.
+	public int versionCode; // Le code de version de la dernière version de Colibri exécutée.
 	private boolean brandNew=true;
-	private int screen=0; // Définit quel écran est affiché : 0:menu, 1:choix niveaux, 2:infos, 3:instructions. Remplace l'utilisation de ViewFlipper qui pouvait causer des outOfMemoryError.
+	public int screen=0; // Définit quel écran est affiché : 0:menu, 1:choix niveaux, 2:infos, 3:instructions. Remplace l'utilisation de ViewFlipper qui pouvait causer des outOfMemoryError.
 	public SharedPreferences pref;
 	public SharedPreferences.Editor editor;
 	private RelativeLayout root;
@@ -79,6 +81,16 @@ public class MenuPrinc extends Activity {
 		}
 	}
 	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if(requestCode==1 && screen==0) { // On met à jour le niveau d'expérience.
+			TextView exp = (TextView) findViewById(R.id.exp_menu);
+			exp.setText(getString(R.string.exp)+" : "+experience);
+			exp.startAnimation(AnimationUtils.loadAnimation(MenuPrinc.this, R.anim.aleat_opt_anim));
+		}
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+	
 	/**
 	 * Pour afficher le menu principal dans root
 	 */
@@ -90,6 +102,9 @@ public class MenuPrinc extends Activity {
 		opt_aleat = (LinearLayout) findViewById(R.id.opt_aleat);
 		opt_reglages = (LinearLayout) findViewById(R.id.opt_reglages);
 		placeButton();
+		if(avancement==Jeu.NIV_MAX+1) {
+			findViewById(R.id.coupe).setVisibility(View.VISIBLE);
+		}
 		TextView exp = (TextView) findViewById(R.id.exp_menu);
 		exp.setText(getString(R.string.exp)+" : "+experience);
 	}
@@ -272,6 +287,18 @@ public class MenuPrinc extends Activity {
 		ParamAleat.loadParams(pref);
 		Log.i("Avancement :","Niv "+avancement);
 		Log.i("Experience :","Score :"+experience);
+		versionCode=pref.getInt("versionCode", 0);
+		int versionActuelle=0;
+		try {
+			versionActuelle = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+		} catch (NameNotFoundException e) {
+			e.printStackTrace();
+		}
+		if(versionActuelle!=versionCode) {
+			editor.putString("adversaires", "[]");
+			editor.putInt("versionCode", versionActuelle);
+			editor.commit();
+		}
 	}
 	
 	/**
@@ -284,6 +311,14 @@ public class MenuPrinc extends Activity {
 	}
 	
 	/**
+	 * Lance l'activité Resultats pour le feu d'artifice de fin de campagne ! :3
+	 * @param v
+	 */
+	public void finCampagne(View v) {
+		startActivity(new Intent(this, Resultats.class));
+	}
+	
+	/**
 	 * Fonctions appelées par le "onClick" des boutons définis dans activity_menu.xml
 	 * 		@param v le bouton appuyé.
 	 */
@@ -291,7 +326,7 @@ public class MenuPrinc extends Activity {
 		opt_reglages.setVisibility(View.INVISIBLE);
 		Jeu.opt.putInt("mode", Niveau.CAMPAGNE);
 		Jeu.opt.putInt("n_niv", Math.min(avancement,Jeu.NIV_MAX));
-		startActivity(new Intent(this, Jeu.class));
+		startActivityForResult(new Intent(this, Jeu.class), 1);
 	}
 	
 	public void campagne(View v) {
@@ -404,7 +439,7 @@ public class MenuPrinc extends Activity {
     			int w=btn_aleat.getWidth(), h=btn_aleat.getHeight();
     			RelativeLayout.LayoutParams p = (RelativeLayout.LayoutParams) opt_aleat.getLayoutParams();
     			p.width=3*w/4;
-    			p.height=3*h;
+    			p.height=opt_aleat.getChildCount()*h;
     			p.leftMargin=w/8;
     			opt_aleat.setLayoutParams(p);
     			Animation a2 = AnimationUtils.loadAnimation(MenuPrinc.this, R.anim.aleat_opt_anim);
@@ -424,7 +459,12 @@ public class MenuPrinc extends Activity {
 	}
 	
 	public void paramAleat(View v) {
-		ParamAleat pa = new ParamAleat(this,avancement);
+		ParamAleat pa = new ParamAleat(new ParamAleat.callBackInterface() {
+			@Override
+			public void launchFunction(int mode) {
+				launchAleat(mode);
+			}
+		}, this, avancement);
 		pa.show(editor); // Si appui sur "OK", lance un niveau aléatoire en mode PERSO.
 	}
 	
@@ -442,12 +482,12 @@ public class MenuPrinc extends Activity {
 	
 	public void launchAleat(int mode) {
 		Jeu.opt.putInt("mode", mode);
-		startActivity(new Intent(this, Jeu.class));
+		startActivityForResult(new Intent(this, Jeu.class), 1);
 	}
 	
 	public void multijoueur(View v) {
 		opt_reglages.setVisibility(View.INVISIBLE);
-		startActivity(new Intent(this, Multijoueur.class));
+		startActivityForResult(new Intent(this, Multijoueur.class), 1);
 	}
 	
 	public void reglages(View v) {

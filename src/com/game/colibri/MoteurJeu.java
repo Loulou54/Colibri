@@ -83,6 +83,7 @@ public class MoteurJeu {
 	 *  Initialise les variables du moteur de jeu (buffer, niv, ...) : appelé après chaque appel de carte.loadNiveau
 	 */
 	public void init(boolean replay) {
+		moveHandler.removeMessages(jeu.n_niv);
 		niv=carte.niv; // pour avoir une référence locale vers le niveau en cours et un nom moins long
 		buf.clear();
 		total_frames = replay ? total_frames+frame : 0;
@@ -342,10 +343,10 @@ public class MoteurJeu {
 			if(buf.size()!=0) {
 				int[] next = buf.getFirst();
 				if(next[0]==mc && next[1]==ml)
-					next[2] = frame+25;
+					next[2] = frame+24;
 			} else {
 				directionDyna = getDirection(mc,ml);
-				wait = frame+25;
+				wait = frame+24;
 			}
 			carte.n_dyna--;
 			carte.animBoom(l+ml,c+mc); // Gère l'animation de l'explosion.
@@ -437,7 +438,6 @@ public class MoteurJeu {
 		int[] mvt;
 		if(buf.size()==0) mvt=new int[3];
 		else mvt=buf.getLast();
-		System.out.println("direc : "+wait+" "+directionDyna+" "+dir);
 		if(wait!=0 && dir!=directionDyna)
 			wait=0;
 		switch (dir) {

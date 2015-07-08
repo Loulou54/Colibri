@@ -1,10 +1,11 @@
 package com.game.colibri;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -18,11 +19,12 @@ public class Multijoueur extends Activity {
 	
 	private ListView lv;
 	private DefiAdapter adapt;
-	private Joueur user;
 	private ArrayList<Joueur> adversaires;
-	public long temps1;
-	public long temps2;
-	public Joueur j;
+	private AlertDialog boxNiv;
+	public int temps1, exp1, penalite1;
+	public int temps2, exp2, penalite2;
+	public int gagne;
+	public Joueur user,j;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +38,7 @@ public class Multijoueur extends Activity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 			    Multijoueur.this.j = adversaires.get(position);
-			    Multijoueur.this.newDefi();
+			    Multijoueur.this.choixNiveau();
 		}});
 	}
 	
@@ -46,7 +48,7 @@ public class Multijoueur extends Activity {
 	private void loadPlayers() {
 		user=new Joueur(menu.pref);
 		if(user.getPseudo()==null) {
-			menu.editor.putString("pseudo", "Vous");
+			menu.editor.putString("pseudo", getString(R.string.vous));
 			menu.editor.commit();
 			user=new Joueur(menu.pref);
 		}
@@ -70,25 +72,65 @@ public class Multijoueur extends Activity {
 		else nouveauJoueur.setVisibility(View.VISIBLE);
 	}
 	
-	public void newDefi() {
+	public void choixNiveau() {
+		boxNiv = new AlertDialog.Builder(this).create();
+		boxNiv.setTitle("vs "+j.getPseudo());
+		boxNiv.setView(LayoutInflater.from(this).inflate(R.layout.choix_niveau_multi, null));
+		boxNiv.show();
+		//newDefi((new Random()).nextInt(3)+1);
+	}
+	
+	public void paramAleat(View v) {
+		ParamAleat pa = new ParamAleat(new ParamAleat.callBackInterface() {
+			@Override
+			public void launchFunction(int mode) {
+				newDefi(mode);
+			}
+		}, this, menu.avancement);
+		pa.show(menu.editor); // Si appui sur "OK", lance un niveau aléatoire en mode PERSO.
+	}
+	
+	public void facile(View v) {
+		newDefi(Niveau.FACILE);
+	}
+	
+	public void moyen(View v) {
+		newDefi(Niveau.MOYEN);
+	}
+
+	public void difficile(View v) {
+		newDefi(Niveau.DIFFICILE);
+	}
+	
+	public void newDefi(int type) {
+		boxNiv.dismiss();
 		Jeu.multi=this;
 		temps1=0;
 		temps2=0;
-		menu.launchAleat((new Random()).nextInt(3)+1);
+		exp1=0;
+		exp2=0;
+		Jeu.startMsg = getString(R.string.c_est_parti)+" "+getString(R.string.joueur)+" 1 ! ("+user.getPseudo()+")";
+		menu.launchAleat(type);
 	}
 	
 	public void finDefi(int exp1, int exp2) {
+		this.exp1 = exp1;
+		this.exp2 = exp2;
 		j.defi();
 		user.defi();
-		if (temps1 > temps2)
-			j.win();
-		else
+		if (gagne==1) {
 			user.win();
+			j.loose();
+		} else if(gagne==2) {
+			j.win();
+			user.loose();
+		}
 		user.addExp(exp1);
 		j.addExp(exp2);
 		menu.experience=user.getExp();
 		menu.editor.putInt("defis", user.getDefis());
 		menu.editor.putInt("win", user.getWin());
+		menu.editor.putInt("loose", user.getLost());
 		saveAdv();
 		menu.saveData();
 	}

@@ -25,7 +25,6 @@
 	<string name="accept">OK</string>
 	<string name="annuler">Annuler</string>
 	<string name="name">Nom</string>
-	<string name="deuxieme">Joueur 2, c\'est parti !</string>
 	<string name="fin">Défi fini :)</string>
 	<string name="bravo">Bien joué !</string>
 	<string name="temps">Temps</string>
@@ -52,5 +51,18 @@
 	<string name="solution_bloque">Vous n\'avez pas encore débloqué la solution de ce niveau !</string>
 	<string name="aleatoire">Aléatoire</string>
 	<string name="choix_campagne">Sélectionnez un niveau : fleur = non résolu</string>
+	<string name="joueur_suivant">\u0009\u21AA Joueur 2 : Prêt ?</string>
+	<string name="forfait">Forfait</string>
+	<string name="forfait_msg">Voulez-vous abandonner par forfait ?</string>
+	<string name="c_est_parti">C\'est parti</string>
+	<string name="joueur">Joueur</string>
+	<string name="vous">Vous</string>
+	<string name="the_results">Les Résultats&#8230;</string>
+	<string name="penalite_aide">Pénalité aide</string>
+	<string name="victoire">Victoire !!</string>
+	<string name="resultats">\u0009\u21D2 Continuez pour les Résultats !</string>
+	<string name="the_end">FIN</string>
+	<string name="toast_fin">Excellent ! Vous avez fini le mode Campagne !!</string>
+	<string name="toast_fin2">Améliorez votre Expérience avec les Niveaux Aléatoires !\nUn classement et des défis en réseau prochainement&#8230; ;)</string>
 	
 </resources>

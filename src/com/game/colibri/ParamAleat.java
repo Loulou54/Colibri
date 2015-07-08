@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,7 +32,7 @@ public class ParamAleat {
 	
 	private AlertDialog.Builder boxAleat = null;
 	private Context context;
-	private MenuPrinc menu;
+	private callBackInterface callback;
 	private int avancement;
 	private TempParam tp;
 	
@@ -49,10 +50,18 @@ public class ParamAleat {
 	}
 	
 	@SuppressLint("InlinedApi")
-	public ParamAleat(MenuPrinc context, int avancement) {
-		this.context = new ContextThemeWrapper(context, android.R.style.Theme_Holo_Light_Dialog);
-		this.menu = context;
+	public ParamAleat(callBackInterface callback, Context context, int avancement) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			this.context = new ContextThemeWrapper(context, android.R.style.Theme_Holo_Light_Dialog);
+		} else {
+			this.context = context;
+		}
+		this.callback = callback;
 		this.avancement = avancement;
+	}
+	
+	public interface callBackInterface {
+		void launchFunction(int mode);
 	}
 	
 	private void prepareParam(final LinearLayout parent) {
@@ -61,7 +70,7 @@ public class ParamAleat {
 		final CheckBox cb = (CheckBox) parent.findViewById(R.id.base_checkbox);
 		sb.setProgress(param[0]-5);
 		cb.setChecked(param[5]==1);
-		tv.setText(menu.getString(R.string.longueur)+" "+(param[0]+param[0]/4)+" ± "+(param[0]/4));
+		tv.setText(context.getString(R.string.longueur)+" "+(param[0]+param[0]/4)+" ± "+(param[0]/4));
 		tp.updateExp(parent);
 		sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 			@Override
@@ -70,7 +79,7 @@ public class ParamAleat {
 			public void onStartTrackingTouch(SeekBar seekBar) {}
 			@Override
 			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-				tv.setText(menu.getString(R.string.longueur)+" "+(5*(progress+5)/4)+" ± "+((progress+5)/4));
+				tv.setText(context.getString(R.string.longueur)+" "+(5*(progress+5)/4)+" ± "+((progress+5)/4));
 				tp.p[0] = progress+5;
 				tp.updateExp(parent);
 			}
@@ -101,7 +110,7 @@ public class ParamAleat {
 				if(i==DialogInterface.BUTTON_POSITIVE) {
 					tp.commit();
 					saveParams(editor);
-					menu.launchAleat(Niveau.PERSO);
+					callback.launchFunction(Niveau.PERSO);
 				} else if(i==DialogInterface.BUTTON_NEUTRAL) {
 					param = paramDefaut.clone();
 					saveParams(editor);
@@ -194,7 +203,7 @@ public class ParamAleat {
 			int min = p[0]*(10+p[0]/4);
 			int lmax = 3*p[0]/2;
 			int max = lmax*(10+lmax/4)+Math.max(p[1],0)*20+Math.max(p[2],0)*15+Math.max(p[3],0)*40+Math.max(p[4],0)*30;
-			((TextView) parent.findViewById(R.id.param_exp)).setText(menu.getString(R.string.exp)+" : "+min+" - "+max);
+			((TextView) parent.findViewById(R.id.param_exp)).setText(context.getString(R.string.exp)+" : "+min+" - "+max);
 		}
 		
 		public void commit() {

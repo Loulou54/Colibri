@@ -11,5 +11,10 @@
     <color name="saumon">#FF7256</color>
     <color name="vert_fonce">#ff669900</color>
     <color name="vert_clair">#ccaacc00</color>
+    <color name="bleu_clair">#bce0ee</color>
+    <color name="bleu_moyen">#29b9e5</color>
+    <color name="gris">#ededed</color>
+    <color name="bleu_nuit">#101040</color>
+    <color name="gris_sombre">#101010</color>
     
 </resources>

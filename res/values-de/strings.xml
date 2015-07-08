@@ -25,7 +25,6 @@
 	<string name="accept">OK</string>
 	<string name="annuler">Abbrechen</string>
 	<string name="name">Name</string>
-	<string name="deuxieme">Spieler 2, los !</string>
 	<string name="fin">Multiplayer-Challenge vertig :)</string>
 	<string name="bravo">Gut gespielt !</string>
 	<string name="temps">Zeit</string>
@@ -33,5 +32,37 @@
 	<string name="defis_joues">Spiele</string>
 	<string name="defis_gagnés">Siege</string>
 	<string name="etat">Spielen</string>
+	<string name="perso">Custom</string>
+	<string name="paramAleat">Random Map - Parameters</string>
+	<string name="defaut">Default</string>
+	<string name="vaches">Cows</string>
+	<string name="dynamites">Dynamites</string>
+	<string name="chats">Cats</string>
+	<string name="arcs">Rainbows</string>
+	<string name="progression">Campaign progression:</string>
+	<string name="longueur">Length:</string>
+	<string name="base_niveau">Menhirs pattern</string>
+	<string name="param_descript">\u0009The length as well as the number of additional elements increases the difficulty but also the amount of experience earned!</string>
+	<string name="did_he_dieded">Oops!</string>
+	<string name="oui">Yes</string>
+	<string name="non">No</string>
+	<string name="aide">Help</string>
+	<string name="bloque">You didn\'t unlock the next level yet!</string>
+	<string name="solution_bloque">You didn\'t unlock the solution of this level yet!</string>
+	<string name="aleatoire">Random</string>
+	<string name="choix_campagne">Select a level: flower = not solved yet</string>
+	<string name="joueur_suivant">\u0009\u21AA Player 2: Ready?</string>
+	<string name="forfait">Forfeit</string>
+	<string name="forfait_msg">Do you wish to abandon by forfeit?</string>
+	<string name="c_est_parti">Let\'s go</string>
+	<string name="joueur">Player</string>
+	<string name="vous">You</string>
+	<string name="the_results">The Results&#8230;</string>
+	<string name="penalite_aide">Help penalty</string>
+	<string name="victoire">Victory!!</string>
+	<string name="resultats">\u0009\u21D2 Press continue for the results!</string>
+	<string name="the_end">THE END</string>
+	<string name="toast_fin">Awesome! You beat the Campagne mode!!</string>
+	<string name="toast_fin2">Improve your Experience with the Random Maps!\nA ranking and network challenges coming soon&#8230;</string>
 	
 </resources>

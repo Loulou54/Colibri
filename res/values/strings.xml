@@ -25,7 +25,6 @@
 	<string name="accept">OK</string>
 	<string name="annuler">Cancel</string>
 	<string name="name">Name</string>
-	<string name="deuxieme">Player 2, get ready !</string>
 	<string name="fin">Challenge finished :)</string>
 	<string name="bravo">Well played !</string>
 	<string name="temps">Time</string>
@@ -52,5 +51,18 @@
 	<string name="solution_bloque">You didn\'t unlock the solution of this level yet!</string>
 	<string name="aleatoire">Random</string>
 	<string name="choix_campagne">Select a level: flower = not solved yet</string>
+	<string name="joueur_suivant">\u0009\u21AA Player 2: Ready?</string>
+	<string name="forfait">Forfeit</string>
+	<string name="forfait_msg">Do you wish to abandon by forfeit?</string>
+	<string name="c_est_parti">Let\'s go</string>
+	<string name="joueur">Player</string>
+	<string name="vous">You</string>
+	<string name="the_results">The Results&#8230;</string>
+	<string name="penalite_aide">Help penalty</string>
+	<string name="victoire">Victory!!</string>
+	<string name="resultats">\u0009\u21D2 Press continue for the results!</string>
+	<string name="the_end">THE END</string>
+	<string name="toast_fin">Awesome! You beat the Campagne mode!!</string>
+	<string name="toast_fin2">Improve your Experience with the Random Maps!\nA ranking and network challenges coming soon&#8230;</string>
 	
 </resources>

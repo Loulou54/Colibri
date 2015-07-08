@@ -48,64 +48,15 @@
         android:onClick="aleatoire"
         android:textSize="16sp" />
     
-    <LinearLayout
+    <include
+        layout="@layout/choix_niveau_aleat"
         android:id="@+id/opt_aleat"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    	android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/bout1"
-        android:layout_below="@+id/bout1"
-        android:layout_marginTop="10dp"
-        android:orientation="vertical"
-        android:visibility="invisible" >
-	    <Button
-	        android:id="@+id/facile"
-	        android:layout_width="match_parent"
-        	android:layout_height="fill_parent"
-        	android:layout_weight="1"
-        	android:layout_marginTop="6dp"
-	        android:background="@drawable/boutons2"
-	        android:gravity="center"
-	        android:text="@string/fac"
-	        android:textColor="@android:color/white"
-	        android:onClick="facile"
-	        android:textSize="14sp" />
-	    <Button
-	        android:id="@+id/moyen"
-	        android:layout_width="match_parent"
-        	android:layout_height="fill_parent"
-        	android:layout_weight="1"
-	        android:layout_marginTop="6dp"
-	        android:background="@drawable/boutons2"
-	        android:gravity="center"
-	        android:text="@string/moy"
-	        android:textColor="@android:color/white"
-	        android:onClick="moyen"
-	        android:textSize="14sp" />
-	    <Button
-	        android:id="@+id/difficile"
-	        android:layout_width="match_parent"
-        	android:layout_height="fill_parent"
-        	android:layout_weight="1"
-	        android:layout_marginTop="6dp"
-	        android:background="@drawable/boutons2"
-	        android:gravity="center"
-	        android:text="@string/dif"
-	        android:textColor="@android:color/white"
-	        android:onClick="difficile"
-	        android:textSize="14sp" />
-	    <Button
-	        android:id="@+id/perso"
-	        android:layout_width="match_parent"
-        	android:layout_height="fill_parent"
-        	android:layout_weight="1"
-	        android:layout_marginTop="6dp"
-	        android:background="@drawable/boutons2"
-	        android:gravity="center"
-	        android:text="@string/perso"
-	        android:textColor="@android:color/white"
-	        android:onClick="paramAleat"
-	        android:textSize="14sp" />
-	</LinearLayout>
+	    android:layout_below="@+id/bout1"
+	    android:layout_marginTop="10dp"
+	    android:visibility="invisible"/>
     
     <Button
         android:id="@+id/bout4"
@@ -201,5 +152,16 @@
         android:text="@string/app_name"
         android:textSize="16sp"
         android:textColor="@color/orange" />
+
+    <ImageView
+        android:id="@+id/coupe"
+        android:layout_width="50dp"
+        android:layout_height="70dp"
+        android:layout_above="@+id/boutmusique"
+        android:layout_alignLeft="@+id/boutmusique"
+        android:src="@drawable/coupe"
+        android:contentDescription="@string/victoire"
+        android:onClick="finCampagne"
+        android:visibility="gone" />
 
 </RelativeLayout>

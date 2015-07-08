@@ -53,17 +53,5 @@
 	    android:layout="@layout/perdu"
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent" />
-
-    <ViewStub
-        android:id="@+id/gain"
-        android:layout="@layout/activity_gagne_multi"
-	    android:layout_width="match_parent"
-	    android:layout_height="match_parent" />
-    
-    <ViewStub
-        android:id="@+id/fin"
-        android:layout="@layout/activity_gagne_multi2"
-	    android:layout_width="match_parent"
-	    android:layout_height="match_parent" />
     
 </RelativeLayout>

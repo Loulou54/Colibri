@@ -32,8 +32,7 @@ public class DefiAdapter extends ArrayAdapter<Joueur> {
 		avatar.setImageResource(j.getAvatar());
 		name.setText(j.getPseudo());
 		exp.setText(expMot+" : " + j.getExp());
-		int scoreOwner = j.getDefis() - j.getWin();
-		score.setText(scoreMot+" " + scoreOwner + " - " + j.getWin());
+		score.setText(scoreMot+" " + j.getLost() + " - " + j.getWin());
 		fer.setId(position);
 		return rowView;
 	}

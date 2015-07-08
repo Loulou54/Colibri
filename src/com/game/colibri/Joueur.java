@@ -7,7 +7,7 @@ public class Joueur {
 	private static int[] img = new int[] {R.drawable.colibri_d1, R.drawable.chat_0, R.drawable.fleur, R.drawable.fleurm, R.drawable.menhir, R.drawable.menhir_rouge, R.drawable.rainbow, R.drawable.skull, R.drawable.vache_0};
 	
 	private String pseudo;
-	private int exp, defis, win, avatar;
+	private int exp, defis, win, loose, avatar;
 	
 	/**
 	 * Création d'un nouveau joueur.
@@ -20,13 +20,15 @@ public class Joueur {
 			exp=0;
 			defis=0;
 			win=0;
+			loose=0;
 			avatar=img[(int) (Math.random()*img.length)];
 		} else {
 			pseudo=data[0];
 			exp=Integer.parseInt(data[1]);
 			defis=Integer.parseInt(data[2]);
 			win=Integer.parseInt(data[3]);
-			avatar=Integer.parseInt(data[4]);
+			loose=Integer.parseInt(data[4]);
+			avatar=Integer.parseInt(data[5]);
 		}
 	}
 	
@@ -39,6 +41,7 @@ public class Joueur {
 		exp=sav.getInt("exp", 0);
 		defis=sav.getInt("defis", 0);
 		win=sav.getInt("win", 0);
+		loose=sav.getInt("loose", 0);
 		avatar=img[0];
 	}
 	
@@ -56,6 +59,10 @@ public class Joueur {
 	
 	public int getWin() {
 		return win;
+	}
+	
+	public int getLost() {
+		return loose;
 	}
 	
 	public int getAvatar() {
@@ -77,6 +84,13 @@ public class Joueur {
 	}
 	
 	/**
+	 * Incrémente le compteur de défaites du joueur.
+	 */
+	public void loose() {
+		loose++;
+	}
+	
+	/**
 	 * Ajoute de l'expérience au joueur.
 	 * @param e
 	 */
@@ -86,6 +100,6 @@ public class Joueur {
 	
 	@Override
 	public String toString() {
-		return pseudo+";"+exp+";"+defis+";"+win+";"+avatar;
+		return pseudo+";"+exp+";"+defis+";"+win+";"+loose+";"+avatar;
 	}
 }
