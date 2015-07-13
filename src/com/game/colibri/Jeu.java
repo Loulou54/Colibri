@@ -211,7 +211,6 @@ public class Jeu extends Activity {
 				multi.temps2 = temps_total_ms;
 				multi.penalite2 = (solUsed) ? niv.solution.length*500 : 0;
 				int exp1=0,exp2=0;
-				System.out.println(multi.temps1+" ; "+multi.temps2);
 				if(multi.temps1==multi.temps2) {
 					multi.gagne = 0;
 					if(multi.temps1!=Integer.MAX_VALUE) { // Égalité !

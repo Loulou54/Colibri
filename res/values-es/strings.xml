@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="app_name">Colibrí</string>
-    <string name="jouer">Continuar</string>
-    <string name="campagne">Campaña</string>
-    <string name="aleat">Mapa Aleatorio</string>
-    <string name="multi">Desafío Multijugador</string>
-    <string name="fac">Principiantes</string>
-    <string name="moy">Intermedio</string>
-    <string name="dif">Experto</string>
-    <string name="pause">-= Pausa =-</string>
-    <string name="reprendre">Reanudar</string>
-    <string name="recommencer">Recomenzar</string>
-    <string name="sortir">Dejar</string>
-    <string name="solution">Solución</string>
-    <string name="info">Informatión</string>
+	
+	<string name="app_name">Colibrí</string>
+	<string name="jouer">Continuar</string>
+	<string name="campagne">Campaña</string>
+	<string name="aleat">Mapa Aleatorio</string>
+	<string name="multi">Desafío Multijugador</string>
+	<string name="fac">Principiantes</string>
+	<string name="moy">Intermedio</string>
+	<string name="dif">Experto</string>
+	<string name="pause">-= Pausa =-</string>
+	<string name="reprendre">Reanudar</string>
+	<string name="recommencer">Recomenzar</string>
+	<string name="sortir">Dejar</string>
+	<string name="solution">Solución</string>
+	<string name="info">Informatión</string>
 	<string name="instru">Instrucción</string>
 	<string name="nouveau_defi">Nuevo desafío</string>
 	<string name="score">Score :</string>
@@ -32,37 +32,37 @@
 	<string name="defis_joues">Desafios</string>
 	<string name="defis_gagnés">Victorias</string>
 	<string name="etat">Jugar</string>
-	<string name="perso">Custom</string>
-	<string name="paramAleat">Random Map - Parameters</string>
-	<string name="defaut">Default</string>
-	<string name="vaches">Cows</string>
-	<string name="dynamites">Dynamites</string>
-	<string name="chats">Cats</string>
-	<string name="arcs">Rainbows</string>
-	<string name="progression">Campaign progression:</string>
-	<string name="longueur">Length:</string>
-	<string name="base_niveau">Menhirs pattern</string>
-	<string name="param_descript">\u0009The length as well as the number of additional elements increases the difficulty but also the amount of experience earned!</string>
-	<string name="did_he_dieded">Oops!</string>
-	<string name="oui">Yes</string>
+	<string name="perso">Personalizado</string>
+	<string name="paramAleat">Mapa aleatoria - Parámetros</string>
+	<string name="defaut">Por defecto</string>
+	<string name="vaches">Vacas</string>
+	<string name="dynamites">Dinamitas</string>
+	<string name="chats">Gatos</string>
+	<string name="arcs">Arco iris</string>
+	<string name="progression">Progresión de la campaña:</string>
+	<string name="longueur">Longitud:</string>
+	<string name="base_niveau">Patrón de los menhires</string>
+	<string name="param_descript">\u0009La longitud y el número de elementos adicionales aumentan la dificultad, sino también la cantidad de experiencia ganada!</string>
+	<string name="did_he_dieded">¡Oops!</string>
+	<string name="oui">Sí</string>
 	<string name="non">No</string>
-	<string name="aide">Help</string>
-	<string name="bloque">You didn\'t unlock the next level yet!</string>
-	<string name="solution_bloque">You didn\'t unlock the solution of this level yet!</string>
-	<string name="aleatoire">Random</string>
-	<string name="choix_campagne">Select a level: flower = not solved yet</string>
-	<string name="joueur_suivant">\u0009\u21AA Player 2: Ready?</string>
-	<string name="forfait">Forfeit</string>
-	<string name="forfait_msg">Do you wish to abandon by forfeit?</string>
-	<string name="c_est_parti">Let\'s go</string>
-	<string name="joueur">Player</string>
-	<string name="vous">You</string>
-	<string name="the_results">The Results&#8230;</string>
-	<string name="penalite_aide">Help penalty</string>
-	<string name="victoire">Victory!!</string>
-	<string name="resultats">\u0009\u21D2 Press continue for the results!</string>
-	<string name="the_end">THE END</string>
-	<string name="toast_fin">Awesome! You beat the Campagne mode!!</string>
-	<string name="toast_fin2">Improve your Experience with the Random Maps!\nA ranking and network challenges coming soon&#8230;</string>
+	<string name="aide">Ayuda</string>
+	<string name="bloque">¡No has desbloqueado el próximo nivel todavía!</string>
+	<string name="solution_bloque">¡No has desbloqueado la próxima solución todavía!</string>
+	<string name="aleatoire">Aleatorio</string>
+	<string name="choix_campagne">Seleccione un nivel: flor = no resuelto todavía</string>
+	<string name="joueur_suivant">\u0009\u21AA ¿Jugador 2: Listo?</string>
+	<string name="forfait">Abandonar</string>
+	<string name="forfait_msg">¿Quieres abandonar?</string>
+	<string name="c_est_parti">¡Vamos!</string>
+	<string name="joueur">Jugador</string>
+	<string name="vous">Tú</string>
+	<string name="the_results">Resultados&#8230;</string>
+	<string name="penalite_aide">Penalidad de ayuda</string>
+	<string name="victoire">¡¡Victoria!!</string>
+	<string name="resultats">\u0009\u21D2 ¡Apreta Continuar para los resulados!</string>
+	<string name="the_end">FÍN</string>
+	<string name="toast_fin">¡Impresionante! ¡¡ Usted acaba de vencer el modo Campaña !!</string>
+	<string name="toast_fin2">¡Mejore su experiencia con los mapas aleatorias! clasificación y desafíos online vienen pronto&#8230;</string>
 	
 </resources>

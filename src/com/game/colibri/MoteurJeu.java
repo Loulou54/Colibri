@@ -20,6 +20,8 @@ import android.view.animation.Animation.AnimationListener;
  */
 public class MoteurJeu {
 	
+	private static final boolean DEBUG = false;
+	
 	public int frame, total_frames;
 	private Carte carte;
 	public Niveau niv;
@@ -29,6 +31,7 @@ public class MoteurJeu {
 	private int wait = 0;
 	private int directionDyna = 0;
 	private LinkedList <int[]> buf; // la file d'attente des touches
+	// private LinkedList <int[]> mouvements; // Les mouvements effectués
 	private int[] lastMove=new int[] {0,0};
 	private int[][] trace_diff; // Contient le différentiel de position lors des ACTION_MOVE.
 	private static int SEUIL=15; // seuil de vitesse de glissement du doigt sur l'écran.
@@ -75,6 +78,7 @@ public class MoteurJeu {
 		carte = c;
 		jeu=activ;
 		buf = new LinkedList<int[]>();
+		// mouvements = new LinkedList<int[]>();
 		trace_diff=new int[3][2];
 		SEUIL = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 15, activ.getResources().getDisplayMetrics());
 	}
@@ -86,6 +90,7 @@ public class MoteurJeu {
 		moveHandler.removeMessages(jeu.n_niv);
 		niv=carte.niv; // pour avoir une référence locale vers le niveau en cours et un nom moins long
 		buf.clear();
+		// mouvements.clear();
 		total_frames = replay ? total_frames+frame : 0;
 		frame=0;
 		wait=0;
@@ -162,11 +167,15 @@ public class MoteurJeu {
 					carte.colibri.step=0;
 				if(mov[2]<=frame) {
 					buf.removeFirst();
+					/*if(carte.colibri.step==0)
+						mov[2]=frame;
+					mouvements.add(mov);*/
 					carte.colibri.setDirection(mov); // On effectue le prochain mouvement de la file.
 					carte.colibri.setSpriteDirection(); // On choisit la direction de l'image.
 					if(carte.n_dyna>0) removeMenhirRouge(mov); // On enlève si nécessaire le menhir rouge de sélection.
 					if(mov[0]==mov[1]) { // <=> mov=={0,0} : pose une dynamite.
-						System.out.println("DYNAMITE : "+frame);
+						if(DEBUG)
+							System.out.println("DYNAMITE : "+frame);
 						exploseMenhir();
 					}
 					lastMove=mov;
@@ -185,7 +194,8 @@ public class MoteurJeu {
 				carte.colibri.mx=0;
 				carte.colibri.my=0;
 				carte.colibri.setPos(c, l);
-				System.out.println("Frame : "+frame+" Pos : "+l+","+c);
+				if(DEBUG)
+					System.out.println("Frame : "+frame+" Pos : "+l+","+c);
 				if(!outOfMap && carte.n_dyna>0) {
 					niv.carte[l+ml][c+mc]=MENHIR_ROUGE;
 					carte.fond.invalidate();
@@ -265,7 +275,8 @@ public class MoteurJeu {
 				if(nl!=l || nc!=c)
 					carte.fond.invalidate();
 			}
-			System.out.println("Frame : "+frame+" Pos : "+carte.colibri.getRow()+","+carte.colibri.getCol()+" VACHE");
+			if(DEBUG)
+				System.out.println("Frame : "+frame+" Pos : "+carte.colibri.getRow()+","+carte.colibri.getCol()+" VACHE");
 		}
 	}
 	
@@ -483,5 +494,13 @@ public class MoteurJeu {
 	public void dynamite() {
 		buf.add(new int[]{0,0,0});
 	}
+	
+	/*public String getMouvements() {
+		String s="";
+		for(int[] m : mouvements) {
+			s+=m[1]+","+m[0]+","+m[2]+",";
+		}
+		return s;
+	}*/
 	
 }

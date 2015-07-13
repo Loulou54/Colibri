@@ -62,7 +62,7 @@
 	<string name="victoire">Victory!!</string>
 	<string name="resultats">\u0009\u21D2 Press continue for the results!</string>
 	<string name="the_end">THE END</string>
-	<string name="toast_fin">Awesome! You beat the Campagne mode!!</string>
+	<string name="toast_fin">Awesome! You beat the Campaign mode!!</string>
 	<string name="toast_fin2">Improve your Experience with the Random Maps!\nA ranking and network challenges coming soon&#8230;</string>
 	
 </resources>

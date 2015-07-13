@@ -18,7 +18,8 @@ import android.util.SparseArray;
  */
 public class Niveau {
 	
-	public final static int CAMPAGNE=0, FACILE=1, MOYEN=2, DIFFICILE=3, PERSO=4;
+	private static final boolean DEBUG = false;
+	public static final int CAMPAGNE=0, FACILE=1, MOYEN=2, DIFFICILE=3, PERSO=4;
 	
 	/*
 	 * Définit s'il s'agit d'un niveau aléatoire ou non.
@@ -243,7 +244,7 @@ public class Niveau {
 				 *  "solution=" suivi d'une succession de nombres et de virgules
 				 *  ATTENTION : la solution dans les fochiers est décrite selon (lig,col) alors que dans notre jeu c'est (x,y) !!
 				 */
-				if (list[i].startsWith("solution",0)) {
+				if (list[i].startsWith("solution",0)) { // Mouvements enchaînés (pas de notion de temps) (doublets (l,c))
 					String line = list[i].substring(9, list[i].length());
 					String[] elements = line.split(",");
 					int nombre_deplacements = (elements.length)/2;
@@ -252,6 +253,16 @@ public class Niveau {
 						solution[j][2] = 0;
 						solution[j][1] = Integer.valueOf(elements[2*j]);
 						solution[j][0] = Integer.valueOf(elements[2*j+1]);
+					}
+				} else if(list[i].startsWith("sol_temp",0)) { // Triplets (l,c,t)
+					String line = list[i].substring(9, list[i].length());
+					String[] elements = line.split(",");
+					int nombre_deplacements = (elements.length)/3;
+					solution = new int[nombre_deplacements][3];
+					for (int j = 0; j < nombre_deplacements; j ++) {
+						solution[j][2] = Integer.valueOf(elements[3*j+2]);
+						solution[j][1] = Integer.valueOf(elements[3*j]);
+						solution[j][0] = Integer.valueOf(elements[3*j+1]);
 					}
 				}
 			}
@@ -1060,7 +1071,8 @@ public class Niveau {
 		int stockDyna=0, cote=0, iiMen=0; // Le nombre de dyna à poser ; le nombre de dyna posée mais pas utilisée ; le cote du menhir explosé lorsqu'une dyna est utilisée.
 		boolean poseArc=false, dropDyna=false, exploseMen=false; // Indique si une dynamite doit être posée pour le déplacement considéré.
 		for (int k=0; k<n && loop<17;k++) { // Pour garantir une proba voulue (pv) de ne pas interrompre un cas encore possible de proba p, il faut une limite de n>=ln(1-pv)/ln(1-p). On a 17 pour p=0.133 et pv=0.9.
-			System.out.println("Fr="+frame+" Pos : "+r+","+c);
+			if(DEBUG)
+				System.out.println("Fr="+frame+" Pos : "+r+","+c);
 			direc=random.nextInt(2); // Choisit si le prochain deplacement se fera selon une ligne ou une colonne.
 			bord=random.nextInt(10); // Il y a une probabilité de 1/5 d'aller jusqu'à la cloture du niveau. Cela permet de ne pas trop confiner le chemin au milieu de la carte, et de donner davantage de possibilités de résolution au joueur...
 			w[0]=0; frameDepart=frame;
@@ -1089,7 +1101,8 @@ public class Niveau {
 					exploseMen = true;
 					w[0]=25; // Temps pris par l'explosion de la dynamite
 					carteOrigin[getCoord(r,ii,11)][getCoord(c,1-ii,19)]+=5; // 6 ou 8 code un menhir démoli.
-					System.out.println("Explo : "+getCoord(r,ii,11)+" , "+getCoord(c,1-ii,19));
+					if(DEBUG)
+						System.out.println("Explo : "+getCoord(r,ii,11)+" , "+getCoord(c,1-ii,19));
 				}
 			}
 			if(poseArc || nbArcs>0 && k<n-4 && random.nextInt(n-k-4)<nbArcs) { // On veut poser une paire d'arcs-en-ciel
@@ -1122,7 +1135,8 @@ public class Niveau {
 					poseArc=true;
 					carteOrigin[rr][cc]=numArcs;
 					int[] arcPos = new int[] {rr,cc,0,0};
-					System.out.println("ARC 1 : "+rr+" , "+cc);
+					if(DEBUG)
+						System.out.println("ARC 1 : "+rr+" , "+cc);
 					direc=dir;
 					cote=(s+1)/2;
 					do { // On cherche l'emplacement du second arc.
@@ -1131,7 +1145,8 @@ public class Niveau {
 					} while(rr==r && cc==c || chemin[rr][cc]!=0 || carteOrigin[rr][cc]!=0 || passVaches.getOccurences(rr, cc)!=null);
 					carteOrigin[rr][cc]=numArcs;
 					arcPos[2]=rr; arcPos[3]=cc;
-					System.out.println("ARC 2 : "+rr+" , "+cc);
+					if(DEBUG)
+						System.out.println("ARC 2 : "+rr+" , "+cc);
 					rainbows.put(numArcs, arcPos);
 					if(bord<2 || cote==0 && (direc==0 && rr<=1 || direc==1 && cc<=1) || cote==1 && (direc==0 && rr>=10 || direc==1 && cc>=18))
 						bord = cote;
@@ -1235,7 +1250,8 @@ public class Niveau {
 						} while((chemin[a][b]==0 || carteOrigin[a][b]==4 || carteOrigin[a][b]>=10 || Math.abs(carteOrigin[a][b]-7)==1) && cp++<15);
 						if(cp<=15) {
 							carteOrigin[a][b]=4;
-							System.out.println("POSE DYNA : "+a+" , "+b);
+							if(DEBUG)
+								System.out.println("POSE DYNA : "+a+" , "+b);
 							dropDyna=false;
 							stockDyna++;
 						}
@@ -1342,7 +1358,8 @@ public class Niveau {
 						} while((chemin[a][b]==0 || carteOrigin[a][b]==4 || carteOrigin[a][b]>=10 || Math.abs(carteOrigin[a][b]-7)==1) && cp++<15);
 						if(cp<=15) {
 							carteOrigin[a][b]=4;
-							System.out.println("POSE DYNA : "+a+" , "+b);
+							if(DEBUG)
+								System.out.println("POSE DYNA : "+a+" , "+b);
 							dropDyna=false;
 							stockDyna++;
 						}
