@@ -51,7 +51,7 @@
 	<string name="solution_bloque">You didn\'t unlock the solution of this level yet!</string>
 	<string name="aleatoire">Random</string>
 	<string name="choix_campagne">Select a level: flower = not solved yet</string>
-	<string name="joueur_suivant">\u0009\u21AA Player 2: Ready?</string>
+	<string name="joueur_suivant">\u0009\u21AA This level and your results will be sent to your opponent.</string>
 	<string name="forfait">Forfeit</string>
 	<string name="forfait_msg">Do you wish to abandon by forfeit?</string>
 	<string name="c_est_parti">Let\'s go</string>
@@ -64,5 +64,23 @@
 	<string name="the_end">THE END</string>
 	<string name="toast_fin">Awesome! You beat the Campaign mode!!</string>
 	<string name="toast_fin2">Improve your Experience with the Random Maps!\nA ranking and network challenges coming soon&#8230;</string>
+	<string name="enter_pseudo">\u0009Please enter your nickname for the multiplayer mode:</string>
+	<string name="register">Register</string>
+	<string name="progress">Transfer&#8230;</string>
+	<string name="err404">Error 404: resource not found.</string>
+	<string name="err500">Error 500: something went wrong at server end.</string>
+	<string name="err">Unknown error. Are you connected to Internet?</string>
+	<string name="deja_pris">This username is already taken.\nTry something else!</string>
+	<string name="enregistre">You\'ve been successfully registered!</string>
+	<string name="pas_connect_register">You must be connected to Internet to Register.</string>
+	<string name="hors_connexion">You\'re currently offline.</string>
+	<string name="gcm_register">Registering to Google Cloud Messaging service&#8230;</string>
+	<string name="gcm_success">Done!</string>
+	<string name="sync_fail">Synchronization with remote database failed!</string>
+	<string name="nom_invalide">Invalid name.</string>
+	<string name="etat_attente">Waiting</string>
+	<string name="etat_resultats">Results!</string>
+	<string name="etat_relever">Solve</string>
+	<string name="etat_lancer">New one</string>
 	
 </resources>

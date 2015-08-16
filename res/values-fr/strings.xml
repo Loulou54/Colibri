@@ -51,7 +51,7 @@
 	<string name="solution_bloque">Vous n\'avez pas encore débloqué la solution de ce niveau !</string>
 	<string name="aleatoire">Aléatoire</string>
 	<string name="choix_campagne">Sélectionnez un niveau : fleur = non résolu</string>
-	<string name="joueur_suivant">\u0009\u21AA Joueur 2 : Prêt ?</string>
+	<string name="joueur_suivant">\u0009\u21AA Ce niveau et vos résultats vont être envoyés à votre adversaire.</string>
 	<string name="forfait">Forfait</string>
 	<string name="forfait_msg">Voulez-vous abandonner par forfait ?</string>
 	<string name="c_est_parti">C\'est parti</string>
@@ -64,5 +64,23 @@
 	<string name="the_end">FIN</string>
 	<string name="toast_fin">Excellent ! Vous avez fini le mode Campagne !!</string>
 	<string name="toast_fin2">Améliorez votre Expérience avec les Niveaux Aléatoires !\nUn classement et des défis en réseau prochainement&#8230; ;)</string>
+	<string name="enter_pseudo">\u0009Entrez votre pseudonyme pour le mode multijoueur :</string>
+	<string name="register">Enregistrement</string>
+	<string name="progress">Transfert&#8230;</string>
+	<string name="err404">Erreur 404: ressource non trouvée.</string>
+	<string name="err500">Erreur 500: quelque chose cloche sur notre serveur !</string>
+	<string name="err">Erreur inconnue. Êtes-vous bien connectés à Internet ?</string>
+	<string name="deja_pris">Ce pseudo est déjà pris.\nEssayez un autre !</string>
+	<string name="enregistre">Vous vous êtes inscrits avec succès !</string>
+	<string name="pas_connect_register">Vous devez être connectés à Internet pour vous inscrire.</string>
+	<string name="hors_connexion">Vous êtes actuellement hors connexion.</string>
+	<string name="gcm_register">Enregistrement au service Google Cloud Messaging&#8230;</string>
+	<string name="gcm_success">Fait !</string>
+	<string name="sync_fail">La synchronisation avec la base de données distante a échoué !</string>
+	<string name="nom_invalide">Nom invalide.</string>
+	<string name="etat_attente">Attente</string>
+	<string name="etat_resultats">Résultats</string>
+	<string name="etat_relever">Relever</string>
+	<string name="etat_lancer">Nouveau</string>
 	
 </resources>

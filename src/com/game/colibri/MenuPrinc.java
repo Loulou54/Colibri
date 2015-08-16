@@ -6,6 +6,7 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,6 +20,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewFlipper;
 import android.app.Activity;
 import android.content.Intent;
@@ -35,7 +37,7 @@ public class MenuPrinc extends Activity {
 	public int ww,wh;
 	public int avancement; // Progression du joueur dans les niveaux campagne.
 	private int n_niv; // Niveau sélectionné dans Campagne
-	public int experience; // L'expérience du joueur.
+	public int experience, expToSync; // L'expérience du joueur et l'expérience encore non synchronisée avec le serveur.
 	public int versionCode; // Le code de version de la dernière version de Colibri exécutée.
 	private boolean brandNew=true;
 	public int screen=0; // Définit quel écran est affiché : 0:menu, 1:choix niveaux, 2:infos, 3:instructions. Remplace l'utilisation de ViewFlipper qui pouvait causer des outOfMemoryError.
@@ -283,6 +285,7 @@ public class MenuPrinc extends Activity {
 	private void loadData() {
 		avancement=pref.getInt("niveau", 1);
 		experience=pref.getInt("exp", 0);
+		expToSync=pref.getInt("expToSync", 0);
 		n_niv=avancement;
 		ParamAleat.loadParams(pref);
 		Log.i("Avancement :","Niv "+avancement);
@@ -307,6 +310,7 @@ public class MenuPrinc extends Activity {
 	public void saveData() {
 		editor.putInt("niveau", avancement);
 		editor.putInt("exp", experience);
+		editor.putInt("expToSync", expToSync);
 		editor.commit();
 	}
 	
@@ -315,6 +319,15 @@ public class MenuPrinc extends Activity {
 	 * @param v
 	 */
 	public void finCampagne(View v) {
+		Resultats.callback = new Resultats.callBackInterface() {
+			@Override
+			public void suite() {
+				Toast toast = Toast.makeText(MenuPrinc.this, R.string.toast_fin2, Toast.LENGTH_LONG);
+		    	TextView tv = (TextView) toast.getView().findViewById(android.R.id.message);
+		    	if( tv != null) tv.setGravity(Gravity.CENTER);
+		    	toast.show();
+			}
+		};
 		startActivity(new Intent(this, Resultats.class));
 	}
 	

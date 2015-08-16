@@ -100,7 +100,7 @@ public class Niveau {
 	 * Constructeur d'un niveau aléatoire de paramètres donnés.
 	 * @param mode le mode de niveau aléatoire (cf: constantes de classe en static)
 	 */
-	public Niveau(int mode, int avancement) {
+	public Niveau(int mode, long graine, int[] param, int avancement) {
 		isRandom=true;
 		init();
 		int lon, lar, base;
@@ -115,16 +115,16 @@ public class Niveau {
 			lon=18; lar=12; nVaches=4; nDyna=4; nChats=3; nArcs=3; base=1;
 			break;
 		default:
-			lon = ParamAleat.param[0];
+			lon = param[0];
 			lar = lon/2;
-			importParam();
-			base = ParamAleat.param[5];
+			importParam(param);
+			base = param[5];
 		}
 		if(avancement<9) nVaches=0;
 		if(avancement<16) nDyna=0;
 		if(avancement<21) nChats=0;
 		if(avancement<23) nArcs=0;
-		this.geneNivRand(lon, lar, base);
+		this.geneNivRand(lon, lar, base, graine);
 		replay();
 	}
 	
@@ -523,11 +523,11 @@ public class Niveau {
 	public int nVaches=3, nDyna=3, nChats=2, nArcs=2; // Paramètres de quantité, dans [0,6]
 	private SparseArray<int[]> rainbows;
 	
-	private void importParam() {
-		nVaches = Math.max(ParamAleat.param[1],0);
-		nDyna = Math.max(ParamAleat.param[2],0);
-		nChats = Math.max(ParamAleat.param[3],0);
-		nArcs = Math.max(ParamAleat.param[4],0);
+	private void importParam(int[] param) {
+		nVaches = Math.max(param[1],0);
+		nDyna = Math.max(param[2],0);
+		nChats = Math.max(param[3],0);
+		nArcs = Math.max(param[4],0);
 	}
 	
 	private void fillPosAleat(int dist, LinkedList<Integer> pos, int sig) { // Génération des possibilités.
@@ -1433,9 +1433,9 @@ public class Niveau {
 	 *  @param var intervalle de variation aléaoire de la longueur du chemin
 	 *  @param base indice indiquant si l'on utilise le générateur de base en menhirs
 	 */
-	public void geneNivRand(int lon, int var, int base){
+	public void geneNivRand(int lon, int var, int base, long graine){
 		random = new Random();
-		seed=random.nextLong();
+		seed=graine;
 		System.out.println("SEED : "+seed);
 		random.setSeed(seed);
 		int nbVaches, nbDyna, nCats, nbArcs;
@@ -1471,7 +1471,7 @@ public class Niveau {
 		if(!geneChemin(longueur,db_l,db_c,nbVaches,nbDyna,nCats,nbArcs,numArcs) || casesParcourues()<15) { // on génère la carte pour une solution en "longueur" coups !
 			// Si la génération s'est retrouvée dans une impasse ou si le niveau généré est trop simple (coincé dans un secteur)
 			init();
-			geneNivRand(lon,var,base);
+			geneNivRand(lon,var,base,seed-42);
 		}
 		experience = solution.length*(10+solution.length/4)+vaches.size()*20+nbDyna*15+chats.size()*40+nbArcs*30;
 	}

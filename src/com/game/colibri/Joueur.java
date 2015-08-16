@@ -1,52 +1,46 @@
 package com.game.colibri;
 
-import android.content.SharedPreferences;
-
 public class Joueur {
 	
-	private static int[] img = new int[] {R.drawable.colibri_d1, R.drawable.chat_0, R.drawable.fleur, R.drawable.fleurm, R.drawable.menhir, R.drawable.menhir_rouge, R.drawable.rainbow, R.drawable.skull, R.drawable.vache_0};
+	public static int[] img = new int[] {R.drawable.colibri_d1, R.drawable.chat_0, R.drawable.fleur, R.drawable.fleurm, R.drawable.menhir, R.drawable.menhir_rouge, R.drawable.rainbow, R.drawable.skull, R.drawable.vache_0, R.drawable.doge, R.drawable.doge_lunettes};
 	
-	private String pseudo;
+	private String pseudo, pays;
 	private int exp, defis, win, loose, avatar;
-	
-	/**
-	 * Création d'un nouveau joueur.
-	 * @param nom
-	 */
-	public Joueur(String nom) {
-		String[] data = nom.split(";");
-		if(data.length==1) {
-			pseudo=nom;
-			exp=0;
-			defis=0;
-			win=0;
-			loose=0;
-			avatar=img[(int) (Math.random()*img.length)];
-		} else {
-			pseudo=data[0];
-			exp=Integer.parseInt(data[1]);
-			defis=Integer.parseInt(data[2]);
-			win=Integer.parseInt(data[3]);
-			loose=Integer.parseInt(data[4]);
-			avatar=Integer.parseInt(data[5]);
-		}
-	}
 	
 	/**
 	 * Récupération des paramètres du joueur propriétaire du smartphone.
 	 * @param sav
 	 */
-	public Joueur(SharedPreferences sav) {
+	/*public Joueur(SharedPreferences sav) {
 		pseudo=sav.getString("pseudo", null);
+		pays=Resources.getSystem().getConfiguration().locale.getCountry();
 		exp=sav.getInt("exp", 0);
 		defis=sav.getInt("defis", 0);
 		win=sav.getInt("win", 0);
 		loose=sav.getInt("loose", 0);
 		avatar=img[0];
+	}*/
+	
+	/**
+	 * Créer un nouveau joueur.
+	 * @param sav
+	 */
+	public Joueur(String nom, String loc, int e, int d, int w, int l, int av) {
+		pseudo=nom;
+		pays=loc;
+		exp=e;
+		defis=d;
+		win=w;
+		loose=l;
+		avatar=av;
 	}
 	
 	public String getPseudo() {
 		return pseudo;
+	}
+	
+	public String getPays() {
+		return pays;
 	}
 	
 	public int getExp() {
@@ -66,7 +60,7 @@ public class Joueur {
 	}
 	
 	public int getAvatar() {
-		return avatar;
+		return img[avatar];
 	}
 	
 	/**
@@ -100,6 +94,6 @@ public class Joueur {
 	
 	@Override
 	public String toString() {
-		return pseudo+";"+exp+";"+defis+";"+win+";"+loose+";"+avatar;
+		return pseudo+";"+pays+";"+exp+";"+defis+";"+win+";"+loose+";"+avatar;
 	}
 }

@@ -2,6 +2,7 @@ package com.game.colibri;
 
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Random;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -44,7 +45,7 @@ public class Jeu extends Activity {
 	public View perdu; 
 	public View gagne; 
 	public Button bout_dyna;
-	private boolean brandNew=true, solUsed=false, solvedBySol=false, solved=false, music=false, popup=false;
+	private boolean brandNew=true, solUsed=false, solvedBySol=false, solved=false, music=false, popup=false, finipartous=false;
 	public int n_niv;
 	
 	/* (non-Javadoc)
@@ -61,12 +62,18 @@ public class Jeu extends Activity {
 		menu_lateral.findViewById(R.id.av_rapide).setOnTouchListener(new View.OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
-				if(event.getAction() == MotionEvent.ACTION_DOWN) {
+				switch(event.getAction()) {
+				case MotionEvent.ACTION_DOWN:
 					MoteurJeu.PERIODE = 1000/50; // Vitesse * 2
-				}else if(event.getAction() == MotionEvent.ACTION_UP) {
+					break;
+				case MotionEvent.ACTION_UP:
 					MoteurJeu.PERIODE = 1000/25;
+					v.performClick();
+					break;
+				default:
+					break;
 				}
-				return false;
+				return true;
 			}
 		});
 		pause= findViewById(R.id.pause);
@@ -142,11 +149,7 @@ public class Jeu extends Activity {
 			else
 				return false;
 		} else {
-			if(keyCode == KeyEvent.KEYCODE_BACK && multi==null) {
-				recommencer(null);
-			}
-			else
-				return false;
+			return false;
 		}
 	return true;
 	}
@@ -201,35 +204,13 @@ public class Jeu extends Activity {
 		menuLateral(0,null);
 		TextView txt = (TextView) findViewById(R.id.resultats);
 		if (multi != null) { // Mode multijoueur
-			if(multi.temps1 == 0) { // Le joueur 1 vient de terminer
-				multi.temps1 = temps_total_ms;
-				multi.penalite1 = (solUsed) ? niv.solution.length*500 : 0;
-			} else if(multi.temps2 == 0 && solved) { // j1 a recommencé
-				temps_total_ms = multi.temps1;
-				solUsed = (multi.penalite1!=0);
-			} else if(multi.temps2 == 0) { // Le joueur 2 vient de terminer
-				multi.temps2 = temps_total_ms;
-				multi.penalite2 = (solUsed) ? niv.solution.length*500 : 0;
-				int exp1=0,exp2=0;
-				if(multi.temps1==multi.temps2) {
-					multi.gagne = 0;
-					if(multi.temps1!=Integer.MAX_VALUE) { // Égalité !
-						exp1 = play.niv.experience*2;
-						exp2 = play.niv.experience*2;
-					}
-				} else if(multi.temps1+multi.penalite1 > multi.temps2+multi.penalite2 && multi.temps2!=Integer.MAX_VALUE || multi.temps1==Integer.MAX_VALUE) {
-					multi.gagne = 2;
-					exp1=(multi.temps1==Integer.MAX_VALUE) ? 0 : play.niv.experience;
-					exp2=(multi.temps2==Integer.MAX_VALUE) ? 0 : play.niv.experience*2;
-				} else {
-					multi.gagne = 1;
-					exp1=(multi.temps1==Integer.MAX_VALUE) ? 0 : play.niv.experience*2;
-					exp2=(multi.temps2==Integer.MAX_VALUE) ? 0 : play.niv.experience;
-				}
-				multi.finDefi(exp1,exp2);
-			} else { // j2 a recommencé
-				temps_total_ms = multi.temps2;
-				solUsed = (multi.penalite2!=0);
+			if(!solved) {
+				finipartous = multi.defi.finMatch(multi.user.getPseudo(), temps_total_ms, (solUsed) ? niv.solution.length*500 : 0);
+				multi.finMatch();
+			} else {
+				Participation p = multi.defi.participants.get(multi.user.getPseudo());
+				temps_total_ms = finipartous ? p.t_fini : p.t_cours;
+				solUsed = (finipartous ? p.penalite_fini : p.penalite_cours)!=0;
 			}
 			String s;
 			if(temps_total_ms==Integer.MAX_VALUE)
@@ -237,7 +218,7 @@ public class Jeu extends Activity {
 			else
 				s=getString(R.string.temps)+" : "+getFormattedTime(temps_total_ms)
 						+"\n"+getString(R.string.aide)+" : "+(solUsed ? getString(R.string.oui) : getString(R.string.non));
-			txt.setText(s+(multi.temps2==0 ? "\n"+getString(R.string.joueur_suivant) : "\n"+getString(R.string.resultats)));
+			txt.setText(s+(!finipartous ? "\n"+getString(R.string.joueur_suivant) : "\n"+getString(R.string.resultats)));
 		}
 		else {
 			int exp=0;
@@ -252,6 +233,7 @@ public class Jeu extends Activity {
 						exp=(solUsed) ? n_niv*(10+n_niv/8)/2 : n_niv*(10+n_niv/8);
 				}
 				menu.experience+=exp;
+				menu.expToSync+=exp;
 				menu.saveData(); // On sauvegarde la progression.
 			}
 			txt.setText(getString(R.string.temps)+" : "+getFormattedTime(temps_total_ms)
@@ -334,7 +316,12 @@ public class Jeu extends Activity {
 			solved = false;
 			solUsed = false;
 			if(opt.getInt("mode", 0)>0) {
-				niv = new Niveau(opt.getInt("mode"), menu.avancement);
+				if(multi!=null) { // Mode multijoueur
+					niv = new Niveau(opt.getInt("mode"), opt.getLong("seed"), opt.getIntArray("param"), menu.avancement);
+					multi.defi.match = new Defi.Match(opt.getInt("mode"), opt.getLong("seed"), opt.getIntArray("param"), niv.experience);
+					multi.base.updateDefi(multi.defi);
+				} else // Mode Carte Aléatoire
+					niv = new Niveau(opt.getInt("mode"), (new Random()).nextLong(), ParamAleat.param, menu.avancement);
 			} else {
 				try { // On ouvre le Niveau index_niv.
 					niv = new Niveau(this.getAssets().open("niveaux/niveau"+n_niv+".txt"));
@@ -398,7 +385,6 @@ public class Jeu extends Activity {
     	play.solution();
 	}
 	
-	@SuppressLint("InlinedApi")
 	public void suivant(View v) {
 		gagne.setVisibility(View.GONE);
 		if(bout_dyna.getVisibility()==View.VISIBLE) hideDyna();
@@ -420,40 +406,16 @@ public class Jeu extends Activity {
 				return;
 			}
 		} else if(multi!=null) {
-			if(multi.temps1==0 || multi.temps2==0 && !solved) { // j1 ou j2 appui bouton Suivant => Forfait
-				play.start(); // Pour que le menu pause se déclenche ensuite.
-				DialogInterface.OnClickListener check = new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						pause.setVisibility(View.GONE);
-						solvedBySol=false;
-						gagne(Integer.MAX_VALUE);
+			if(!solved) { // j1 ou j2 appui bouton Suivant => Forfait
+				forfaitBox();
+			} else{
+				if(v.getId()==R.id.continuer) { // appui sur continuer
+					if(finipartous) {
+						finDefi();
+					} else {
+						quitter(null);
 					}
-				};
-				AlertDialog.Builder forfait;
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-					forfait = new AlertDialog.Builder(new ContextThemeWrapper(this, android.R.style.Theme_Holo_Light_Dialog));
-				} else {
-					forfait = new AlertDialog.Builder(this);
-				}
-				forfait.setTitle(R.string.forfait);
-				forfait.setMessage(R.string.forfait_msg);
-				forfait.setPositiveButton(R.string.accept, check);
-				forfait.setNegativeButton(R.string.annuler, null);
-				popup = true;
-				forfait.show();
-			} else if(multi.temps2==0) {
-				if(v.getId()==R.id.continuer) { // j1 a appuyé sur continuer
-					solved = false;
-					solUsed = false;
-					startMsg = getString(R.string.c_est_parti)+" "+getString(R.string.joueur)+" 2 ! ("+multi.j.getPseudo()+")";
-					recommencer(v);
-				} else // j1 a recommencé et appuyé sur Suivant
-					gagne(10);
-			} else {
-				if(v.getId()==R.id.continuer) // j2 a appuyé sur continuer
-					finDefi();
-				else // j2 a recommencé et appuyé sur Suivant
+				} else // le joueur a recommencé et appuyé sur Suivant
 					gagne(10);
 			}
 			return;
@@ -461,9 +423,44 @@ public class Jeu extends Activity {
 		launch_niv(false);
 	}
 	
+	@SuppressLint("InlinedApi")
+	private void forfaitBox() {
+		play.start(); // Pour que le menu pause se déclenche ensuite.
+		DialogInterface.OnClickListener check = new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				pause.setVisibility(View.GONE);
+				solvedBySol=false;
+				solUsed = false;
+				gagne(Integer.MAX_VALUE);
+			}
+		};
+		AlertDialog.Builder forfait;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			forfait = new AlertDialog.Builder(new ContextThemeWrapper(this, android.R.style.Theme_Holo_Light_Dialog));
+		} else {
+			forfait = new AlertDialog.Builder(this);
+		}
+		forfait.setTitle(R.string.forfait);
+		forfait.setMessage(R.string.forfait_msg);
+		forfait.setPositiveButton(R.string.accept, check);
+		forfait.setNegativeButton(R.string.annuler, null);
+		popup = true;
+		forfait.show();
+	}
+	
 	private void finDefi() {
-		Resultats.jeu = this;
+		Resultats.callback = new Resultats.callBackInterface() {
+			@Override
+			public void suite() {
+				multi.defi.participants.get(multi.user.getPseudo()).resultatsVus=true;
+				multi.base.setresultatsVus(multi.defi.id,multi.user.getPseudo(),true);
+				quitter(null);
+				//multi.choixNiveau();
+			}
+		};
 		Resultats.multi = multi;
+		Resultats.DISPLAY_RES = true;
 		popup = true;
 		startActivity(new Intent(this, Resultats.class));
 	}
