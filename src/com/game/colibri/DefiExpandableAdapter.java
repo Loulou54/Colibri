@@ -3,6 +3,10 @@ package com.game.colibri;
 import java.util.ArrayList;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,18 +40,36 @@ public class DefiExpandableAdapter extends BaseExpandableListAdapter {
 	@Override
 	public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 		Participation p = (Participation) getChild(groupPosition, childPosition);
+		ChildViewHolder h;
 		if(convertView==null) {
 			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			convertView = inflater.inflate(R.layout.list_participation, parent, false);
-			((ImageView) convertView.findViewById(R.id.avatar)).setImageResource(p.joueur.getAvatar());
-			((TextView) convertView.findViewById(R.id.nomJoueur)).setText(p.joueur.getPseudo());
+			h = new ChildViewHolder();
+			h.avatar = (ImageView) convertView.findViewById(R.id.avatar);
+			h.nom = (TextView) convertView.findViewById(R.id.nomJoueur);
+			h.score = (TextView) convertView.findViewById(R.id.scoreJoueur);
+			h.etat = (ImageView) convertView.findViewById(R.id.etatJoueur);
+			h.exp = (TextView) convertView.findViewById(R.id.expJoueur);
+			convertView.setTag(h);
+		} else {
+			h = (ChildViewHolder) convertView.getTag();
 		}
-		((TextView) convertView.findViewById(R.id.scoreJoueur)).setText(""+p.win);
-		((ImageView) convertView.findViewById(R.id.etatJoueur)).setImageResource((p.t_cours==0) ? R.drawable.horloge : R.drawable.check);
-		((TextView) convertView.findViewById(R.id.expJoueur)).setText(""+p.joueur.getExp());
+		h.avatar.setImageResource(p.joueur.getAvatar());
+		h.nom.setText(p.joueur.getPseudo());
+		h.score.setText(""+p.win);
+		h.etat.setImageResource((p.t_cours==0) ? R.drawable.horloge : R.drawable.check);
+		h.exp.setText(""+p.joueur.getExp());
 		return convertView;
 	}
-
+	
+	static class ChildViewHolder {
+		ImageView avatar;
+		TextView nom;
+		TextView score;
+		ImageView etat;
+		TextView exp;
+	}
+	
 	@Override
 	public int getChildrenCount(int groupPosition) {
 		return adversaires.get(groupPosition).participants.size();
@@ -71,37 +93,77 @@ public class DefiExpandableAdapter extends BaseExpandableListAdapter {
 	@Override
 	public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 		Defi d = (Defi) getGroup(groupPosition);
+		GroupViewHolder h;
 		if(convertView==null) {
 			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			convertView = inflater.inflate(R.layout.list_defi, parent, false);
-			((TextView) convertView.findViewById(R.id.nomDefi)).setText(d.nom);
-			((Button) convertView.findViewById(R.id.etat)).setContentDescription(""+groupPosition);
-			((Button) convertView.findViewById(R.id.fermer)).setContentDescription(""+groupPosition);
+			h = new GroupViewHolder();
+			h.nom = (TextView) convertView.findViewById(R.id.nomDefi);
+			h.nMatch = (TextView) convertView.findViewById(R.id.nMatch);
+			h.etat = (Button) convertView.findViewById(R.id.etat);
+			h.fermer = (Button) convertView.findViewById(R.id.fermer);
+			convertView.setTag(h);
+		} else {
+			h = (GroupViewHolder) convertView.getTag();
 		}
-		((TextView) convertView.findViewById(R.id.nMatch)).setText(""+d.nMatch);
-		String etat="";
+		h.nom.setText(d.nom);
+		h.nMatch.setText(""+d.nMatch);
+		SpannableString etat;
 		int color=0;
+		long t_restant = d.limite-System.currentTimeMillis()/1000;
 		switch(d.getEtat(user)) {
 		case Defi.ATTENTE:
-			etat = context.getString(R.string.etat_attente);
+			etat = new SpannableString(context.getString(R.string.etat_attente)+(d.t_max==0 ? "" : "\n"+getTimeLeft(t_restant)));
 			color = R.color.bleu_moyen;
 			break;
 		case Defi.RESULTATS:
-			etat = context.getString(R.string.etat_resultats);
+			etat = new SpannableString(context.getString(R.string.etat_resultats)+(d.t_max==0 || d.match==null ? "" : "\n"+getTimeLeft(t_restant)));
 			color = R.color.violet;
 			break;
 		case Defi.RELEVER:
-			etat = context.getString(R.string.etat_relever);
-			color = R.color.bleu_moyen;
+			etat = new SpannableString(context.getString(R.string.etat_relever)+(d.t_max==0 ? "" : "\n"+getTimeLeft(t_restant)));
+			color = R.color.red;
 			break;
 		case Defi.LANCER:
-			etat = context.getString(R.string.etat_lancer);
+			etat = new SpannableString(context.getString(R.string.etat_lancer));
 			color = R.color.vert_fonce;
 			break;
+		case Defi.OBSOLETE:
+			etat = new SpannableString(context.getString(R.string.etat_obsolete));
+			color = R.color.choco;
+			break;
+		default:
+			etat = new SpannableString("-");
 		}
-		((Button) convertView.findViewById(R.id.etat)).setText(etat);
-		((Button) convertView.findViewById(R.id.etat)).setTextColor(color);
+		String s = etat.toString();
+		if(s.indexOf("\n")>0) {
+			etat.setSpan(new RelativeSizeSpan(0.75f), s.indexOf("\n"), s.length(), 0);
+			if(t_restant<12*3600)
+				etat.setSpan(new ForegroundColorSpan(Color.RED), s.indexOf("\n"), s.length(), 0);
+			else
+				etat.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.vert_fonce)), s.indexOf("\n"), s.length(), 0);
+		}
+		h.etat.setText(etat);
+		h.etat.setTextColor(context.getResources().getColor(color));
+		h.etat.setTag(groupPosition);
+		h.fermer.setTag(groupPosition);
 		return convertView;
+	}
+	
+	private String getTimeLeft(long t) {
+		if(t>=3600*24) {
+			return context.getResources().getString(R.string.temps_restant, t/(3600*24), (t/3600)%24);
+		} else if (t>0) {
+			return context.getResources().getString(R.string.temps_restant2, t/3600, (t/60)%60);
+		} else
+			return "/!\\";
+	}
+	
+	static class GroupViewHolder {
+		TextView nom;
+		TextView nMatch;
+		Button etat;
+		Button fermer;
 	}
 
 	@Override

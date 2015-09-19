@@ -32,6 +32,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ExpandableListView;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,6 +48,7 @@ public class Multijoueur extends Activity {
 	public Defi defi;
 	public Joueur user;
 	public ConnectionDetector connect;
+	public AsyncHttpClient client;
 	public DBController base;
 	
 	@Override
@@ -54,9 +56,19 @@ public class Multijoueur extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_multijoueur);
 		connect = new ConnectionDetector(this);
+		client = new AsyncHttpClient();
 		base = new DBController(this);
+		joueurs = new HashMap<String, Joueur>();
 		adversaires = new ArrayList<Defi>();
 		lv = (ExpandableListView) findViewById(R.id.listView1);
+		lv.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+			@Override
+			public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+				Participation p = (Participation) adapt.getChild(groupPosition, childPosition);
+				(new DispJoueur(Multijoueur.this, p.joueur)).show();
+				return true;
+			}
+		});
 		//GCMRegistrar.checkDevice(this); TODO /!\
 		//GCMRegistrar.checkManifest(this);
 		registerReceiver(mHandleMessageReceiver, new IntentFilter(BROADCAST_MESSAGE_ACTION));
@@ -92,8 +104,6 @@ public class Multijoueur extends Activity {
 			base.getDefis(user.getPseudo(),joueurs,adversaires);
 			adapt = new DefiExpandableAdapter(this, user.getPseudo(), adversaires);
 			lv.setAdapter(adapt);
-			System.out.println("Adversaires : "+adversaires.size());
-			System.out.println("Joueurs : "+joueurs.size());
 			dispUser();
 			if(!connect.isConnectedToInternet())
 				Toast.makeText(this, R.string.hors_connexion, Toast.LENGTH_LONG).show();
@@ -104,7 +114,7 @@ public class Multijoueur extends Activity {
 	}
 	
 	private void loadJoueurs() {
-		joueurs = base.getJoueurs();
+		base.getJoueurs(joueurs);
 		user = joueurs.get(menu.pref.getString("pseudo",null));
 	}
 	
@@ -166,48 +176,30 @@ public class Multijoueur extends Activity {
 		startActivity(new Intent(this, Jeu.class));
 	}
 	
-	public void finMatch() {
-		menu.experience=user.getExp();
-		menu.saveData();
-		syncData();
-		dispUser();
-	}
-	
-	/*public void cancel(View v) {
-		LinearLayout nouveauJoueur = (LinearLayout) findViewById(R.id.ajoutJoueur);
-		nouveauJoueur.setVisibility(View.INVISIBLE);
-	}*/
-	
 	public void nouveauDefi(View v) {
-		//LinearLayout nouveauJoueur = (LinearLayout) findViewById(R.id.ajoutJoueur);
-		//nouveauJoueur.setVisibility(View.VISIBLE);
-		// TODO: Sélection d'un adversaire soit automatique, soit par recherche du pseudo.
-		AsyncHttpClient client = new AsyncHttpClient();
-		RequestParams params = new RequestParams();
-		params.put("pseudo", menu.pref.getString("pseudo", ""));
-		params.put("nAdv", "1");
-		client.post(SERVER_URL+"/newdefi_auto.php", params, new AsyncHttpResponseHandler() {
+		if(!connect.isConnectedToInternet()) {
+			Toast.makeText(this, R.string.hors_connexion, Toast.LENGTH_LONG).show();
+			return;
+		}
+		if(menu.expToSync!=0)
+			syncData();
+		(new NewDefi(this, client, user.getPseudo(), new NewDefi.callBackInterface() {
 			@Override
-			public void onSuccess(String response) {
-				insertJSONData(response);
+			public void create(String jsonData) {
+				insertJSONData(jsonData);
 			}
-
-			@Override
-			public void onFailure(int statusCode, Throwable error, String content) {
-				Toast.makeText(Multijoueur.this, R.string.err, Toast.LENGTH_LONG).show();
-			}
-		});
+		})).show();
 	}
 	
 	public void supprDefi(View v) {
 		// TODO : supprimer défi de la bdd
-		int groupPosition = Integer.parseInt((String) v.getContentDescription());
-		adversaires.remove(groupPosition);
-		adapt.notifyDataSetChanged();
+		int groupPosition = (Integer) v.getTag();
+		base.removeDefi(adversaires.remove(groupPosition));
+		syncData();
 	}
 	
 	public void actionDefi(View v) {
-		int groupPosition = Integer.parseInt((String) v.getContentDescription());
+		int groupPosition = (Integer) v.getTag();
 		Multijoueur.this.defi = adversaires.get(groupPosition);
 		switch(defi.getEtat(user.getPseudo())) {
 		case Defi.ATTENTE: // Send POKE
@@ -217,8 +209,7 @@ public class Multijoueur extends Activity {
 			Resultats.callback = new Resultats.callBackInterface() {
 				@Override
 				public void suite() {
-					defi.participants.get(user.getPseudo()).resultatsVus=true;
-					base.setresultatsVus(defi.id,user.getPseudo(),true);
+					base.setResultatsVus(defi.id,defi.nMatch);
 					adapt.notifyDataSetChanged();
 					//releverMatch();
 				}
@@ -230,8 +221,11 @@ public class Multijoueur extends Activity {
 		case Defi.RELEVER: // Lancer le jeu avec Seed donnée
 			releverMatch();
 			break;
-		default: // Lancer nouveau défi
+		case Defi.LANCER: // Lancer nouveau défi
 			Multijoueur.this.choixNiveau();
+			break;
+		case Defi.OBSOLETE: // Deadline dépassée -> il faudrait synchroniser.
+			Toast.makeText(Multijoueur.this, R.string.obsolete_txt, Toast.LENGTH_LONG).show();
 		}
 	}
 	
@@ -241,14 +235,11 @@ public class Multijoueur extends Activity {
 	}
 	
 	private void dispUser() {
-		TextView name = (TextView) findViewById(R.id.user_name);
-		name.setText(user.getPseudo());
-		TextView exp = (TextView) findViewById(R.id.user_exp);
-		exp.setText(getString(R.string.exp)+" :\n"+user.getExp());
-		TextView defis = (TextView) findViewById(R.id.user_defis);
-		defis.setText(getString(R.string.defis_joues)+" : "+user.getDefis());
-		TextView win = (TextView) findViewById(R.id.user_wins);
-		win.setText(getString(R.string.defis_gagnés)+" : "+user.getWin());
+		((ImageView) findViewById(R.id.user_avatar)).setImageResource(user.getAvatar());
+		((TextView) findViewById(R.id.user_name)).setText(user.getPseudo());
+		((TextView) findViewById(R.id.user_exp)).setText(getString(R.string.exp)+" :\n"+user.getExp());
+		((TextView) findViewById(R.id.user_defis)).setText(getString(R.string.defis_joues)+" : "+user.getDefis());
+		((TextView) findViewById(R.id.user_wins)).setText(getString(R.string.defis_gagnés)+" : "+user.getWin());
 	}
 	
 	private final BroadcastReceiver mHandleMessageReceiver = new BroadcastReceiver() {
@@ -264,7 +255,7 @@ public class Multijoueur extends Activity {
 	};
 	
 	private void registerUser() {
-		(new RegisterUser(this, new RegisterUser.callBackInterface() {
+		(new RegisterUser(this, client, new RegisterUser.callBackInterface() {
 			@Override
 			public int getExp() {
 				return menu.experience;
@@ -297,20 +288,16 @@ public class Multijoueur extends Activity {
 	
 	public void syncData() {
 		adapt.notifyDataSetChanged();
-		AsyncHttpClient client = new AsyncHttpClient();
 		RequestParams params = new RequestParams();
 		params.put("pseudo", menu.pref.getString("pseudo", ""));
 		params.put("tasks", base.getTasks());
+		System.out.println(base.getTasks());
 		params.put("expToSync", ""+menu.expToSync);
 		client.post(SERVER_URL+"/sync_data.php", params, new AsyncHttpResponseHandler() {
 			@Override
 			public void onSuccess(String response) {
 				insertJSONData(response);
 				base.clearTasks();
-				if(menu.expToSync!=0) {
-					menu.expToSync = 0;
-					menu.saveData();
-				}
 			}
 
 			@Override
@@ -332,22 +319,35 @@ public class Multijoueur extends Activity {
 	
 	/**
 	 * Insert ou met à jour les défis contenus dans def sous le format :
-	 * {defis:[{Defi},{Defi},...],participations:[{Participation},{Participation},...],joueurs:[{Joueur},{Joueur},...]}
+	 * {defis:[{Defi},{Defi},...],participations:[{Participation},{Participation},...],joueurs:[{Joueur},{Joueur},...],tasks:[{task:"delete", defi:3},{task:"message", msg:"Message!"},...]}
 	 * @param def
 	 */
 	private void insertJSONData(String def) {
 		System.out.println(def);
+		if(def.length()<4) // Dans le cas où def vaut []
+			return;
 		try {
 			JSONObject o = new JSONObject(def);
-			int up=base.insertJSONJoueurs((JSONArray) o.get("joueurs"));
-			if(up>0)
+			if(o.has("joueurs")) {
+				base.insertJSONJoueurs((JSONArray) o.get("joueurs"));
 				loadJoueurs();
-			int up2=base.insertJSONDefis((JSONArray) o.get("defis"));
-			up2+=base.insertJSONParticipations((JSONArray) o.get("participations"));
-			if(up2>0)
+				menu.expToSync = 0;
+				menu.experience = user.getExp();
+				menu.saveData();
+				dispUser();
+			}
+			if(o.has("defis"))
+				base.insertJSONDefis((JSONArray) o.get("defis"));
+			if(o.has("participations"))
+				base.insertJSONParticipations((JSONArray) o.get("participations"));
+			if(o.has("deletePart"))
+				base.deletePart(this, (JSONArray) o.get("deletePart"));
+			if(o.has("deleteDef"))
+				base.deleteDef(this, (JSONArray) o.get("deleteDef"));
+			if(o.length()!=0) { // On rafraîchit l'affichage.
 				base.getDefis(user.getPseudo(),joueurs,adversaires);
-			if(up+up2>0)
 				adapt.notifyDataSetChanged();
+			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}

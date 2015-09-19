@@ -206,14 +206,14 @@ public class Jeu extends Activity {
 		if (multi != null) { // Mode multijoueur
 			if(!solved) {
 				finipartous = multi.defi.finMatch(multi.user.getPseudo(), temps_total_ms, (solUsed) ? niv.solution.length*500 : 0);
-				multi.finMatch();
+				multi.syncData();
 			} else {
 				Participation p = multi.defi.participants.get(multi.user.getPseudo());
 				temps_total_ms = finipartous ? p.t_fini : p.t_cours;
 				solUsed = (finipartous ? p.penalite_fini : p.penalite_cours)!=0;
 			}
 			String s;
-			if(temps_total_ms==Integer.MAX_VALUE)
+			if(temps_total_ms==Participation.FORFAIT)
 				s=getString(R.string.forfait)+" !";
 			else
 				s=getString(R.string.temps)+" : "+getFormattedTime(temps_total_ms)
@@ -244,7 +244,7 @@ public class Jeu extends Activity {
 	}
 	
 	public static String getFormattedTime(int time) {
-		return String.format(Locale.FRANCE, "%d min %d.%02d s", time/60000, (time%60000)/1000, (time%1000)/10);
+		return String.format(Locale.FRANCE, (time>=60000 ? (time/60000)+" min " : "")+"%d.%02d s", (time%60000)/1000, (time%1000)/10);
 	}
 	
 	/**
@@ -318,8 +318,11 @@ public class Jeu extends Activity {
 			if(opt.getInt("mode", 0)>0) {
 				if(multi!=null) { // Mode multijoueur
 					niv = new Niveau(opt.getInt("mode"), opt.getLong("seed"), opt.getIntArray("param"), menu.avancement);
-					multi.defi.match = new Defi.Match(opt.getInt("mode"), opt.getLong("seed"), opt.getIntArray("param"), niv.experience);
-					multi.base.updateDefi(multi.defi);
+					if(multi.defi.match==null) {
+						multi.defi.match = new Defi.Match(opt.getInt("mode"), opt.getLong("seed"), opt.getIntArray("param"), niv.experience);
+						multi.defi.limite = System.currentTimeMillis()/1000 + multi.defi.t_max;
+						multi.base.updateDefi(multi.defi);
+					}
 				} else // Mode Carte Aléatoire
 					niv = new Niveau(opt.getInt("mode"), (new Random()).nextLong(), ParamAleat.param, menu.avancement);
 			} else {
@@ -432,7 +435,7 @@ public class Jeu extends Activity {
 				pause.setVisibility(View.GONE);
 				solvedBySol=false;
 				solUsed = false;
-				gagne(Integer.MAX_VALUE);
+				gagne(Participation.FORFAIT);
 			}
 		};
 		AlertDialog.Builder forfait;
@@ -453,8 +456,7 @@ public class Jeu extends Activity {
 		Resultats.callback = new Resultats.callBackInterface() {
 			@Override
 			public void suite() {
-				multi.defi.participants.get(multi.user.getPseudo()).resultatsVus=true;
-				multi.base.setresultatsVus(multi.defi.id,multi.user.getPseudo(),true);
+				multi.base.setResultatsVus(multi.defi.id,multi.defi.nMatch);
 				quitter(null);
 				//multi.choixNiveau();
 			}

@@ -7,11 +7,13 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
         android:text="@string/enter_pseudo"
         android:textSize="20sp"
         android:textStyle="italic"
-        android:textColor="@color/vert_fonce"
-        android:gravity="center" />
+        android:textColor="@color/vert_fonce" />
 
     <EditText
         android:id="@+id/pseudo"
@@ -24,6 +26,37 @@
 
         <requestFocus />
     </EditText>
+    
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/pick_avatar"
+        android:textSize="20sp"
+        android:textStyle="italic"
+        android:textColor="@color/vert_fonce" />
+    
+    <ImageView
+        android:id="@+id/avatarReg"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:src="@drawable/colibri_d1"
+        android:contentDescription="@string/pick_avatar" />
 
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" >
+
+        <LinearLayout
+            android:id="@+id/imagePicker"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:orientation="horizontal"
+            android:visibility="gone" >
+        </LinearLayout>
+    </HorizontalScrollView>
 
 </LinearLayout>

@@ -12,9 +12,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.Build;
+import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.animation.AnimationUtils;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 import static com.network.colibri.CommonUtilities.SERVER_URL;
@@ -24,14 +29,17 @@ public class RegisterUser {
 	private Context context;
 	private ProgressDialog prgDialog;
 	private callBackInterface callback;
+	private AsyncHttpClient client;
+	private int avatar=0;
 	
 	@SuppressLint("InlinedApi")
-	public RegisterUser(Context context, callBackInterface callback) {
+	public RegisterUser(Context context, AsyncHttpClient client, callBackInterface callback) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			this.context = new ContextThemeWrapper(context, android.R.style.Theme_Holo_Light_Dialog);
 		} else {
 			this.context = context;
 		}
+		this.client = client;
 		this.callback= callback;
 		prgDialog = new ProgressDialog(this.context);
 		prgDialog.setMessage(context.getString(R.string.progress));
@@ -49,6 +57,35 @@ public class RegisterUser {
 		final LinearLayout lay = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.register_layout, null);
 		if(content!=null)
 			((EditText) lay.findViewById(R.id.pseudo)).setText(content);
+		final LinearLayout imagePicker = (LinearLayout) lay.findViewById(R.id.imagePicker);
+		final ImageView avatarReg = (ImageView) lay.findViewById(R.id.avatarReg);
+		avatarReg.setImageResource(Joueur.img[avatar]);
+		avatarReg.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				avatarReg.setVisibility(View.GONE);
+				imagePicker.setVisibility(View.VISIBLE);
+			}
+		});
+		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 60, context.getResources().getDisplayMetrics()), LinearLayout.LayoutParams.MATCH_PARENT);
+		OnClickListener click = new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				imagePicker.setVisibility(View.GONE);
+				avatar = v.getId();
+				avatarReg.setImageResource(Joueur.img[avatar]);
+				avatarReg.setVisibility(View.VISIBLE);
+				avatarReg.startAnimation(AnimationUtils.loadAnimation(context, R.anim.aleat_opt_anim));
+			}
+		};
+		for(int i=0; i<Joueur.img.length; i++) {
+			ImageView iv= new ImageView(context);
+			iv.setLayoutParams(params);
+			iv.setId(i);
+			iv.setImageResource(Joueur.img[i]);
+			iv.setOnClickListener(click);
+			imagePicker.addView(iv);
+		}
 		AlertDialog.Builder boxRegister = new AlertDialog.Builder(context);
 		boxRegister.setTitle(R.string.register);
 		boxRegister.setCancelable(false);
@@ -81,10 +118,9 @@ public class RegisterUser {
 	}
 	
 	private void registerUser(final String name) {
-		AsyncHttpClient client = new AsyncHttpClient();
 		RequestParams params = new RequestParams();
 		params.put("pseudo", name);
-		params.put("avatar", ""+((int) (Math.random()*Joueur.img.length)));
+		params.put("avatar", ""+avatar);
 		params.put("exp", ""+callback.getExp());
 		params.put("regId", GCMRegistrar.getRegistrationId(context));
 		params.put("pays", Resources.getSystem().getConfiguration().locale.getCountry());
@@ -101,8 +137,10 @@ public class RegisterUser {
 				} else { // Succès
 					if(callback.registered(response, name))
 						Toast.makeText(context, R.string.enregistre, Toast.LENGTH_LONG).show();
-					else
+					else {
 						Toast.makeText(context, R.string.err, Toast.LENGTH_LONG).show();
+						show(name);
+					}
 				}
 			}
 

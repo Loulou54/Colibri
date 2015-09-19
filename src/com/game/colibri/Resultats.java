@@ -1,5 +1,7 @@
 package com.game.colibri;
 
+import java.util.Comparator;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
@@ -9,6 +11,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,11 +22,8 @@ public class Resultats extends Activity {
 	public static Multijoueur multi;
 	public static int PERIODE = 1000/20;
 	
-	private Participation[] participations;
-	private int t1,t2;
-	private double prog; // Progression
-	private TextView j1,j2,r1,r2,score;
 	private RefreshHandler handler;
+	private ResultatsAdapter adapt;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -34,33 +34,13 @@ public class Resultats extends Activity {
 			return;
 		}
 		setContentView(R.layout.activity_resultats);
-		participations = new Participation[multi.defi.participants.size()+1]; // TODO /!\
-		int i = 0;
-		for(Participation part : multi.defi.participants.values()) {
-			participations[i++] = part;
-		}
-		participations[1] = participations[0]; // TODO /!\
-		t1=participations[0].t_fini;
-		t2=participations[1].t_fini;
-		prog=0;
+		ResultatsAdapter.prog=0;
+		ResultatsAdapter.etape=0;
 		handler = new RefreshHandler();
-		score = (TextView) findViewById(R.id.score_multi);
-		int s1=participations[0].win,s2=participations[1].win;
-		if(participations[0].gagne)
-			s1--;
-		else if(participations[1].gagne)
-			s2--;
-		score.setText(s1+" -=- "+s2);
-		j1 = (TextView) findViewById(R.id.joueur1);
-		j2 = (TextView) findViewById(R.id.joueur2);
-		j1.setText(participations[0].joueur.getPseudo());
-		j2.setText(participations[1].joueur.getPseudo());
-		r1 = (TextView) findViewById(R.id.resultats1);
-		r2 = (TextView) findViewById(R.id.resultats2);
-		r1.setText((t1==Integer.MAX_VALUE) ? getString(R.string.forfait)+" !" : Jeu.getFormattedTime(0)+"\n\n");
-		r2.setText((t2==Integer.MAX_VALUE) ? getString(R.string.forfait)+" !" : Jeu.getFormattedTime(0)+"\n\n");
-		if(t1!=Integer.MAX_VALUE || t2!=Integer.MAX_VALUE)
-			handler.sendMessageDelayed(handler.obtainMessage(0), 1200); // Pour différer le démarrage du comptage
+		adapt = new ResultatsAdapter(this, multi.defi.participants.values().toArray(new Participation[0]));
+		((ListView) findViewById(R.id.listRes)).setAdapter(adapt);
+		((TextView) findViewById(R.id.nomDefiRes)).setText(multi.defi.nom);
+		handler.sendMessageDelayed(handler.obtainMessage(0), 1200); // Commence les animations après 1200ms
 	}
 	
 	public interface callBackInterface {
@@ -78,72 +58,33 @@ public class Resultats extends Activity {
 		}
 	}
 	
-	private void updateTime() {
-		prog+=0.02;
-		if(t1!=Integer.MAX_VALUE)
-			r1.setText(Jeu.getFormattedTime((int) (t1*prog))+"\n\n");
-		if(t2!=Integer.MAX_VALUE)
-			r2.setText(Jeu.getFormattedTime((int) (t2*prog))+"\n\n");
-		if(prog<1)
-			handler.sleep(PERIODE);
-		else
-			handler.sendMessageDelayed(handler.obtainMessage(1), 800);
-	}
-	
-	private void solution(int what) {
-		if(participations[0].t_fini!=Integer.MAX_VALUE)
-			r1.setText(Jeu.getFormattedTime(t1)+"\n"+getString(R.string.penalite_aide)+" :\n + "+Jeu.getFormattedTime(participations[0].penalite_fini));
-		if(participations[1].t_fini!=Integer.MAX_VALUE)
-			r2.setText(Jeu.getFormattedTime(t2)+"\n"+getString(R.string.penalite_aide)+" :\n + "+Jeu.getFormattedTime(participations[1].penalite_fini));
-		if(what==1)
-			handler.sendMessageDelayed(handler.obtainMessage(2), 800);
-		else
-			handler.sendMessageDelayed(handler.obtainMessage(3), 800);
-	}
-	
-	private void updateScore() {
-		if(participations[0].t_fini!=Integer.MAX_VALUE)
-			r1.setText(Jeu.getFormattedTime(t1)+"\n"+getString(R.string.penalite_aide)+" :\n + "+Jeu.getFormattedTime(participations[0].penalite_fini)+"\n"+getString(R.string.exp)+" : "+participations[0].exp);
-		if(participations[1].t_fini!=Integer.MAX_VALUE)
-			r2.setText(Jeu.getFormattedTime(t2)+"\n"+getString(R.string.penalite_aide)+" :\n + "+Jeu.getFormattedTime(participations[1].penalite_fini)+"\n"+getString(R.string.exp)+" : "+participations[1].exp);
-		score.setText(participations[0].win+" -=- "+participations[1].win);
-		score.startAnimation(AnimationUtils.loadAnimation(this, R.anim.aleat_opt_anim));
-		handler.sendMessageDelayed(handler.obtainMessage(4), 800);
-	}
-	
-	private void gagnant() {
-		Artifices a=null;
-		TextView g=null;
-		if(participations[0].gagne) {
-			a = (Artifices) findViewById(R.id.artifices1);
-			g = (TextView) findViewById(R.id.gagne1);
-		} else if(participations[1].gagne) {
-			a = (Artifices) findViewById(R.id.artifices2);
-			g = (TextView) findViewById(R.id.gagne2);
-		}
-		if(a!=null) {
-			a.setVisibility(View.VISIBLE);
-			g.setVisibility(View.VISIBLE);
-			g.startAnimation(AnimationUtils.loadAnimation(this, R.anim.aleat_opt_anim));
-		}
-	}
-	
 	@SuppressLint("HandlerLeak")
 	class RefreshHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
 			if(msg.what==0) {
-				updateTime();
-			} else if(msg.what==1) {
-				solution(1);
-			} else if(msg.what==2) {
-				t1+=participations[0].penalite_fini;
-				t2+=participations[1].penalite_fini;
-				solution(2);
-			} else if(msg.what==3) {
-				updateScore();
-			} else if(msg.what==4) {
-				gagnant();
+				ResultatsAdapter.prog+=0.02;
+				adapt.notifyDataSetChanged();
+				if(ResultatsAdapter.prog<1)
+					sleep(PERIODE);
+				else
+					sendMessageDelayed(obtainMessage(1), 800);
+			} else {
+				ResultatsAdapter.etape = msg.what;
+				if(msg.what==4) {
+					if(multi.defi.participants.get(multi.user.getPseudo()).gagne==1)
+						((Artifices) findViewById(R.id.artifices)).setVisibility(View.VISIBLE);
+				}
+				if(msg.what==5) {
+					adapt.sort(new Comparator<Participation>() {
+						@Override
+						public int compare(Participation lhs, Participation rhs) {
+							return lhs.t_cours+lhs.penalite_cours - (rhs.t_cours+rhs.penalite_cours);
+						}
+					});
+				} else
+					sendMessageDelayed(obtainMessage(msg.what+1), 800);
+				adapt.notifyDataSetChanged();
 			}
 		}
 		public void sleep(long delayMillis) {

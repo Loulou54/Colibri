@@ -5,18 +5,9 @@
     android:background="@drawable/shape_resultats" >
 
     <com.game.colibri.Artifices
-        android:id="@+id/artifices1"
+        android:id="@+id/artifices"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignRight="@+id/score_multi"
-        android:background="@android:color/transparent"
-        android:visibility="gone" />
-    
-    <com.game.colibri.Artifices
-        android:id="@+id/artifices2"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignLeft="@+id/score_multi"
         android:background="@android:color/transparent"
         android:visibility="gone" />
     
@@ -40,115 +31,83 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:baselineAligned="false"
         android:layout_below="@+id/the_res"
-        android:layout_centerHorizontal="true" >
+        android:orientation="vertical"
+        android:background="@android:drawable/alert_light_frame" >
 
         <LinearLayout
-            android:layout_width="0dip"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical" >
-
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+            
             <TextView
-                android:id="@+id/joueur1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="@string/joueur"
-                android:fontFamily="serif"
-				android:textSize="25sp"
+	            android:id="@+id/nomDefiRes"
+	            android:layout_width="0dip"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="3"
+	            android:gravity="center"
+	            android:layout_gravity="center_vertical"
+	            android:text="@string/joueur"
+	            android:fontFamily="serif"
+				android:textSize="22sp"
 				android:textStyle="bold"
 				android:textColor="@color/vert_clair"
 				android:shadowColor="@color/choco"
 				android:shadowDx="-4"
 				android:shadowDy="3"
-        		android:shadowRadius="3" />
+	    		android:shadowRadius="3" />
             
             <TextView
-		        android:id="@+id/resultats1"
-		        android:layout_width="match_parent"
-		        android:layout_height="wrap_content"
-		        android:paddingLeft="20dp"
-		        android:gravity="center_vertical"
-		        android:textSize="25sp"
-		        android:fontFamily="sans-serif-condensed"
-		        android:textColor="@color/saumon"
-		        android:text="@string/app_name"
-		        android:background="@android:drawable/alert_light_frame" />
-
-            <TextView
-                android:id="@+id/gagne1"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="@string/victoire"
-                android:fontFamily="serif"
-                android:textSize="35sp"
-                android:textStyle="bold"
-                android:textColor="@color/red"
-                android:visibility="gone" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="0dip"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical" >
+	            android:layout_width="0dip"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="2"
+	            android:gravity="center"
+	            android:layout_gravity="center_vertical"
+	            android:text="@string/temps"
+	            android:fontFamily="serif"
+				android:textSize="14sp"
+				android:textColor="@color/vert_clair" />
             
             <TextView
-                android:id="@+id/joueur2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="@string/joueur"
-                android:fontFamily="serif"
-				android:textSize="25sp"
-				android:textStyle="bold"
-				android:textColor="@color/vert_clair"
-				android:shadowColor="@color/choco"
-				android:shadowDx="4"
-				android:shadowDy="3"
-        		android:shadowRadius="3" />
+	            android:layout_width="0dip"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:gravity="center"
+	            android:layout_gravity="center_vertical"
+	            android:text="@string/penalite_aide"
+	            android:fontFamily="serif"
+				android:textSize="14sp"
+				android:textColor="@color/vert_clair" />
             
             <TextView
-		        android:id="@+id/resultats2"
-		        android:layout_width="match_parent"
-		        android:layout_height="wrap_content"
-		        android:paddingLeft="20dp"
-		        android:gravity="center_vertical"
-		        android:textSize="25sp"
-		        android:fontFamily="sans-serif-condensed"
-		        android:textColor="@color/saumon"
-		        android:text="@string/app_name"
-		        android:background="@android:drawable/alert_light_frame" />
+	            android:layout_width="0dip"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:gravity="center"
+	            android:layout_gravity="center_vertical"
+	            android:text="@string/exp"
+	            android:fontFamily="serif"
+				android:textSize="14sp"
+				android:textColor="@color/vert_clair" />
             
             <TextView
-                android:id="@+id/gagne2"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="@string/victoire"
-                android:fontFamily="serif"
-                android:textSize="35sp"
-                android:textStyle="bold"
-                android:textColor="@color/red"
-                android:visibility="gone" />
+	            android:layout_width="0dip"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:gravity="center"
+	            android:layout_gravity="center_vertical"
+	            android:text="@string/score"
+	            android:fontFamily="serif"
+	            android:textStyle="bold"
+				android:textSize="14sp"
+				android:textColor="@color/vert_clair" />
             
         </LinearLayout>
+        
+        <ListView
+	        android:id="@+id/listRes"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent" />
 
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/score_multi"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/the_res"
-        android:layout_centerHorizontal="true"
-        android:text="@string/score"
-		android:textSize="22sp"
-		android:textStyle="bold"
-		android:textColor="@color/orange" />
 
 </RelativeLayout>

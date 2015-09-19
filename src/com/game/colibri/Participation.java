@@ -2,13 +2,15 @@ package com.game.colibri;
 
 public class Participation {
 	
+	public static final int FORFAIT = Integer.MAX_VALUE-1, NOT_PLAYED = Integer.MAX_VALUE;
+	
 	public Joueur joueur;
 	public int win;
 	public int t_cours, penalite_cours;
 	public int t_fini, penalite_fini, exp;
-	public boolean gagne, resultatsVus;
+	public int gagne;
 	
-	public Participation(Joueur j, int w, int tc, int pc, int tf, int pf, int exp, boolean gagne, boolean resultatsVus) {
+	public Participation(Joueur j, int w, int tc, int pc, int tf, int pf, int exp, int gagne) {
 		joueur = j;
 		win = w;
 		t_cours = tc;
@@ -17,7 +19,6 @@ public class Participation {
 		penalite_fini = pf;
 		this.exp = exp;
 		this.gagne = gagne;
-		this.resultatsVus = resultatsVus;
 	}
 	
 	public void solved(int t, int p) {
@@ -25,22 +26,25 @@ public class Participation {
 		penalite_cours = p;
 	}
 	
-	public void fini(boolean gagne, int exp) {
+	public void fini(int classement, int exp, int multiplicateur) {
 		t_fini = t_cours;
 		penalite_fini = penalite_cours;
 		t_cours = 0;
-		t_fini = 0;
-		this.gagne = gagne;
-		resultatsVus = false;
-		if(gagne) {
+		penalite_cours = 0;
+		this.gagne = classement;
+		if(t_fini>=FORFAIT)
+			gagne=0;
+		if(t_fini==NOT_PLAYED)
+			return;
+		if(gagne==1) {
 			win++;
 			joueur.win();
-			joueur.addExp(exp*2);
-			this.exp = exp*2;
+			joueur.addExp(exp*multiplicateur);
+			this.exp = exp*multiplicateur;
 		} else {
 			joueur.loose();
-			joueur.addExp(exp);
-			this.exp = exp;
+			this.exp = t_fini==FORFAIT ? 0: exp;
+			joueur.addExp(this.exp);
 		}
 		joueur.defi();
 	}

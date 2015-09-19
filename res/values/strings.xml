@@ -82,5 +82,24 @@
 	<string name="etat_resultats">Results!</string>
 	<string name="etat_relever">Solve</string>
 	<string name="etat_lancer">New one</string>
+	<string name="etat_obsolete">Obsolete</string>
+	<string name="tiret"> - </string>
+	<string name="chercher_adv">Search for a player&#8230;</string>
+	<string name="ajouter">Add</string>
+	<string name="adversaires">Opponents:</string>
+	<string name="ajout_part">Add opponents.</string>
+	<string name="nojoueur">No opponent yet.</string>
+	<string name="nojoueurfound">No additional opponent found!</string>
+	<string name="nom_defi">Challenge\'s name (optional)</string>
+	<string name="creer">Create!</string>
+	<string name="pick_avatar">\u0009And pick your avatar:</string>
+	<string name="defis_perdus">Defeats</string>
+	<string name="not_played">Not played!</string>
+	<string name="deletedPart">%1$s has withdrawn from challenge %2$s.</string>
+	<string name="deletedDef">Challenge %1$s has been cancelled.</string>
+	<string name="notification">Notification</string>
+	<string name="temps_restant">%1$d days %2$d hr</string>
+	<string name="temps_restant2">%1$d hr %2$d min</string>
+	<string name="obsolete_txt">The deadline has been surpassed.\nConnect to the network and refresh!</string>
 	
 </resources>

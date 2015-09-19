@@ -52,7 +52,8 @@
         <activity
             android:name="com.game.colibri.Multijoueur"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="landscape" >
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden|adjustPan|adjustResize" >
         </activity>
         <activity
             android:name="com.game.colibri.Resultats"

@@ -82,5 +82,24 @@
 	<string name="etat_resultats">Résultats</string>
 	<string name="etat_relever">Relever</string>
 	<string name="etat_lancer">Nouveau</string>
+	<string name="etat_obsolete">Obsolète</string>
+	<string name="tiret"> - </string>
+	<string name="chercher_adv">Rechercher un joueur&#8230;</string>
+	<string name="ajouter">Ajouter</string>
+	<string name="adversaires">Adversaires :</string>
+	<string name="ajout_part">Ajouter des participants.</string>
+	<string name="nojoueur">Aucun adversaire.</string>
+	<string name="nojoueurfound">Aucun adversaire supplémentaire trouvé !</string>
+	<string name="nom_defi">Nom du défi (optionel)</string>
+	<string name="creer">Créer !</string>
+	<string name="pick_avatar">\u0009Et choisissez votre avatar :</string>
+	<string name="defis_perdus">Défaites</string>
+	<string name="not_played">Non joué !</string>
+	<string name="deletedPart">%1$s s\'est retiré du défi %2$s.</string>
+	<string name="deletedDef">Le défi %1$s a été annulé.</string>
+	<string name="notification">Notification</string>
+	<string name="temps_restant">%1$d jours %2$d h</string>
+	<string name="temps_restant2">%1$d h %2$d min</string>
+	<string name="obsolete_txt">La date limite a été dépassée.\nConnectez vous au réseau et rafraîchissez !</string>
 	
 </resources>

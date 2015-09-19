@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal" >
+    android:orientation="horizontal"
+    android:background="@android:drawable/bottom_bar" >
     
     <TextView
         android:id="@+id/nomDefi"
@@ -37,6 +38,7 @@
         android:layout_width="0dip"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:layout_gravity="center_vertical"
         android:focusable="false"
         android:text="@string/etat"
         android:onClick="actionDefi" />
