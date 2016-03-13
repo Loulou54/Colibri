@@ -13,13 +13,13 @@ import com.loopj.android.http.RequestParams;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -28,6 +28,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,9 +37,11 @@ public class NewDefi {
 	private Context context;
 	private callBackInterface callback;
 	private String user, nomDefi;
+	private int t_max;
 	private DropDownAdapter dropDownAdapter;
 	private JoueursAdapter jAdapter;
 	private AsyncHttpClient client;
+	private ProgressDialog prgDialog;
 	
 	@SuppressLint("InlinedApi")
 	public NewDefi(Context context, AsyncHttpClient client, String user, callBackInterface callback) {
@@ -53,6 +56,9 @@ public class NewDefi {
 		ArrayList<Joueur> joueurs = new ArrayList<Joueur>();
 		jAdapter = new JoueursAdapter(context, R.layout.element_joueur, joueurs);
 		dropDownAdapter = new DropDownAdapter(context, R.layout.simple_list_element, new ArrayList<String>(), user, joueurs);
+		prgDialog = new ProgressDialog(this.context);
+		prgDialog.setMessage(context.getString(R.string.progress));
+		prgDialog.setCancelable(false);
 	}
 	
 	/**
@@ -60,23 +66,22 @@ public class NewDefi {
 	 */
 	@SuppressLint("InflateParams")
 	public void show() {
-		final EditText et = new EditText(context);
-		et.setHint(R.string.nom_defi);
-		et.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
+		final LinearLayout lay = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.newdefi_layout1, null);
 		AlertDialog.Builder boxParticipants = new AlertDialog.Builder(context);
 		boxParticipants.setTitle(R.string.nouveau_defi);
 		DialogInterface.OnClickListener check = new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				if(which==DialogInterface.BUTTON_POSITIVE) {
-					nomDefi = et.getText().toString().trim();
+					nomDefi = ((EditText) lay.findViewById(R.id.defiName)).getText().toString().trim();
+					t_max = fetchTimeSecond(((Spinner) lay.findViewById(R.id.defiLimit)).getSelectedItemPosition());
 					showParticipants();
 				}
 			}
 		};
 		boxParticipants.setPositiveButton(R.string.accept, check);
 		boxParticipants.setNegativeButton(R.string.annuler, check);
-		boxParticipants.setView(et);
+		boxParticipants.setView(lay);
 		boxParticipants.show();
 	}
 	
@@ -85,7 +90,7 @@ public class NewDefi {
 	 */
 	@SuppressLint("InflateParams")
 	public void showParticipants() {
-		final LinearLayout lay = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.newdefi_layout, null);
+		final LinearLayout lay = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.newdefi_layout2, null);
 		final SuggestionsEditText actv = (SuggestionsEditText) lay.findViewById(R.id.searchAdv);
 		actv.setLoadingIndicator((ProgressBar) lay.findViewById(R.id.loading_indicator)); 
 		actv.setAdapter(dropDownAdapter);
@@ -122,6 +127,8 @@ public class NewDefi {
 						showParticipants();
 					} else
 						createDefi();
+				} else {
+					prgDialog.dismiss();
 				}
 			}
 		};
@@ -147,6 +154,7 @@ public class NewDefi {
 	}
 	
 	private void addJoueur(String name) {
+		prgDialog.show();
 		RequestParams params = new RequestParams();
 		if(name==null) // Mode auto. On spécifie la liste des joueurs déjà pris.
 			params.put("auto", getStringListOfJoueurs());
@@ -155,6 +163,7 @@ public class NewDefi {
 		client.post(SERVER_URL+"/get_joueur.php", params, new AsyncHttpResponseHandler() {
 			@Override
 			public void onSuccess(String response) {
+				prgDialog.hide();
 				Gson g = new Gson();
 				try {
 					Joueur j = g.fromJson(response, Joueur.class);
@@ -169,25 +178,29 @@ public class NewDefi {
 
 			@Override
 			public void onFailure(int statusCode, Throwable error, String content) {
+				prgDialog.hide();
 				Toast.makeText(context, R.string.err, Toast.LENGTH_LONG).show();
 			}
 		});
 	}
 	
 	private void createDefi() {
+		prgDialog.show();
 		RequestParams params = new RequestParams();
 		params.put("pseudo", user);
 		params.put("nom", nomDefi);
 		params.put("participants", "["+getStringListOfJoueurs()+"]");
-		params.put("t_max", ""+3*60);
+		params.put("t_max", ""+t_max);
 		client.post(SERVER_URL+"/newdefi.php", params, new AsyncHttpResponseHandler() {
 			@Override
 			public void onSuccess(String response) {
+				prgDialog.dismiss();
 				callback.create(response);
 			}
 
 			@Override
 			public void onFailure(int statusCode, Throwable error, String content) {
+				prgDialog.dismiss();
 				Toast.makeText(context, R.string.err, Toast.LENGTH_LONG).show();
 			}
 		});
@@ -197,4 +210,35 @@ public class NewDefi {
 		void create(String jsonData);
 	}
 	
+	/**
+	 * Retourne la limite temporelle en secondes correspondant à l'élément choisi dans le spinner.
+	 * @param pos position de l'item choisi
+	 * @return temps en s
+	 */
+	private static int fetchTimeSecond(int pos) {
+		switch (pos) {
+		case 0:
+			return 0;
+		case 1:
+			return 3600*24;
+		case 2:
+			return 3600*24*2;
+		case 3:
+			return 3600*24*3;
+		case 4:
+			return 3600*24*5;
+		case 5:
+			return 3600*24*7;
+		case 6:
+			return 3600*24*10;
+		case 7:
+			return 3600*24*7*2;
+		case 8:
+			return 3600*24*7*3;
+		case 9:
+			return 3600*24*7*4;
+		default:
+			return 0;
+		}
+	}
 }

@@ -221,9 +221,9 @@ public class DBController  extends SQLiteOpenHelper {
 	 * @param joueurs les joueurs
 	 * @return la liste des défis à afficher
 	 */
-	public ArrayList<Defi> getDefis(String user, HashMap<String,Joueur> joueurs, ArrayList<Defi> l) {
+	public void getDefis(String user, HashMap<String,Joueur> joueurs, ArrayList<Defi> l) {
 		l.clear();
-		String selectQuery = "SELECT id,nom,nMatch,nivCours,nivFini,t_max,limite FROM `defis` JOIN `participations` ON id=defi AND t_cours=0 WHERE joueur='"+user+"' UNION SELECT id,nom,nMatch,nivCours,nivFini,t_max,limite FROM `defis` JOIN `participations` ON id=defi AND t_cours>0 WHERE joueur='"+user+"'";
+		String selectQuery = "SELECT id,nom,nMatch,nivCours,nivFini,t_max,limite FROM `defis` JOIN `participations` ON id=defi WHERE joueur='"+user+"' ORDER BY t_cours";
 	    SQLiteDatabase database = this.getWritableDatabase();
 	    Cursor cursor = database.rawQuery(selectQuery, null);
 	    if (cursor.moveToFirst()) {
@@ -241,25 +241,25 @@ public class DBController  extends SQLiteOpenHelper {
 	        } while (cursor.moveToNext());
 	    }
 	    database.close();
-		return l;
 	}
 	
 	/**
 	 * Supprime les Joueurs qui n'ont aucune participation dans les défis de l'utilisateur.
 	 * @param database
 	 */
-	private void cleanJoueurs(SQLiteDatabase database) {
-		database.rawQuery("DELETE FROM `joueurs` WHERE pseudo NOT IN (SELECT joueur FROM Participations)", null);
+	private void cleanJoueurs(SQLiteDatabase database, String user) {
+		database.execSQL("DELETE FROM `joueurs` WHERE pseudo NOT IN (SELECT joueur FROM Participations) AND pseudo<>'"+user+"'");
 	}
 	
 	/**
 	 * Supprimer un défi et retirer sa participation.
 	 * @param defi
 	 */
-	public void removeDefi(Defi defi) {
+	public void removeDefi(Defi defi, String user) {
 		SQLiteDatabase database = this.getWritableDatabase();
 		database.delete("defis", "id="+defi.id, null);
-		cleanJoueurs(database);
+		database.delete("participations", "defi="+defi.id, null);
+		cleanJoueurs(database, user);
 		// Requête serveur
 		ContentValues values = new ContentValues();
 		JSONObject o = new JSONObject();
@@ -406,20 +406,22 @@ public class DBController  extends SQLiteOpenHelper {
 		String selectQuery = "SELECT nMatch FROM resultatsVus WHERE defi="+id;
 	    SQLiteDatabase database = this.getWritableDatabase();
 	    Cursor cursor = database.rawQuery(selectQuery, null);
+	    int res = 0;
 	    if(cursor.moveToFirst())
-	    	return cursor.getInt(0);
-	    else
-	    	return 0;
+	    	res = cursor.getInt(0);
+	    database.close();
+	    return res;
 	}
 	
 	/**
 	 * Supprime tout et demande le renvoi de toutes les données.
 	 */
-	public void taskSyncTotale() {
+	public void taskSyncTotale(String user) {
 		SQLiteDatabase database = this.getWritableDatabase();
 		database.delete("participations", null, null);
 		database.delete("defis", null, null);
-		database.delete("joueurs", null, null);
+		database.delete("joueurs", "pseudo<>'"+user+"'", null);
+		database.delete("tasks", null, null);
 		ContentValues values = new ContentValues();
 		values = new ContentValues();
 		JSONObject o = new JSONObject();
@@ -433,52 +435,38 @@ public class DBController  extends SQLiteOpenHelper {
 		database.close();
 	}
 
-	public void deletePart(Context context, JSONArray jsonArray) {
+	public void execJSONTasks(Context context, JSONArray jsonArray, String user) {
 		SQLiteDatabase database = this.getWritableDatabase();
 		String liste = "";
 		for(int i=0; i<jsonArray.length(); i++) {
 			try {
 				JSONObject d = jsonArray.getJSONObject(i);
-				Cursor cursor = database.rawQuery("SELECT nom FROM `defis` WHERE id="+d.getInt("part_defi"), null);
-				String nomDefi="?";
-			    if (cursor.moveToFirst()) {
-			    	nomDefi = cursor.getString(0);
-			    }
-				database.delete("participations", "defi="+d.getInt("part_defi")+" AND joueur='"+d.getString("part_joueur")+"'", null);
-				liste+=context.getResources().getString(R.string.deletedPart, d.getString("part_joueur"), nomDefi)+"\n";
+				String task = d.getString("task");
+				if(task.equalsIgnoreCase("delPart")) {
+					database.delete("participations", "defi="+d.getInt("part_defi")+" AND joueur='"+d.getString("part_joueur")+"'", null);
+					cleanJoueurs(database, user);
+					liste+=context.getResources().getString(R.string.deletedPart, d.getString("part_joueur"), d.getString("part_defi_nom"))+"\n";
+				} else if(task.equalsIgnoreCase("delDefi")) {
+					database.delete("defis", "id="+d.getInt("defi"), null);
+					database.delete("participations", "defi="+d.getInt("defi"), null);
+					cleanJoueurs(database, user);
+					liste+=context.getResources().getString(R.string.deletedDef, d.getString("defi_nom"))+"\n";
+				} else if(task.equalsIgnoreCase("newNiv")) {
+					liste+=context.getResources().getString(R.string.newNivDejaCree, d.getString("nomDefi"))+"\n";
+				} else if(task.equalsIgnoreCase("partObsolete")) {
+					liste+=context.getResources().getString(R.string.partObsolete, d.getString("nomDefi"))+"\n";
+				} else if(task.equalsIgnoreCase("message")) {
+					liste+=context.getResources().getString(R.string.messageServeur, d.getString("message"))+"\n";
+				}
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
 		}
+		database.close();
 		AlertDialog.Builder box = new AlertDialog.Builder(context);
 		box.setTitle(R.string.notification);
 		box.setMessage(liste);
 		box.show();
-		database.close();
-	}
-
-	public void deleteDef(Context context, JSONArray jsonArray) {
-		SQLiteDatabase database = this.getWritableDatabase();
-		String liste = "";
-		for(int i=0; i<jsonArray.length(); i++) {
-			try {
-				JSONObject d = jsonArray.getJSONObject(i);
-				Cursor cursor = database.rawQuery("SELECT nom FROM `defis` WHERE id="+d.getInt("defi"), null);
-				String nomDefi="?";
-			    if (cursor.moveToFirst()) {
-			    	nomDefi = cursor.getString(0);
-			    }
-				database.delete("defis", "id="+d.getInt("defi"), null);
-				liste+=context.getResources().getString(R.string.deletedDef, nomDefi)+"\n";
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-		}
-		AlertDialog.Builder box = new AlertDialog.Builder(context);
-		box.setTitle(R.string.notification);
-		box.setMessage(liste);
-		box.show();
-		database.close();
 	}
 
 }

@@ -35,16 +35,19 @@ import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewSwitcher;
 
 public class Multijoueur extends Activity {
 	
 	public static MenuPrinc menu;
+	public static boolean active = false;
 	
 	private ExpandableListView lv;
 	private DefiExpandableAdapter adapt;
 	private HashMap<String,Joueur> joueurs;
 	private ArrayList<Defi> adversaires;
 	private AlertDialog boxNiv;
+	private ViewSwitcher loader;
 	public Defi defi;
 	public Joueur user;
 	public ConnectionDetector connect;
@@ -55,6 +58,7 @@ public class Multijoueur extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_multijoueur);
+		active = true;
 		connect = new ConnectionDetector(this);
 		client = new AsyncHttpClient();
 		base = new DBController(this);
@@ -69,14 +73,17 @@ public class Multijoueur extends Activity {
 				return true;
 			}
 		});
-		//GCMRegistrar.checkDevice(this); TODO /!\
-		//GCMRegistrar.checkManifest(this);
+		lv.setEmptyView((TextView) findViewById(R.id.defaultViewDefis));
+		loader = (ViewSwitcher) findViewById(R.id.loader);
+		GCMRegistrar.checkDevice(this);
+		GCMRegistrar.checkManifest(this);
 		registerReceiver(mHandleMessageReceiver, new IntentFilter(BROADCAST_MESSAGE_ACTION));
 		loadData();
 	}
 	
 	@Override
     protected void onDestroy() {
+		active = false;
 		try {
             unregisterReceiver(mHandleMessageReceiver);
             GCMRegistrar.onDestroy(this);
@@ -92,9 +99,13 @@ public class Multijoueur extends Activity {
 	private void loadData() {
 		loadJoueurs();
 		if(user==null) { // Utilisateur non inscrit !
-			//final String regId = GCMRegistrar.getRegistrationId(this); TODO /!\
-			//if(regId.equals("")) {
-			if(false) {
+			if(!connect.isConnectedToInternet()) {
+				Toast.makeText(this, R.string.connexion_register, Toast.LENGTH_LONG).show();
+				finish();
+				return;
+			}
+			String regId = GCMRegistrar.getRegistrationId(this);
+			if(regId.equals("")) {
 				Toast.makeText(this, R.string.gcm_register, Toast.LENGTH_SHORT).show();
 				GCMRegistrar.register(this, SENDER_ID);
 			} else { // Si jamais l'enregistrement GCM a fonctionné mais pas l'enregistrement à notre serveur
@@ -106,7 +117,7 @@ public class Multijoueur extends Activity {
 			lv.setAdapter(adapt);
 			dispUser();
 			if(!connect.isConnectedToInternet())
-				Toast.makeText(this, R.string.hors_connexion, Toast.LENGTH_LONG).show();
+				Toast.makeText(this, R.string.hors_connexion, Toast.LENGTH_SHORT).show();
 			else {
 				syncData();
 			}
@@ -115,6 +126,10 @@ public class Multijoueur extends Activity {
 	
 	private void loadJoueurs() {
 		base.getJoueurs(joueurs);
+		System.out.println("Nombre de Joueurs : "+joueurs.size());
+		for(Joueur j : joueurs.values()) {
+			System.out.println(j.getPseudo());
+		}
 		user = joueurs.get(menu.pref.getString("pseudo",null));
 	}
 	
@@ -177,8 +192,8 @@ public class Multijoueur extends Activity {
 	}
 	
 	public void nouveauDefi(View v) {
-		if(!connect.isConnectedToInternet()) {
-			Toast.makeText(this, R.string.hors_connexion, Toast.LENGTH_LONG).show();
+		if(!connect.isConnectedToInternet() || user==null) {
+			Toast.makeText(this, R.string.hors_connexion, Toast.LENGTH_SHORT).show();
 			return;
 		}
 		if(menu.expToSync!=0)
@@ -192,9 +207,9 @@ public class Multijoueur extends Activity {
 	}
 	
 	public void supprDefi(View v) {
-		// TODO : supprimer défi de la bdd
+		// TODO : confirmation ?
 		int groupPosition = (Integer) v.getTag();
-		base.removeDefi(adversaires.remove(groupPosition));
+		base.removeDefi(adversaires.remove(groupPosition), user.getPseudo());
 		syncData();
 	}
 	
@@ -230,7 +245,11 @@ public class Multijoueur extends Activity {
 	}
 	
 	public void syncTotale(View v) {
-		base.taskSyncTotale();
+		if(!connect.isConnectedToInternet()) {
+			Toast.makeText(this, R.string.hors_connexion, Toast.LENGTH_SHORT).show();
+			return;
+		}
+		base.taskSyncTotale(user.getPseudo());
 		syncData();
 	}
 	
@@ -246,10 +265,33 @@ public class Multijoueur extends Activity {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String newMessage = intent.getExtras().getString(EXTRA_MESSAGE);
+			System.out.println("onReceiveNotification : "+newMessage);
 			if(newMessage.equals("GCMRegistartion")) { // GCM Registration successful => Server registration
 				Toast.makeText(Multijoueur.this, R.string.gcm_success, Toast.LENGTH_SHORT).show();
 				registerUser();
 				return;
+			} else {
+				String title = context.getString(R.string.app_name), msg="";
+				try {
+					JSONObject o = new JSONObject(newMessage);
+					String typ = o.getString("type");
+					if(typ.equals("newMatch")) {
+						title = o.getString("nomDefi");
+						msg = context.getString(R.string.notif_newdefi, o.getString("initPlayer"));
+					} else if(typ.equals("results")) {
+						title = o.getString("nomDefi");
+						if(o.has("initPlayer"))
+							msg = context.getString(R.string.notif_results, o.getString("initPlayer"));
+						else
+							msg = context.getString(R.string.notif_results_exp);
+					} else if(typ.equals("message")) {
+						msg = o.getString("message");
+					}
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+				Toast.makeText(Multijoueur.this, context.getString(R.string.notification)+" !\n\n"+title+"\n"+msg, Toast.LENGTH_LONG).show();
+				syncData();
 			}
 		}
 	};
@@ -287,7 +329,9 @@ public class Multijoueur extends Activity {
 	}
 	
 	public void syncData() {
+		adapt.setLaunchEnabled(false);
 		adapt.notifyDataSetChanged();
+		loader.showNext();
 		RequestParams params = new RequestParams();
 		params.put("pseudo", menu.pref.getString("pseudo", ""));
 		params.put("tasks", base.getTasks());
@@ -296,13 +340,20 @@ public class Multijoueur extends Activity {
 		client.post(SERVER_URL+"/sync_data.php", params, new AsyncHttpResponseHandler() {
 			@Override
 			public void onSuccess(String response) {
-				insertJSONData(response);
-				base.clearTasks();
+				loader.showNext();
+				adapt.setLaunchEnabled(true);
+				if(insertJSONData(response)) {
+					base.clearTasks();
+					// TODO : acquitement pour que le serveur supprime les *ToSync.
+				}
 			}
 
 			@Override
 			public void onFailure(int statusCode, Throwable error, String content) {
-				Toast.makeText(Multijoueur.this, R.string.sync_fail, Toast.LENGTH_LONG).show();
+				loader.showNext();
+				adapt.setLaunchEnabled(true);
+				adapt.notifyDataSetChanged();
+				Toast.makeText(Multijoueur.this, R.string.sync_fail, Toast.LENGTH_SHORT).show();
 			}
 		});
 	}
@@ -322,35 +373,36 @@ public class Multijoueur extends Activity {
 	 * {defis:[{Defi},{Defi},...],participations:[{Participation},{Participation},...],joueurs:[{Joueur},{Joueur},...],tasks:[{task:"delete", defi:3},{task:"message", msg:"Message!"},...]}
 	 * @param def
 	 */
-	private void insertJSONData(String def) {
+	private boolean insertJSONData(String def) {
+		boolean res;
 		System.out.println(def);
-		if(def.length()<4) // Dans le cas où def vaut []
-			return;
-		try {
-			JSONObject o = new JSONObject(def);
-			if(o.has("joueurs")) {
-				base.insertJSONJoueurs((JSONArray) o.get("joueurs"));
-				loadJoueurs();
-				menu.expToSync = 0;
-				menu.experience = user.getExp();
-				menu.saveData();
-				dispUser();
+		if(def.length()>=4) { // Dans le cas où def vaut []
+			try {
+				JSONObject o = new JSONObject(def);
+				if(o.has("joueurs")) {
+					base.insertJSONJoueurs((JSONArray) o.get("joueurs"));
+					loadJoueurs();
+					menu.expToSync = 0;
+					menu.experience = user.getExp();
+					menu.saveData();
+					dispUser();
+				}
+				if(o.has("defis"))
+					base.insertJSONDefis((JSONArray) o.get("defis"));
+				if(o.has("participations"))
+					base.insertJSONParticipations((JSONArray) o.get("participations"));
+				if(o.has("tasks"))
+					base.execJSONTasks(this, (JSONArray) o.get("tasks"), user.getPseudo());
+				res = true;
+			} catch (JSONException e) {
+				e.printStackTrace();
+				res = false;
 			}
-			if(o.has("defis"))
-				base.insertJSONDefis((JSONArray) o.get("defis"));
-			if(o.has("participations"))
-				base.insertJSONParticipations((JSONArray) o.get("participations"));
-			if(o.has("deletePart"))
-				base.deletePart(this, (JSONArray) o.get("deletePart"));
-			if(o.has("deleteDef"))
-				base.deleteDef(this, (JSONArray) o.get("deleteDef"));
-			if(o.length()!=0) { // On rafraîchit l'affichage.
-				base.getDefis(user.getPseudo(),joueurs,adversaires);
-				adapt.notifyDataSetChanged();
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
+		} else
+			res = true;
+		base.getDefis(user.getPseudo(),joueurs,adversaires);
+		adapt.notifyDataSetChanged();
+		return res;
 	}
 	
 }

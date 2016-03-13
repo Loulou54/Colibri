@@ -95,11 +95,32 @@
 	<string name="pick_avatar">\u0009And pick your avatar:</string>
 	<string name="defis_perdus">Defeats</string>
 	<string name="not_played">Not played!</string>
-	<string name="deletedPart">%1$s has withdrawn from challenge %2$s.</string>
-	<string name="deletedDef">Challenge %1$s has been cancelled.</string>
+	<string name="deletedPart">> %1$s has withdrawn from challenge %2$s.</string>
+	<string name="deletedDef">> Challenge %1$s has been cancelled.</string>
 	<string name="notification">Notification</string>
 	<string name="temps_restant">%1$d days %2$d hr</string>
 	<string name="temps_restant2">%1$d hr %2$d min</string>
 	<string name="obsolete_txt">The deadline has been surpassed.\nConnect to the network and refresh!</string>
+	<string name="newNivDejaCree">Another participant in the challenge %1$s has already submitted a new level. Yours has been therefore discarded.</string>
+	<string name="partObsolete">Your last participation to the challenge %1$s has been submitted after the deadline!</string>
+	<string name="messageServeur">Message from the creator!\n %1$s</string>
+	<string name="connexion_register">You must be connected to register for multiplayer mode!</string>
+	<string name="nodefis">No challenge yet!\n\nCreate a new challenge with\nthe button on the left.</string>
+	<string name="notif_newdefi">%1$s launched a new challenge!</string>
+	<string name="notif_results">%1$s finished the challenge. Check the results!</string>
+	<string name="notif_results_exp">The challenge expired. Check the results!</string>
+	<string name="time_limit">Time limit per match:</string>
+	<string-array name="time_limits">
+	    <item>None</item>
+	    <item>1 day</item>
+	    <item>2 days</item>
+	    <item>3 days</item>
+	    <item>5 days</item>
+	    <item>7 days</item>
+	    <item>10 days</item>
+	    <item>2 weeks</item>
+	    <item>3 weeks</item>
+	    <item>4 weeks</item>
+	</string-array>
 	
 </resources>

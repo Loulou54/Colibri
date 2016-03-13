@@ -95,11 +95,32 @@
 	<string name="pick_avatar">\u0009Et choisissez votre avatar :</string>
 	<string name="defis_perdus">Défaites</string>
 	<string name="not_played">Non joué !</string>
-	<string name="deletedPart">%1$s s\'est retiré du défi %2$s.</string>
-	<string name="deletedDef">Le défi %1$s a été annulé.</string>
+	<string name="deletedPart">> %1$s s\'est retiré du défi %2$s.</string>
+	<string name="deletedDef">> Le défi %1$s a été annulé.</string>
 	<string name="notification">Notification</string>
 	<string name="temps_restant">%1$d jours %2$d h</string>
 	<string name="temps_restant2">%1$d h %2$d min</string>
 	<string name="obsolete_txt">La date limite a été dépassée.\nConnectez vous au réseau et rafraîchissez !</string>
+	<string name="newNivDejaCree">Un autre participant au défi %1$s a déjà soumi un nouveau niveau. Le vôtre a donc été abandonné.</string>
+	<string name="partObsolete">Votre dernière participation au défi %1$s a été soumise après la limite temporelle !</string>
+	<string name="messageServeur">Message du créateur !\n %1$s</string>
+	<string name="connexion_register">Vous devez être connecté pour vous inscrire au mode multijoueur !</string>
+	<string name="nodefis">Aucun défi !\n\nCréez un nouveau défi à l\'aide\ndu bouton à gauche.</string>
+	<string name="notif_newdefi">%1$s a lancé un nouveau défi !</string>
+	<string name="notif_results">%1$s a résolu le défi. Regardez les résultats !</string>
+	<string name="notif_results_exp">Le défi a expiré. Regardez les résultats !</string>
+	<string name="time_limit">Limite temporelle par match :</string>
+	<string-array name="time_limits">
+	    <item>Aucune</item>
+	    <item>1 jour</item>
+	    <item>2 jours</item>
+	    <item>3 jours</item>
+	    <item>5 jours</item>
+	    <item>7 jours</item>
+	    <item>10 jours</item>
+	    <item>2 semaines</item>
+	    <item>3 semaines</item>
+	    <item>4 semaines</item>
+	</string-array>
 	
 </resources>

@@ -20,11 +20,16 @@ public class DefiExpandableAdapter extends BaseExpandableListAdapter {
 	private Context context;
 	private String user;
 	private ArrayList<Defi> adversaires;
+	private boolean launchEnabled = true;
 	
 	public DefiExpandableAdapter(Context c, String user, ArrayList<Defi> defis) {
 		context = c;
 		this.user = user;
 		adversaires = defis;
+	}
+	
+	public void setLaunchEnabled(boolean b) {
+		launchEnabled = b;
 	}
 	
 	@Override
@@ -146,6 +151,7 @@ public class DefiExpandableAdapter extends BaseExpandableListAdapter {
 		h.etat.setText(etat);
 		h.etat.setTextColor(context.getResources().getColor(color));
 		h.etat.setTag(groupPosition);
+		h.etat.setEnabled(launchEnabled);
 		h.fermer.setTag(groupPosition);
 		return convertView;
 	}

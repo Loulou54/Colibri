@@ -128,7 +128,7 @@ public class RegisterUser {
 		client.post(SERVER_URL+"/register.php", params, new AsyncHttpResponseHandler() {
 			@Override
 			public void onSuccess(String response) {
-				prgDialog.hide();
+				prgDialog.dismiss();
 				if(response.equalsIgnoreCase("pris")) { // Nom déjà pris
 					Toast.makeText(context, R.string.deja_pris, Toast.LENGTH_LONG).show();
 					show(name);
@@ -146,7 +146,7 @@ public class RegisterUser {
 
 			@Override
 			public void onFailure(int statusCode, Throwable error, String content) {
-				prgDialog.hide();
+				prgDialog.dismiss();
 				if (statusCode == 404) {
 					Toast.makeText(context, R.string.err404, Toast.LENGTH_LONG).show();
 				} else if (statusCode == 500 || statusCode == 503) {

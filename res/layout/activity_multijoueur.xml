@@ -31,13 +31,27 @@
 	        android:onClick="nouveauDefi"
 	        android:textSize="16sp" />
 
-        <ImageButton
+        <ViewSwitcher
+            android:id="@+id/loader"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:layout_gravity="center"
-            android:src="@drawable/repeat"
-            android:contentDescription="@string/sync_fail"
-            android:onClick="syncTotale" />
+            android:background="@android:drawable/btn_default"
+            android:onClick="syncTotale">
+            
+            <ImageView
+                android:layout_width="wrap_content"
+	            android:layout_height="50dp"
+	            android:layout_gravity="center"
+	            android:layout_marginBottom="2dp"
+	            android:src="@drawable/repeat"
+	            android:contentDescription="@string/sync_fail" />
+            
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent" />
+            
+        </ViewSwitcher>
         
         <ImageView
 	        android:id="@+id/user_avatar"
@@ -99,5 +113,18 @@
         android:layout_height="match_parent"
         android:layout_weight="25"
         android:background="@android:drawable/alert_light_frame" />
+    
+    <TextView
+        android:id="@+id/defaultViewDefis"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="25"
+        android:background="@android:drawable/alert_light_frame"
+        android:gravity="center"
+        android:text="@string/nodefis"
+        android:textSize="16sp"
+        android:textStyle="italic"
+        android:textColor="@color/bleu_moyen"
+        android:visibility="gone" />
 
 </LinearLayout>

@@ -23,6 +23,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 import android.app.Activity;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -80,6 +82,11 @@ public class MenuPrinc extends Activity {
 					boucle.start();
 				}
 			});
+		}
+		// Lancé depuis une notification ?
+		if(getIntent().getExtras()!=null && getIntent().getExtras().getString("com.game.colibri.notification")!=null) {
+			((NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE)).cancelAll();
+			multijoueur(null);
 		}
 	}
 	
