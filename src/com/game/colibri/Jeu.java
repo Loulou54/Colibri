@@ -317,9 +317,9 @@ public class Jeu extends Activity {
 			solUsed = false;
 			if(opt.getInt("mode", 0)>0) {
 				if(multi!=null) { // Mode multijoueur
-					niv = new Niveau(opt.getInt("mode"), opt.getLong("seed"), opt.getIntArray("param"), menu.avancement);
+					niv = new Niveau(opt.getInt("mode"), opt.getLong("seed"), opt.getIntArray("param"), opt.getInt("progressMin"));
 					if(multi.defi.match==null) {
-						multi.defi.match = new Defi.Match(opt.getInt("mode"), opt.getLong("seed"), opt.getIntArray("param"), niv.experience);
+						multi.defi.match = new Defi.Match(opt.getInt("mode"), opt.getLong("seed"), opt.getIntArray("param"), opt.getInt("progressMin"), niv.experience);
 						multi.defi.limite = System.currentTimeMillis()/1000 + multi.defi.t_max;
 						multi.base.updateDefi(multi.defi);
 					}

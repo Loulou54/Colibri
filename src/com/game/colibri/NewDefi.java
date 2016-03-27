@@ -157,7 +157,7 @@ public class NewDefi {
 		prgDialog.show();
 		RequestParams params = new RequestParams();
 		if(name==null) // Mode auto. On spécifie la liste des joueurs déjà pris.
-			params.put("auto", getStringListOfJoueurs());
+			params.put("auto", "["+getStringListOfJoueurs()+"]");
 		else
 			params.put("joueur", name);
 		client.post(SERVER_URL+"/get_joueur.php", params, new AsyncHttpResponseHandler() {

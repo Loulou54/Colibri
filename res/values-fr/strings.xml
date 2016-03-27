@@ -6,6 +6,7 @@
     <string name="campagne">Campagne</string>
     <string name="aleat">Carte Aléatoire</string>
     <string name="multi">Défi Multijoueur</string>
+    <string name="classements">Classements</string>
     <string name="fac">Débutant</string>
     <string name="moy">Intermédiaire</string>
     <string name="dif">Expert</string>
@@ -122,5 +123,18 @@
 	    <item>3 semaines</item>
 	    <item>4 semaines</item>
 	</string-array>
+	<string name="supprDefi">Supprimer un défi</string>
+	<string name="supprDefiConf">Voulez-vous réellement annuler votre participation au défi \"%1$s\" et le supprimer de votre liste ?</string>
+	<string name="winlost">Gagnés-Perdus</string>
+	<string name="rank">Rang</string>
+	<string name="avatar">Avatar</string>
+	<string name="pays">Pays</string>
+	<string name="global">Global</string>
+	<string name="amis">Amis</string>
+	<string name="connexion_ranking">Vous devez être connectés pour voir les classements !</string>
+	<string name="commencer">Commencer</string>
+	<string name="minutesAgo">Il y a %1$d minute%2$s</string>
+	<string name="hoursAgo">Il y a %1$d heure%2$s</string>
+	<string name="daysAgo">Il y a %1$d jour%2$s</string>
 	
 </resources>

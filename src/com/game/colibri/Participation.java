@@ -37,8 +37,10 @@ public class Participation {
 		if(t_fini==NOT_PLAYED)
 			return;
 		if(gagne==1) {
-			win++;
-			joueur.win();
+			if(multiplicateur>1) {
+				win++;
+				joueur.win(multiplicateur-1);
+			}
 			joueur.addExp(exp*multiplicateur);
 			this.exp = exp*multiplicateur;
 		} else {
@@ -46,6 +48,7 @@ public class Participation {
 			this.exp = t_fini==FORFAIT ? 0: exp;
 			joueur.addExp(this.exp);
 		}
-		joueur.defi();
+		if(multiplicateur>1)
+			joueur.defi();
 	}
 }

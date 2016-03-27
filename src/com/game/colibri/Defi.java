@@ -61,9 +61,12 @@ public class Defi {
 				partEffectives++;
 		}
 		if(classement[0].t_cours!=0) { // Tous les participants ont fini.
-			int pos=1, t_pos=classement[0].t_cours;
+			int ligne=0, pos=0, t_pos=0;
 			for(Participation p : classement) {
-				p.fini(p.t_cours!=t_pos ? ++pos : pos, match.exp, partEffectives);
+				ligne++;
+				pos = p.t_cours!=t_pos ? ligne : pos;
+				t_pos=p.t_cours;
+				p.fini(pos, match.exp, partEffectives);
 			}
 			nMatch++;
 			matchFini = match;
@@ -90,6 +93,20 @@ public class Defi {
 	}
 	
 	/**
+	 * Retourne l'avancement minimal des participants dans la campagne.
+	 * @return
+	 */
+	public int getProgressMin() {
+		int m = Integer.MAX_VALUE;
+		for(Participation p : participants.values()) {
+			if(p.joueur.getProgress()<m) {
+				m = p.joueur.getProgress();
+			}
+		}
+		return m;
+	}
+	
+	/**
 	 * Destiné à contenir les infos du match en cours.
 	 * @author Louis
 	 *
@@ -99,12 +116,14 @@ public class Defi {
 		public int mode;
 		public long seed;
 		public int[] param;
+		public int progressMin;
 		public int exp;
 		
-		public Match(int m, long s, int[] p, int e) {
+		public Match(int m, long s, int[] p, int pm, int e) {
 			mode=m;
 			seed=s;
 			param=p;
+			progressMin=pm;
 			exp=e;
 		}
 		

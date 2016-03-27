@@ -113,6 +113,7 @@ public class RegisterUser {
 	
 	public interface callBackInterface {
 		int getExp();
+		int getProgress();
 		boolean registered(String JSONresponse, String name);
 		void cancelled();
 	}
@@ -122,6 +123,7 @@ public class RegisterUser {
 		params.put("pseudo", name);
 		params.put("avatar", ""+avatar);
 		params.put("exp", ""+callback.getExp());
+		params.put("progress", ""+callback.getProgress());
 		params.put("regId", GCMRegistrar.getRegistrationId(context));
 		params.put("pays", Resources.getSystem().getConfiguration().locale.getCountry());
 		prgDialog.show();

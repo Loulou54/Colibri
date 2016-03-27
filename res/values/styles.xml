@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Application theme. -->
     <style name="AppTheme" parent="@android:style/Theme.NoTitleBar.Fullscreen">
@@ -7,5 +7,35 @@
         <item name="android:windowBackground">@null</item>
     </style>
     
-
+    <style name="tabStyle">
+		<item name="android:layout_width">wrap_content</item>
+		<item name="android:layout_height">match_parent</item>
+		<item name="android:background">@color/theme_vert</item>
+		<item name="android:padding">6dp</item>
+		<item name="android:layout_marginRight">1dp</item>
+		<item name="android:layout_marginBottom">2dp</item>
+		<item name="android:textColor">@color/theme_gris</item>
+		<item name="android:onClick">dispClassement</item>
+    </style>
+    
+	<style name="valueListJoueur">
+		<item name="android:layout_width">0dip</item>
+		<item name="android:layout_height">match_parent</item>
+		<item name="android:layout_weight">1</item>
+		<item name="android:gravity">center</item>
+		<item name="android:layout_gravity">center_vertical</item>
+		<item name="android:text">@string/tiret</item>
+		<item name="android:textColor">@color/orange</item>
+		<item name="android:textSize">18sp</item>
+	</style>
+	
+	<style name="titleListJoueur">
+		<item name="android:layout_width">0dip</item>
+		<item name="android:layout_height">match_parent</item>
+		<item name="android:layout_weight">1</item>
+		<item name="android:gravity">center</item>
+		<item name="android:textColor">@color/theme_gris</item>
+		<item name="android:textSize">11sp</item>
+	</style>
+	
 </resources>

@@ -25,6 +25,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -147,7 +148,7 @@ public class Multijoueur extends Activity {
 			public void launchFunction(int mode) {
 				newMatch(mode);
 			}
-		}, this, menu.avancement);
+		}, this, defi.getProgressMin());
 		pa.show(menu.editor); // Si appui sur "OK", lance un niveau aléatoire en mode PERSO.
 	}
 	
@@ -175,6 +176,7 @@ public class Multijoueur extends Activity {
 		Jeu.opt.putInt("mode", mode);
 		Jeu.opt.putLong("seed", seed);
 		Jeu.opt.putIntArray("param", ParamAleat.param);
+		Jeu.opt.putInt("progressMin", defi.getProgressMin());
 		startActivity(new Intent(this, Jeu.class));
 	}
 	
@@ -188,6 +190,7 @@ public class Multijoueur extends Activity {
 		Jeu.opt.putInt("mode", defi.match.mode);
 		Jeu.opt.putLong("seed", defi.match.seed);
 		Jeu.opt.putIntArray("param", defi.match.param);
+		Jeu.opt.putInt("progressMin", defi.match.progressMin);
 		startActivity(new Intent(this, Jeu.class));
 	}
 	
@@ -207,10 +210,20 @@ public class Multijoueur extends Activity {
 	}
 	
 	public void supprDefi(View v) {
-		// TODO : confirmation ?
-		int groupPosition = (Integer) v.getTag();
-		base.removeDefi(adversaires.remove(groupPosition), user.getPseudo());
-		syncData();
+		final int groupPosition = (Integer) v.getTag();
+		new AlertDialog.Builder(this)
+			.setIcon(android.R.drawable.ic_dialog_alert)
+			.setTitle(R.string.supprDefi)
+			.setMessage(this.getString(R.string.supprDefiConf, adversaires.get(groupPosition).nom))
+			.setPositiveButton(R.string.accept, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					base.removeDefi(adversaires.remove(groupPosition), user.getPseudo());
+					syncData();
+				}
+			})
+			.setNegativeButton(R.string.annuler, null)
+			.show();
 	}
 	
 	public void actionDefi(View v) {
@@ -303,6 +316,10 @@ public class Multijoueur extends Activity {
 				return menu.experience;
 			}
 			@Override
+			public int getProgress() {
+				return menu.avancement;
+			}
+			@Override
 			public boolean registered(String JSONresponse, String name) {
 				try {
 					base.insertJSONJoueurs(new JSONArray(JSONresponse));
@@ -337,6 +354,7 @@ public class Multijoueur extends Activity {
 		params.put("tasks", base.getTasks());
 		System.out.println(base.getTasks());
 		params.put("expToSync", ""+menu.expToSync);
+		params.put("progress", ""+menu.avancement);
 		client.post(SERVER_URL+"/sync_data.php", params, new AsyncHttpResponseHandler() {
 			@Override
 			public void onSuccess(String response) {

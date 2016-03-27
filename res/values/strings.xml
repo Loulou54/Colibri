@@ -6,6 +6,7 @@
     <string name="campagne">Campaign</string>
     <string name="aleat">Random Map</string>
     <string name="multi">Multiplayer Challenge</string>
+    <string name="classements">Rankings</string>
     <string name="fac">Beginner</string>
     <string name="moy">Intermediate</string>
     <string name="dif">Expert</string>
@@ -122,5 +123,18 @@
 	    <item>3 weeks</item>
 	    <item>4 weeks</item>
 	</string-array>
+	<string name="supprDefi">Delete challenge</string>
+	<string name="supprDefiConf">Do you really wish to cancel your participation to the challenge \"%1$s\" and remove it from your list?</string>
+	<string name="winlost">Wins-Losts</string>
+	<string name="rank">Rank</string>
+	<string name="avatar">Avatar</string>
+	<string name="pays">Country</string>
+	<string name="global">Global</string>
+	<string name="amis">Friends</string>
+	<string name="connexion_ranking">You must be connected to view the rankings!</string>
+	<string name="commencer">Start</string>
+	<string name="minutesAgo">%1$d minute%2$s ago</string>
+	<string name="hoursAgo">%1$d hour%2$s ago</string>
+	<string name="daysAgo">%1$d day%2$s ago</string>
 	
 </resources>

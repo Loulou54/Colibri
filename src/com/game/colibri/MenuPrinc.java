@@ -21,6 +21,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 import android.widget.ViewFlipper;
 import android.app.Activity;
 import android.app.NotificationManager;
@@ -68,6 +69,9 @@ public class MenuPrinc extends Activity {
 		Jeu.menu=this;
 		Multijoueur.menu=this;
 		loadData();
+		if(avancement==1) {
+			((TextView) findViewById(R.id.bout1)).setText(R.string.commencer);
+		}
 		if(intro==null && boucle==null) {
 			intro = MediaPlayer.create(this, R.raw.intro);
 			intro.setLooping(false);
@@ -82,6 +86,8 @@ public class MenuPrinc extends Activity {
 					boucle.start();
 				}
 			});
+			if(!pref.getBoolean("musique", true))
+				stopMusic();
 		}
 		// Lancé depuis une notification ?
 		if(getIntent().getExtras()!=null && getIntent().getExtras().getString("com.game.colibri.notification")!=null) {
@@ -174,6 +180,8 @@ public class MenuPrinc extends Activity {
 		if(brandNew) {
 			brandNew=false;
 			displayMenu();
+			ToggleButton tb = (ToggleButton) findViewById(R.id.bout_musique);
+			tb.setChecked(pref.getBoolean("musique", true));
 		}
 		if(screen==1 && hasFocus)
 			campagne(carte); // Permet de rafraîchir la progression lorsque l'on quitte le jeu et revient au menu de sélection.
@@ -183,7 +191,7 @@ public class MenuPrinc extends Activity {
 	 * Place le premier bouton à la position voulue. Les autres sont placés par rapport à lui. Redimensionne chaque bouton à la largeur/hauteur voulue.
 	 */
 	private void placeButton() {
-		int[] boutons = new int[] {R.id.bout1,R.id.bout2,R.id.bout3,R.id.bout4};
+		int[] boutons = new int[] {R.id.bout1,R.id.bout2,R.id.bout3,R.id.bout4,R.id.bout5};
 		for(int i=0; i<boutons.length; i++) {
 			Button btn_lay = (Button)findViewById(boutons[i]);
 			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) btn_lay.getLayoutParams();
@@ -239,11 +247,13 @@ public class MenuPrinc extends Activity {
 						((Button)findViewById(R.id.bout2)).startAnimation(a);
 						((Button)findViewById(R.id.bout4)).startAnimation(a);
 						((Button)findViewById(R.id.bout5)).startAnimation(a);
+						((Button)findViewById(R.id.bout6)).startAnimation(a);
 						((Button)findViewById(R.id.bout1)).setClickable(true);
 						((Button)findViewById(R.id.bout2)).setClickable(true);
 						((Button)findViewById(R.id.bout3)).setClickable(true);
 						((Button)findViewById(R.id.bout4)).setClickable(true);
 						((Button)findViewById(R.id.bout5)).setClickable(true);
+						((Button)findViewById(R.id.bout6)).setClickable(true);
     	    		}
     	    	});
 			}
@@ -344,6 +354,8 @@ public class MenuPrinc extends Activity {
 	 */
 	public void continuer(View v) {
 		opt_reglages.setVisibility(View.INVISIBLE);
+		if(avancement==1)
+			((TextView) findViewById(R.id.bout1)).setText(R.id.continuer);
 		Jeu.opt.putInt("mode", Niveau.CAMPAGNE);
 		Jeu.opt.putInt("n_niv", Math.min(avancement,Jeu.NIV_MAX));
 		startActivityForResult(new Intent(this, Jeu.class), 1);
@@ -439,11 +451,13 @@ public class MenuPrinc extends Activity {
 		((Button)findViewById(R.id.bout2)).setClickable(false);
 		((Button)findViewById(R.id.bout4)).setClickable(false);
 		((Button)findViewById(R.id.bout5)).setClickable(false);
+		((Button)findViewById(R.id.bout6)).setClickable(false);
 		Animation a = AnimationUtils.loadAnimation(this, R.anim.menu_right);
 		((Button)findViewById(R.id.bout1)).startAnimation(a);
 		((Button)findViewById(R.id.bout2)).startAnimation(a);
 		((Button)findViewById(R.id.bout4)).startAnimation(a);
 		((Button)findViewById(R.id.bout5)).startAnimation(a);
+		((Button)findViewById(R.id.bout6)).startAnimation(a);
 		Button btn_aleat = (Button)findViewById(R.id.bout3);
 		btn_aleat.setClickable(false);
 		btn_aleat.startAnimation(AnimationUtils.loadAnimation(this, R.anim.bouton_aleat_up));
@@ -510,6 +524,12 @@ public class MenuPrinc extends Activity {
 		startActivityForResult(new Intent(this, Multijoueur.class), 1);
 	}
 	
+	public void classements(View v) {
+		opt_reglages.setVisibility(View.INVISIBLE);
+		ClassementAdapter.userName = pref.getString("pseudo",null);
+		startActivityForResult(new Intent(this, Classements.class), 1);
+	}
+	
 	public void reglages(View v) {
 		if (opt_reglages.getVisibility()==View.INVISIBLE)
 			opt_reglages.setVisibility(View.VISIBLE);
@@ -530,26 +550,16 @@ public class MenuPrinc extends Activity {
 	}
 	
 	public void musique(View v) {
-		Button son_off = (Button)findViewById(R.id.boutmusique);
-		Button son_on = (Button) findViewById(R.id.boutmusique2);
+		ToggleButton tb = (ToggleButton) v;
 		opt_reglages.setVisibility(View.INVISIBLE);
-		if (son_on.getVisibility()==View.INVISIBLE) {
-			son_on.setVisibility(View.VISIBLE);
-			son_off.setVisibility(View.INVISIBLE);
-			son_off.setClickable(false);
-			son_on.setClickable(true);
+		if (tb.isChecked()) {
 			startMusic();
+			editor.putBoolean("musique", true);
+		} else {
+			stopMusic();
+			editor.putBoolean("musique", false);
 		}
-		else {
-			son_off.setVisibility(View.VISIBLE);
-			son_on.setVisibility(View.INVISIBLE);
-			son_on.setClickable(false);
-			son_off.setClickable(true);
-			if(intro==null)
-				boucle.pause();
-			else
-				intro.pause();
-		}
+		editor.commit();
 	}
 	
 	public static void startMusic() {

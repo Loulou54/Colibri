@@ -1,11 +1,14 @@
 package com.game.colibri;
 
+import android.content.Context;
+
 public class Joueur {
 	
 	public static int[] img = new int[] {R.drawable.colibri_d1, R.drawable.fleur, R.drawable.fleurm, R.drawable.menhir, R.drawable.menhir_rouge, R.drawable.dynamite_allumee, R.drawable.explo2, R.drawable.rainbow, R.drawable.skull, R.drawable.chat_0, R.drawable.vache_0, R.drawable.doge, R.drawable.doge_lunettes, R.drawable.megusta, R.drawable.ampoule, R.drawable.coupe, android.R.drawable.star_big_on, android.R.drawable.sym_def_app_icon};
 	
 	private String pseudo, pays;
-	private int exp, defis, win, loose, avatar;
+	private int exp, progress, defis, win, loose, avatar, rang;
+	private long lastVisit;
 	
 	/**
 	 * Récupération des paramètres du joueur propriétaire du smartphone.
@@ -25,14 +28,17 @@ public class Joueur {
 	 * Créer un nouveau joueur.
 	 * @param sav
 	 */
-	public Joueur(String nom, String loc, int e, int d, int w, int l, int av) {
+	public Joueur(String nom, String loc, int e, int prog, int d, int w, int l, int av, long lv) {
 		pseudo=nom;
 		pays=loc;
 		exp=e;
+		progress=prog;
 		defis=d;
 		win=w;
 		loose=l;
 		avatar=av;
+		lastVisit=lv;
+		rang=0;
 	}
 	
 	public String getPseudo() {
@@ -45,6 +51,10 @@ public class Joueur {
 	
 	public int getExp() {
 		return exp;
+	}
+	
+	public int getProgress() {
+		return progress;
 	}
 	
 	public int getDefis() {
@@ -63,6 +73,30 @@ public class Joueur {
 		return img[avatar];
 	}
 	
+	public int getRang() {
+		return rang;
+	}
+	
+	public String getLastVisit(Context c) {
+		/*DateFormat df = SimpleDateFormat.getDateTimeInstance();
+		Date d = new Date(lastVisit*1000);
+		return df.format(d);*/
+		long t = System.currentTimeMillis()/1000-lastVisit;
+		if(t<3600)
+			return c.getResources().getString(R.string.minutesAgo, t/60, t/60>1 ? "s" : "");
+		else if(t<3600*24)
+			return c.getResources().getString(R.string.hoursAgo, t/3600, t/3600>1 ? "s" : "");
+		else
+			return c.getResources().getString(R.string.daysAgo, t/(3600*24), t/(3600*24)>1 ? "s" : "");
+	}
+	
+	/**
+	 * Pour transformer le temps relatif en absolu de lastVisit. A appeler après désérialisation JSON.
+	 */
+	public void computeLastVisit() {
+		lastVisit=System.currentTimeMillis()/1000-lastVisit;
+	}
+	
 	/**
 	 * Incrémente le compteur de défis du joueur.
 	 */
@@ -73,8 +107,8 @@ public class Joueur {
 	/**
 	 * Incrémente le compteur de victoires du joueur.
 	 */
-	public void win() {
-		win++;
+	public void win(int n) {
+		win+=n;
 	}
 	
 	/**
@@ -94,6 +128,6 @@ public class Joueur {
 	
 	@Override
 	public String toString() {
-		return pseudo+";"+pays+";"+exp+";"+defis+";"+win+";"+loose+";"+avatar;
+		return pseudo+";"+pays+";"+exp+";"+progress+";"+defis+";"+win+";"+loose+";"+avatar+";"+lastVisit;
 	}
 }

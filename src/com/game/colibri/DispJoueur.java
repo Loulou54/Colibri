@@ -45,7 +45,9 @@ public class DispJoueur {
 		} catch (IOException e) {
 			pays.setVisibility(View.INVISIBLE);
 		}
+		((TextView) lay.findViewById(R.id.lastConnectDetails)).setText(""+j.getLastVisit(context));
 		((TextView) lay.findViewById(R.id.expDetails)).setText(""+j.getExp());
+		((TextView) lay.findViewById(R.id.progressDetails)).setText(""+(j.getProgress()-1)+"/"+Jeu.NIV_MAX);
 		((TextView) lay.findViewById(R.id.defisDetails)).setText(""+j.getDefis());
 		((TextView) lay.findViewById(R.id.winsDetails)).setText(""+j.getWin());
 		((TextView) lay.findViewById(R.id.looseDetails)).setText(""+j.getLost());

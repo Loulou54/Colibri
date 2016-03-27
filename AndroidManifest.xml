@@ -63,6 +63,12 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="landscape" >
         </activity>
+        <activity
+            android:name="com.game.colibri.Classements"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden|adjustPan|adjustResize" >
+        </activity>
         
         <receiver
             android:name="com.google.android.gcm.GCMBroadcastReceiver"

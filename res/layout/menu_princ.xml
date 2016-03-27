@@ -71,9 +71,23 @@
         android:textColor="@android:color/white"
         android:onClick="multijoueur"
         android:textSize="16sp" />
-	
+    
     <Button
         android:id="@+id/bout5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/bout4"
+        android:layout_below="@+id/bout4"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/boutons"
+        android:gravity="center"
+        android:text="@string/classements"
+        android:textColor="@android:color/white"
+        android:onClick="classements"
+        android:textSize="16sp" />
+	
+    <Button
+        android:id="@+id/bout6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
@@ -118,29 +132,18 @@
 
 	</LinearLayout>
 	
-    <Button
-        android:id="@+id/boutmusique"
+    <ToggleButton
+        android:id="@+id/bout_musique"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
-        android:background="@drawable/son1"
+        android:background="@drawable/bouton_musique"
         android:layout_marginLeft="6dp"
         android:layout_marginBottom="6dp"
-        android:onClick="musique" 
-        android:visibility="invisible"
-        android:clickable="false"/>
-
-    <Button
-        android:id="@+id/boutmusique2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/son2"
-        android:layout_marginLeft="6dp"
-        android:layout_marginBottom="6dp"
-        android:onClick="musique" />
+        android:onClick="musique"
+        android:textOn=""
+        android:textOff="" />
 
     <TextView
         android:id="@+id/exp_menu"

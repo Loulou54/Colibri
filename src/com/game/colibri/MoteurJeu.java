@@ -18,6 +18,7 @@ import android.view.animation.Animation.AnimationListener;
  * Classe gérant les déplacements des éléments (colibri, vaches, ...) selon les régles
  * et le rafraîchissement de l'écran.
  */
+@SuppressLint("RtlHardcoded")
 public class MoteurJeu {
 	
 	private static final boolean DEBUG = false;

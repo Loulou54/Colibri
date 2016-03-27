@@ -23,7 +23,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DBController  extends SQLiteOpenHelper {
 		
 	public DBController(Context applicationcontext) {
-        super(applicationcontext, "Colibri.db", null, 5);
+        super(applicationcontext, "Colibri.db", null, 6);
         Defi.base = this;
     }
 	
@@ -46,10 +46,12 @@ public class DBController  extends SQLiteOpenHelper {
         		+ " pseudo varchar(15) NOT NULL,"
         		+ " pays varchar(10) DEFAULT NULL,"
 				+ " exp int NOT NULL DEFAULT 0,"
+				+ " progress int NOT NULL DEFAULT 1,"
 				+ " defis int NOT NULL DEFAULT 0,"
 				+ " win int NOT NULL DEFAULT 0,"
 				+ " loose int NOT NULL DEFAULT 0,"
 				+ " avatar int NOT NULL DEFAULT 0,"
+				+ " time int NOT NULL DEFAULT 0,"
 				+ " PRIMARY KEY (pseudo)"
 				+ ")";
         database.execSQL(query);
@@ -155,11 +157,13 @@ public class DBController  extends SQLiteOpenHelper {
 				JSONObject d = jsonArray.getJSONObject(i);
 				values.put("pseudo",d.getString("pseudo"));
 				values.put("pays",d.getString("pays"));
-				values.put("exp",""+d.getInt("exp"));
-				values.put("defis",""+d.getInt("defis"));
-				values.put("win",""+d.getInt("win"));
-				values.put("loose",""+d.getInt("loose"));
-				values.put("avatar",""+d.getInt("avatar"));
+				values.put("exp",d.getInt("exp"));
+				values.put("progress",d.getInt("progress"));
+				values.put("defis",d.getInt("defis"));
+				values.put("win",d.getInt("win"));
+				values.put("loose",d.getInt("loose"));
+				values.put("avatar",d.getInt("avatar"));
+				values.put("time",System.currentTimeMillis()/1000 - d.getLong("time"));
 				database.insertWithOnConflict("joueurs", null, values, SQLiteDatabase.CONFLICT_REPLACE);
 			} catch (JSONException e) {
 				e.printStackTrace();
@@ -203,12 +207,12 @@ public class DBController  extends SQLiteOpenHelper {
 	 */
 	public HashMap<String, Joueur> getJoueurs(HashMap<String,Joueur> joueurs) {
 		joueurs.clear();
-		String selectQuery = "SELECT pseudo,pays,exp,defis,win,loose,avatar FROM `joueurs`";
+		String selectQuery = "SELECT pseudo,pays,exp,progress,defis,win,loose,avatar,time FROM `joueurs`";
 	    SQLiteDatabase database = this.getWritableDatabase();
 	    Cursor cursor = database.rawQuery(selectQuery, null);
 	    if (cursor.moveToFirst()) {
 	        do {
-	        	joueurs.put(cursor.getString(0), new Joueur(cursor.getString(0), cursor.getString(1), cursor.getInt(2), cursor.getInt(3), cursor.getInt(4), cursor.getInt(5), cursor.getInt(6)));
+	        	joueurs.put(cursor.getString(0), new Joueur(cursor.getString(0), cursor.getString(1), cursor.getInt(2), cursor.getInt(3), cursor.getInt(4), cursor.getInt(5), cursor.getInt(6), cursor.getInt(7), cursor.getLong(8)));
 	        } while(cursor.moveToNext());
 	    }
 	    database.close();
@@ -223,9 +227,9 @@ public class DBController  extends SQLiteOpenHelper {
 	 */
 	public void getDefis(String user, HashMap<String,Joueur> joueurs, ArrayList<Defi> l) {
 		l.clear();
-		String selectQuery = "SELECT id,nom,nMatch,nivCours,nivFini,t_max,limite FROM `defis` JOIN `participations` ON id=defi WHERE joueur='"+user+"' ORDER BY t_cours";
+		String selectQuery = "SELECT id,nom,nMatch,nivCours,nivFini,t_max,limite FROM `defis` JOIN `participations` ON id=defi WHERE joueur=? ORDER BY t_cours";
 	    SQLiteDatabase database = this.getWritableDatabase();
-	    Cursor cursor = database.rawQuery(selectQuery, null);
+	    Cursor cursor = database.rawQuery(selectQuery, new String[] {user});
 	    if (cursor.moveToFirst()) {
 	        do {
 	        	String selectQuery2 = "SELECT joueur,win,t_cours,penalite_cours,t_fini,penalite_fini,exp,gagne FROM `participations` WHERE defi="+cursor.getInt(0);
@@ -248,7 +252,8 @@ public class DBController  extends SQLiteOpenHelper {
 	 * @param database
 	 */
 	private void cleanJoueurs(SQLiteDatabase database, String user) {
-		database.execSQL("DELETE FROM `joueurs` WHERE pseudo NOT IN (SELECT joueur FROM Participations) AND pseudo<>'"+user+"'");
+		//database.execSQL("DELETE FROM `joueurs` WHERE pseudo NOT IN (SELECT joueur FROM Participations) AND pseudo<>'"+user+"'");
+		database.delete("joueurs", "pseudo NOT IN (SELECT joueur FROM Participations) AND pseudo<>?", new String[] {user});
 	}
 	
 	/**
@@ -326,14 +331,14 @@ public class DBController  extends SQLiteOpenHelper {
 			values.put("penalite_fini", p.penalite_fini);
 			values.put("exp", p.exp);
 			values.put("gagne", p.gagne);
-			database.update("participations", values, "defi="+defi.id+" AND joueur='"+p.joueur.getPseudo()+"'", null);
+			database.update("participations", values, "defi="+defi.id+" AND joueur=?", new String[] {p.joueur.getPseudo()});
 			// MAJ Joueurs
 			values = new ContentValues();
 			values.put("exp", p.joueur.getExp());
 			values.put("defis", p.joueur.getDefis());
 			values.put("win", p.joueur.getWin());
 			values.put("loose", p.joueur.getLost());
-			database.update("joueurs", values, "pseudo='"+p.joueur.getPseudo()+"'", null);
+			database.update("joueurs", values, "pseudo=?", new String[] {p.joueur.getPseudo()});
 		}
 		// Requête serveur
 		values = new ContentValues();
@@ -367,7 +372,7 @@ public class DBController  extends SQLiteOpenHelper {
 		values.put("penalite_fini", p.penalite_fini);
 		values.put("exp", p.exp);
 		values.put("gagne", p.gagne);
-		database.update("participations", values, "defi="+defi+" AND joueur='"+p.joueur.getPseudo()+"'", null);
+		database.update("participations", values, "defi="+defi+" AND joueur=?", new String[] {p.joueur.getPseudo()});
 		// Requète Serveur
 		values = new ContentValues();
 		JSONObject o = new JSONObject();
@@ -420,7 +425,7 @@ public class DBController  extends SQLiteOpenHelper {
 		SQLiteDatabase database = this.getWritableDatabase();
 		database.delete("participations", null, null);
 		database.delete("defis", null, null);
-		database.delete("joueurs", "pseudo<>'"+user+"'", null);
+		database.delete("joueurs", "pseudo<>?", new String[] {user});
 		database.delete("tasks", null, null);
 		ContentValues values = new ContentValues();
 		values = new ContentValues();
@@ -443,7 +448,7 @@ public class DBController  extends SQLiteOpenHelper {
 				JSONObject d = jsonArray.getJSONObject(i);
 				String task = d.getString("task");
 				if(task.equalsIgnoreCase("delPart")) {
-					database.delete("participations", "defi="+d.getInt("part_defi")+" AND joueur='"+d.getString("part_joueur")+"'", null);
+					database.delete("participations", "defi="+d.getInt("part_defi")+" AND joueur=?", new String[] {d.getString("part_joueur")});
 					cleanJoueurs(database, user);
 					liste+=context.getResources().getString(R.string.deletedPart, d.getString("part_joueur"), d.getString("part_defi_nom"))+"\n";
 				} else if(task.equalsIgnoreCase("delDefi")) {

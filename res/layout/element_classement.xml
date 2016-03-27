@@ -4,6 +4,18 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal" >
     
+    <TextView
+        android:id="@+id/classAdv"
+        android:layout_width="0dip"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:textSize="20sp"
+        android:textColor="@color/theme_vert"
+        android:textStyle="bold"
+        android:text="@string/tiret" />
+    
     <ImageView
         android:id="@+id/avatarAdv"
         android:layout_width="40dp"
@@ -23,7 +35,7 @@
         android:paddingStart="5dp"
         android:paddingEnd="5dp"
         android:textSize="18sp"
-        android:textColor="@color/rose_doux"
+        android:textColor="@color/choco"
         android:text="@string/joueur" />
     
     <ImageView
@@ -42,16 +54,14 @@
     
     <TextView
         style="@style/valueListJoueur"
+        android:id="@+id/defisAdv" />
+    
+    <TextView
+        style="@style/valueListJoueur"
         android:id="@+id/winDefisAdv" />
-
-    <ImageButton
-        android:id="@+id/poubelle"
-        android:layout_width="0dip"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:background="@android:color/transparent"
-        android:contentDescription="@string/tiret"
-        android:src="@android:drawable/ic_menu_delete"
-        android:visibility="gone" />
+	
+    <TextView
+        style="@style/valueListJoueur"
+        android:id="@+id/winLostAdv" />
 
 </LinearLayout>

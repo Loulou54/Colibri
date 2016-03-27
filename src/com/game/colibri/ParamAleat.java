@@ -57,7 +57,7 @@ public class ParamAleat {
 			this.context = context;
 		}
 		this.callback = callback;
-		this.avancement = avancement;
+		this.avancement = avancement-1;
 	}
 	
 	public interface callBackInterface {
@@ -92,16 +92,17 @@ public class ParamAleat {
 		});
 	}
 	
+	@SuppressLint("InflateParams")
 	public void show(final SharedPreferences.Editor editor) {
 		tp = new TempParam();
 		final ScrollView content = (ScrollView) LayoutInflater.from(context).inflate(R.layout.param_aleat, null);
 		final LinearLayout lay = (LinearLayout) content.findViewById(R.id.param_lay);
 		prepareParam(lay);
 		int index = 1;
-		new ParamElement(index++,lay,9,R.drawable.vache_0,R.string.vaches);
-		new ParamElement(index++,lay,16,R.drawable.dynamite,R.string.dynamites);
-		new ParamElement(index++,lay,21,R.drawable.chat_0,R.string.chats);
-		new ParamElement(index++,lay,23,R.drawable.rainbow,R.string.arcs);
+		new ParamElement(index++,lay,8,R.drawable.vache_0,R.string.vaches);
+		new ParamElement(index++,lay,15,R.drawable.dynamite,R.string.dynamites);
+		new ParamElement(index++,lay,20,R.drawable.chat_0,R.string.chats);
+		new ParamElement(index++,lay,22,R.drawable.rainbow,R.string.arcs);
 		boxAleat = new AlertDialog.Builder(context);
 		boxAleat.setTitle(R.string.paramAleat);
 		DialogInterface.OnClickListener check = new DialogInterface.OnClickListener() {
@@ -143,6 +144,7 @@ public class ParamAleat {
 		 * @param resString La ressource du texte à afficher.
 		 * @param value La valeur actuelle de l'option sur la SeekBar, entre 1 et 6.
 		 */
+		@SuppressLint("InflateParams")
 		public ParamElement(int index, final LinearLayout parent, int seuil, int resDrawable, int resString) {
 			final int i = index;
 			elem =(LinearLayout) LayoutInflater.from(context).inflate(R.layout.param_element, null);
