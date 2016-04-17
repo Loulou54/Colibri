@@ -136,5 +136,6 @@
 	<string name="minutesAgo">%1$d minute%2$s ago</string>
 	<string name="hoursAgo">%1$d hour%2$s ago</string>
 	<string name="daysAgo">%1$d day%2$s ago</string>
+	<string name="partie_rapide">Quick match</string>
 	
 </resources>

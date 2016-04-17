@@ -8,7 +8,7 @@ public class Joueur {
 	
 	private String pseudo, pays;
 	private int exp, progress, defis, win, loose, avatar, rang;
-	private long lastVisit;
+	private long time;
 	
 	/**
 	 * Récupération des paramètres du joueur propriétaire du smartphone.
@@ -37,7 +37,7 @@ public class Joueur {
 		win=w;
 		loose=l;
 		avatar=av;
-		lastVisit=lv;
+		time=lv;
 		rang=0;
 	}
 	
@@ -79,9 +79,9 @@ public class Joueur {
 	
 	public String getLastVisit(Context c) {
 		/*DateFormat df = SimpleDateFormat.getDateTimeInstance();
-		Date d = new Date(lastVisit*1000);
+		Date d = new Date(time*1000);
 		return df.format(d);*/
-		long t = System.currentTimeMillis()/1000-lastVisit;
+		long t = System.currentTimeMillis()/1000-time;
 		if(t<3600)
 			return c.getResources().getString(R.string.minutesAgo, t/60, t/60>1 ? "s" : "");
 		else if(t<3600*24)
@@ -91,10 +91,10 @@ public class Joueur {
 	}
 	
 	/**
-	 * Pour transformer le temps relatif en absolu de lastVisit. A appeler après désérialisation JSON.
+	 * Pour transformer le temps relatif en absolu de time. A appeler après désérialisation JSON.
 	 */
 	public void computeLastVisit() {
-		lastVisit=System.currentTimeMillis()/1000-lastVisit;
+		time=System.currentTimeMillis()/1000-time;
 	}
 	
 	/**
@@ -128,6 +128,6 @@ public class Joueur {
 	
 	@Override
 	public String toString() {
-		return pseudo+";"+pays+";"+exp+";"+progress+";"+defis+";"+win+";"+loose+";"+avatar+";"+lastVisit;
+		return pseudo+";"+pays+";"+exp+";"+progress+";"+defis+";"+win+";"+loose+";"+avatar+";"+time;
 	}
 }

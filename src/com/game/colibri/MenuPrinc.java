@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.Typeface;
 
 /**
  * Menu principal : activité lancée au démarage.
@@ -122,6 +123,7 @@ public class MenuPrinc extends Activity {
 		}
 		TextView exp = (TextView) findViewById(R.id.exp_menu);
 		exp.setText(getString(R.string.exp)+" : "+experience);
+		exp.setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Sketch_Block.ttf"));
 	}
 	
 	/**
@@ -192,6 +194,7 @@ public class MenuPrinc extends Activity {
 	 */
 	private void placeButton() {
 		int[] boutons = new int[] {R.id.bout1,R.id.bout2,R.id.bout3,R.id.bout4,R.id.bout5};
+		Typeface font = Typeface.createFromAsset(getAssets(),"fonts/Passing Notes.ttf");
 		for(int i=0; i<boutons.length; i++) {
 			Button btn_lay = (Button)findViewById(boutons[i]);
 			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) btn_lay.getLayoutParams();
@@ -202,6 +205,7 @@ public class MenuPrinc extends Activity {
 		    layoutParams.width = 4*ww/10;
 		    layoutParams.height = 128*ww/2320;
 		    btn_lay.setLayoutParams(layoutParams);
+		    btn_lay.setTypeface(font);
 		}
 	}
 	

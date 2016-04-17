@@ -2,11 +2,11 @@ package com.network.colibri;
 
 import android.content.Context;
 import android.content.Intent;
- 
+
 public final class CommonUtilities {
      
     // give your server registration url here
-    public static final String SERVER_URL = "http://192.168.0.15/Colibri"; 
+    public static final String SERVER_URL = "http://10.0.0.9/Colibri"; 
  
     // Google project id
     public static final String SENDER_ID = "533995009920"; 

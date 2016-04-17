@@ -21,8 +21,9 @@ public class Defi {
 	public Match matchFini; // Le dernier match terminé
 	public int t_max;
 	public long limite;
+	public int type;
 	
-	public Defi(int id, String nom, HashMap<String,Participation> p, int nMatch, String nivCours, String nivFini, int t_m, int lim) {
+	public Defi(int id, String nom, HashMap<String,Participation> p, int nMatch, String nivCours, String nivFini, int t_m, int lim, int type) {
 		this.id = id;
 		this.nom = nom;
 		participants = p;
@@ -40,6 +41,7 @@ public class Defi {
 		}
 		t_max = t_m;
 		limite = lim;
+		this.type = type;
 	}
 	
 	/**
@@ -60,7 +62,12 @@ public class Defi {
 			if(p.t_cours!=Participation.NOT_PLAYED)
 				partEffectives++;
 		}
-		if(classement[0].t_cours!=0) { // Tous les participants ont fini.
+		boolean result = (classement[0].t_cours!=0 && classement.length>=type);
+		System.out.println(result);
+		System.out.println(classement[0].t_cours);
+		System.out.println(classement.length);
+		System.out.println(type);
+		if(result) { // Tous les participants ont fini.
 			int ligne=0, pos=0, t_pos=0;
 			for(Participation p : classement) {
 				ligne++;
@@ -75,7 +82,7 @@ public class Defi {
 		} else {
 			base.updateParticipation(participants.get(user), id, nMatch);
 		}
-		return classement[0].t_cours!=0;
+		return result;
 	}
 	
 	public int getEtat(String user) {

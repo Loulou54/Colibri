@@ -23,11 +23,13 @@ import com.network.colibri.DBController;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -65,6 +67,10 @@ public class Multijoueur extends Activity {
 		base = new DBController(this);
 		joueurs = new HashMap<String, Joueur>();
 		adversaires = new ArrayList<Defi>();
+		((TextView) findViewById(R.id.titreMulti)).setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Adventure.otf"));
+		((TextView) findViewById(R.id.nvDefi)).setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Sketch_Block.ttf"));
+		((TextView) findViewById(R.id.nvPRapide)).setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Sketch_Block.ttf"));
+		((TextView) findViewById(R.id.user_name)).setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Sketch_Block.ttf"));
 		lv = (ExpandableListView) findViewById(R.id.listView1);
 		lv.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
 			@Override
@@ -76,9 +82,13 @@ public class Multijoueur extends Activity {
 		});
 		lv.setEmptyView((TextView) findViewById(R.id.defaultViewDefis));
 		loader = (ViewSwitcher) findViewById(R.id.loader);
-		GCMRegistrar.checkDevice(this);
-		GCMRegistrar.checkManifest(this);
-		registerReceiver(mHandleMessageReceiver, new IntentFilter(BROADCAST_MESSAGE_ACTION));
+		try {
+			GCMRegistrar.checkDevice(this);
+			GCMRegistrar.checkManifest(this);
+			registerReceiver(mHandleMessageReceiver, new IntentFilter(BROADCAST_MESSAGE_ACTION));
+		} catch (Exception e) {
+			System.out.println("No GCM : Notification system disabled.");
+		}
 		loadData();
 	}
 	
@@ -99,13 +109,19 @@ public class Multijoueur extends Activity {
 	 */
 	private void loadData() {
 		loadJoueurs();
-		if(user==null) { // Utilisateur non inscrit !
+		String userName = menu.pref.getString("pseudo",null);
+		if(userName==null) { // Utilisateur non inscrit !
 			if(!connect.isConnectedToInternet()) {
 				Toast.makeText(this, R.string.connexion_register, Toast.LENGTH_LONG).show();
 				finish();
 				return;
 			}
-			String regId = GCMRegistrar.getRegistrationId(this);
+			String regId;
+			try {
+				regId = GCMRegistrar.getRegistrationId(this);
+			} catch(Exception e) {
+				regId = "No GCM";
+			}
 			if(regId.equals("")) {
 				Toast.makeText(this, R.string.gcm_register, Toast.LENGTH_SHORT).show();
 				GCMRegistrar.register(this, SENDER_ID);
@@ -113,25 +129,35 @@ public class Multijoueur extends Activity {
 				registerUser();
 			}
 		} else {
-			base.getDefis(user.getPseudo(),joueurs,adversaires);
-			adapt = new DefiExpandableAdapter(this, user.getPseudo(), adversaires);
+			base.getDefis(userName,joueurs,adversaires);
+			adapt = new DefiExpandableAdapter(this, userName, adversaires);
 			lv.setAdapter(adapt);
 			dispUser();
-			if(!connect.isConnectedToInternet())
+			if(!connect.isConnectedToInternet()) {
 				Toast.makeText(this, R.string.hors_connexion, Toast.LENGTH_SHORT).show();
-			else {
+			} else {
 				syncData();
 			}
 		}
 	}
 	
 	private void loadJoueurs() {
+		String userName = menu.pref.getString("pseudo",null);
 		base.getJoueurs(joueurs);
 		System.out.println("Nombre de Joueurs : "+joueurs.size());
 		for(Joueur j : joueurs.values()) {
 			System.out.println(j.getPseudo());
 		}
-		user = joueurs.get(menu.pref.getString("pseudo",null));
+		user = joueurs.get(userName);
+		if(user==null) {
+			if(!connect.isConnectedToInternet()) {
+				Toast.makeText(this, R.string.hors_connexion, Toast.LENGTH_SHORT).show();
+				finish();
+			} else {
+				user = new Joueur(userName, "", 0, 0, 0, 0, 0, 0, 0);
+				base.taskSyncTotale(userName);
+			}
+		}
 	}
 	
 	@SuppressLint("InflateParams")
@@ -209,6 +235,38 @@ public class Multijoueur extends Activity {
 		})).show();
 	}
 	
+	public void partieRapide(View v) {
+		if(!connect.isConnectedToInternet() || user==null) {
+			Toast.makeText(this, R.string.hors_connexion, Toast.LENGTH_SHORT).show();
+			return;
+		}
+		final ProgressDialog prgDialog = new ProgressDialog(this);
+		prgDialog.setMessage(getString(R.string.progress));
+		prgDialog.setCancelable(false);
+		prgDialog.show();
+		RequestParams params = new RequestParams();
+		params.put("pseudo", menu.pref.getString("pseudo", ""));
+		client.post(SERVER_URL+"/partie_rapide.php", params, new AsyncHttpResponseHandler() {
+			@Override
+			public void onSuccess(String response) {
+				prgDialog.dismiss();
+				insertJSONData(response);
+			}
+
+			@Override
+			public void onFailure(int statusCode, Throwable error, String content) {
+				prgDialog.dismiss();
+				if (statusCode == 404) {
+					Toast.makeText(Multijoueur.this, R.string.err404, Toast.LENGTH_LONG).show();
+				} else if (statusCode == 500 || statusCode == 503) {
+					Toast.makeText(Multijoueur.this, R.string.err500, Toast.LENGTH_LONG).show();
+				} else {
+					Toast.makeText(Multijoueur.this, R.string.err, Toast.LENGTH_LONG).show();
+				}
+			}
+		});
+	}
+	
 	public void supprDefi(View v) {
 		final int groupPosition = (Integer) v.getTag();
 		new AlertDialog.Builder(this)
@@ -227,8 +285,8 @@ public class Multijoueur extends Activity {
 	}
 	
 	public void actionDefi(View v) {
-		int groupPosition = (Integer) v.getTag();
-		Multijoueur.this.defi = adversaires.get(groupPosition);
+		final int groupPosition = (Integer) v.getTag();
+		defi = adversaires.get(groupPosition);
 		switch(defi.getEtat(user.getPseudo())) {
 		case Defi.ATTENTE: // Send POKE
 			// TODO: Poke.
@@ -237,23 +295,27 @@ public class Multijoueur extends Activity {
 			Resultats.callback = new Resultats.callBackInterface() {
 				@Override
 				public void suite() {
-					base.setResultatsVus(defi.id,defi.nMatch);
-					adapt.notifyDataSetChanged();
-					//releverMatch();
+					if(defi.type>0) { // Partie rapide
+						base.removeDefi(adversaires.remove(groupPosition), user.getPseudo());
+						syncData();
+					} else {
+						base.setResultatsVus(defi.id,defi.nMatch);
+						adapt.notifyDataSetChanged();
+					}
 				}
 			};
-			Resultats.multi = Multijoueur.this;
+			Resultats.multi = this;
 			Resultats.DISPLAY_RES = true;
-			startActivity(new Intent(Multijoueur.this, Resultats.class));
+			startActivity(new Intent(this, Resultats.class));
 			break;
 		case Defi.RELEVER: // Lancer le jeu avec Seed donnée
 			releverMatch();
 			break;
 		case Defi.LANCER: // Lancer nouveau défi
-			Multijoueur.this.choixNiveau();
+			choixNiveau();
 			break;
 		case Defi.OBSOLETE: // Deadline dépassée -> il faudrait synchroniser.
-			Toast.makeText(Multijoueur.this, R.string.obsolete_txt, Toast.LENGTH_LONG).show();
+			Toast.makeText(this, R.string.obsolete_txt, Toast.LENGTH_LONG).show();
 		}
 	}
 	
@@ -349,6 +411,7 @@ public class Multijoueur extends Activity {
 		adapt.setLaunchEnabled(false);
 		adapt.notifyDataSetChanged();
 		loader.showNext();
+		loader.setEnabled(false);
 		RequestParams params = new RequestParams();
 		params.put("pseudo", menu.pref.getString("pseudo", ""));
 		params.put("tasks", base.getTasks());
@@ -359,6 +422,7 @@ public class Multijoueur extends Activity {
 			@Override
 			public void onSuccess(String response) {
 				loader.showNext();
+				loader.setEnabled(true);
 				adapt.setLaunchEnabled(true);
 				if(insertJSONData(response)) {
 					base.clearTasks();
@@ -369,6 +433,7 @@ public class Multijoueur extends Activity {
 			@Override
 			public void onFailure(int statusCode, Throwable error, String content) {
 				loader.showNext();
+				loader.setEnabled(true);
 				adapt.setLaunchEnabled(true);
 				adapt.notifyDataSetChanged();
 				Toast.makeText(Multijoueur.this, R.string.sync_fail, Toast.LENGTH_SHORT).show();
@@ -418,8 +483,13 @@ public class Multijoueur extends Activity {
 			}
 		} else
 			res = true;
-		base.getDefis(user.getPseudo(),joueurs,adversaires);
+		int pRapide = base.getDefis(user.getPseudo(),joueurs,adversaires);
 		adapt.notifyDataSetChanged();
+		if(pRapide!=-1) {
+			View v = new View(this);
+			v.setTag(pRapide);
+			actionDefi(v);
+		}
 		return res;
 	}
 	

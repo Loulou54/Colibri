@@ -32,6 +32,11 @@ public class Niveau {
 	public int experience;
 	
 	/*
+	 * Le progrès minimum requis dans campagne pour faire ce niveau. (utilisé pour les parties rapides)
+	 */
+	public int progressMin;
+	
+	/*
 	 * Carte contenant les informations statiques du niveau en
 	 * question c'est-à-dire les menhirs, les fleurs ainsi
 	 * que les fleurs magiques et les dynamites.
@@ -1078,6 +1083,7 @@ public class Niveau {
 			w[0]=0; frameDepart=frame;
 			rf=r; cf=c;
 			if(nbDyna>0 && k<n-4 && random.nextInt(n-k-4)<nbDyna) { // Détermine si l'on va poser une dynamite à ce tour.
+				progressMin = 16; // Niveau min requis
 				dropDyna = true;
 				nbDyna--;
 			}
@@ -1413,6 +1419,7 @@ public class Niveau {
 				}
 			}
 		}
+		progressMin = Math.max(progressMin, numArcs>10 ? 23 : (chats.size()>0 ? 21 : (vaches.size()>0 ? 9 : 0)));
 		return true;
 	}
 	

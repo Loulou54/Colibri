@@ -23,7 +23,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DBController  extends SQLiteOpenHelper {
 		
 	public DBController(Context applicationcontext) {
-        super(applicationcontext, "Colibri.db", null, 6);
+        super(applicationcontext, "Colibri.db", null, 7);
         Defi.base = this;
     }
 	
@@ -35,10 +35,11 @@ public class DBController  extends SQLiteOpenHelper {
 				+ " id int NOT NULL,"
 				+ " nom varchar(25) DEFAULT NULL,"
 				+ " nMatch int NOT NULL,"
-				+ " nivCours text NOT NULL,"
-				+ " nivFini text NOT NULL,"
+				+ " nivCours text DEFAULT NULL,"
+				+ " nivFini text DEFAULT NULL,"
 				+ " t_max int NOT NULL,"
 				+ " limite int NOT NULL,"
+				+ " type int NOT NULL,"
 				+ " PRIMARY KEY (`id`)"
 				+ ")";
         database.execSQL(query);
@@ -114,10 +115,11 @@ public class DBController  extends SQLiteOpenHelper {
 				values.put("id", d.getInt("id"));
 				values.put("nom",d.getString("nom"));
 				values.put("nMatch",d.getInt("nMatch"));
-				values.put("nivCours",d.getString("nivCours"));
-				values.put("nivFini",d.getString("nivFini"));
+				values.put("nivCours",d.isNull("nivCours") ? null : d.getString("nivCours"));
+				values.put("nivFini",d.isNull("nivFini") ? null : d.getString("nivFini"));
 				values.put("t_max", d.getInt("t_max"));
 				values.put("limite", d.getInt("t_restant")+System.currentTimeMillis()/1000);
+				values.put("type", d.getInt("type"));
 				database.insertWithOnConflict("defis", null, values, SQLiteDatabase.CONFLICT_REPLACE);
 			} catch (JSONException e) {
 				e.printStackTrace();
@@ -181,7 +183,7 @@ public class DBController  extends SQLiteOpenHelper {
 	public String getTasks() {
 		ArrayList<String> tasks = new ArrayList<String>();
 	    SQLiteDatabase database = this.getWritableDatabase();
-	    Cursor cursor = database.rawQuery("SELECT task FROM `tasks`", null);
+	    Cursor cursor = database.rawQuery("SELECT task FROM `tasks` ORDER BY id", null);
 	    if (cursor.moveToFirst()) {
 	        do {
 				tasks.add(cursor.getString(0));
@@ -225,9 +227,13 @@ public class DBController  extends SQLiteOpenHelper {
 	 * @param joueurs les joueurs
 	 * @return la liste des défis à afficher
 	 */
-	public void getDefis(String user, HashMap<String,Joueur> joueurs, ArrayList<Defi> l) {
+	public int getDefis(String user, HashMap<String,Joueur> joueurs, ArrayList<Defi> l) {
+		int pRapideIndice = -1; // Pour lancer la partie rapide juste reçue le cas échéant.
 		l.clear();
-		String selectQuery = "SELECT id,nom,nMatch,nivCours,nivFini,t_max,limite FROM `defis` JOIN `participations` ON id=defi WHERE joueur=? ORDER BY t_cours";
+		String selectQuery = ""
+				+ "SELECT id,nom,d.nMatch,nivCours,nivFini,t_max,limite,type,"
+				+ "(CASE WHEN nivFini IS NOT NULL AND (rv.nMatch IS NULL OR d.nMatch<>rv.nMatch) THEN 1 ELSE (CASE WHEN t_cours>0 THEN 3 ELSE (CASE WHEN nivCours IS NULL THEN 2 ELSE 0 END) END) END) AS ordre "
+				+ "FROM `defis` AS d LEFT OUTER JOIN `resultatsVus` AS rv ON id=rv.defi JOIN `participations` AS p ON id=p.defi WHERE joueur=? ORDER BY ordre, id";
 	    SQLiteDatabase database = this.getWritableDatabase();
 	    Cursor cursor = database.rawQuery(selectQuery, new String[] {user});
 	    if (cursor.moveToFirst()) {
@@ -241,10 +247,13 @@ public class DBController  extends SQLiteOpenHelper {
 		        		part.put(cursor2.getString(0), p);
 		        	} while(cursor2.moveToNext());
 	        	}
-	        	l.add(new Defi(cursor.getInt(0), cursor.getString(1), part, cursor.getInt(2), cursor.getString(3), cursor.getString(4), cursor.getInt(5), cursor.getInt(6)));
+	        	if(cursor.getInt(7)>0 && cursor.getInt(8)%2==0) // Partie rapide non jouée (donc à lancer) (type>0 && etat=Lancer ou Relever)
+	        		pRapideIndice = l.size();
+	        	l.add(new Defi(cursor.getInt(0), cursor.getString(1), part, cursor.getInt(2), cursor.getString(3), cursor.getString(4), cursor.getInt(5), cursor.getInt(6), cursor.getInt(7)));
 	        } while (cursor.moveToNext());
 	    }
 	    database.close();
+	    return pRapideIndice;
 	}
 	
 	/**
@@ -318,8 +327,8 @@ public class DBController  extends SQLiteOpenHelper {
 		// MAJ Defi
 		ContentValues values = new ContentValues();
 		values.put("nMatch", defi.nMatch);
-		values.put("nivCours", g.toJson(defi.match));
-		values.put("nivFini", g.toJson(defi.matchFini));
+		values.put("nivCours", defi.match==null ? null : g.toJson(defi.match));
+		values.put("nivFini", defi.matchFini==null ? null : g.toJson(defi.matchFini));
 		database.update("defis", values, "id="+defi.id, null);
 		for(Participation p : defi.participants.values()) {
 			// MAJ Participations

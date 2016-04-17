@@ -319,7 +319,7 @@ public class Jeu extends Activity {
 				if(multi!=null) { // Mode multijoueur
 					niv = new Niveau(opt.getInt("mode"), opt.getLong("seed"), opt.getIntArray("param"), opt.getInt("progressMin"));
 					if(multi.defi.match==null) {
-						multi.defi.match = new Defi.Match(opt.getInt("mode"), opt.getLong("seed"), opt.getIntArray("param"), opt.getInt("progressMin"), niv.experience);
+						multi.defi.match = new Defi.Match(opt.getInt("mode"), opt.getLong("seed"), opt.getIntArray("param"), niv.progressMin, niv.experience);
 						multi.defi.limite = System.currentTimeMillis()/1000 + multi.defi.t_max;
 						multi.base.updateDefi(multi.defi);
 					}
@@ -413,7 +413,7 @@ public class Jeu extends Activity {
 				forfaitBox();
 			} else{
 				if(v.getId()==R.id.continuer) { // appui sur continuer
-					if(finipartous) {
+					if(finipartous && multi.defi.type==0) {
 						finDefi();
 					} else {
 						quitter(null);

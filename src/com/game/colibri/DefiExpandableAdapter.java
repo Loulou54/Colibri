@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
@@ -21,11 +22,14 @@ public class DefiExpandableAdapter extends BaseExpandableListAdapter {
 	private String user;
 	private ArrayList<Defi> adversaires;
 	private boolean launchEnabled = true;
+	private Typeface font1, font2;
 	
 	public DefiExpandableAdapter(Context c, String user, ArrayList<Defi> defis) {
 		context = c;
 		this.user = user;
 		adversaires = defis;
+		font1 = Typeface.createFromAsset(c.getAssets(),"fonts/cookies&milk-regular.ttf");
+		font2 = Typeface.createFromAsset(c.getAssets(),"fonts/Passing Notes.ttf");
 	}
 	
 	public void setLaunchEnabled(boolean b) {
@@ -52,6 +56,7 @@ public class DefiExpandableAdapter extends BaseExpandableListAdapter {
 			h = new ChildViewHolder();
 			h.avatar = (ImageView) convertView.findViewById(R.id.avatar);
 			h.nom = (TextView) convertView.findViewById(R.id.nomJoueur);
+			h.nom.setTypeface(font1);
 			h.score = (TextView) convertView.findViewById(R.id.scoreJoueur);
 			h.etat = (ImageView) convertView.findViewById(R.id.etatJoueur);
 			h.exp = (TextView) convertView.findViewById(R.id.expJoueur);
@@ -104,8 +109,10 @@ public class DefiExpandableAdapter extends BaseExpandableListAdapter {
 			convertView = inflater.inflate(R.layout.list_defi, parent, false);
 			h = new GroupViewHolder();
 			h.nom = (TextView) convertView.findViewById(R.id.nomDefi);
+			h.nom.setTypeface(font1);
 			h.nMatch = (TextView) convertView.findViewById(R.id.nMatch);
 			h.etat = (Button) convertView.findViewById(R.id.etat);
+			h.etat.setTypeface(font2);
 			h.fermer = (Button) convertView.findViewById(R.id.fermer);
 			convertView.setTag(h);
 		} else {
