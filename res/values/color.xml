@@ -28,5 +28,6 @@
 	<color name="theme_orange">#F19425</color>
 	<color name="theme_beige">#E6E6DC</color>
 	<color name="theme_rouge">#D74621</color>
+	<color name="theme_gris_alpha">#704A535A</color>
 	
 </resources>

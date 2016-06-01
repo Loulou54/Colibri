@@ -6,93 +6,72 @@
     android:layout_marginBottom="20dp"
     android:layout_marginLeft="40dp"
     android:layout_marginRight="40dp"
-    android:background="@drawable/shape_pause" >
-
+    android:background="@drawable/affiche" >
+    
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/ornement_pause_col" />
+    
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/titlePause"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="15dp"
+        android:paddingLeft="60dp"
         android:text="@string/pause"
-        android:textColor="@color/saumon"
+        android:textColor="@color/theme_vert"
         android:textSize="32sp"
-        android:fontFamily="serif"
-        android:textStyle="bold"
         android:shadowColor="@color/choco"
         android:shadowDy="4"
         android:shadowRadius="3" />
     
-    <ImageView
-        android:id="@+id/imageView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignTop="@+id/but1"
-        android:layout_toLeftOf="@+id/but1"
-        android:background="@drawable/dessin_pause"
-        android:contentDescription="@string/app_name" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/titlePause" >
     
-    <Button
-        android:id="@+id/but1"
-        android:layout_width="wrap_content"
+    <View
+        android:layout_width="0dip"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/textView1"
-        android:layout_marginRight="14dp"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/boutons2"
-        android:gravity="center"
-        android:onClick="reprendre"
-        android:text="@string/reprendre"
-        android:textColor="@android:color/white"
-        android:textSize="16sp" />
+        android:layout_weight="2" />
     
-    <Button
-        android:id="@+id/but2"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/pause_buttons"
+        android:layout_width="0dip"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/but1"
-        android:layout_below="@+id/but1"
-        android:layout_marginTop="6dp"
-        android:layout_gravity="center"
-        android:background="@drawable/boutons2"
-        android:gravity="center"
-        android:onClick="recommencer"
-        android:text="@string/recommencer"
-        android:textColor="@android:color/white"
-        android:textSize="16sp" />
+        android:layout_weight="3"
+        android:layout_gravity="center_vertical"
+        android:gravity="center_horizontal"
+        android:orientation="vertical" >
 
-    <Button
-        android:id="@+id/but3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/but2"
-        android:layout_below="@+id/but2"
-        android:layout_marginTop="6dp"
-        android:layout_gravity="center"
-        android:background="@drawable/boutons2"
-        android:gravity="center"
-        android:onClick="solution"
-        android:text="@string/solution"
-        android:textColor="@android:color/white"
-        android:textSize="16sp" />
+        <Button
+            style="@style/pencil_button"
+            android:onClick="reprendre"
+            android:text="@string/reprendre" />
 
-    <Button
-        android:id="@+id/but4"
-        android:layout_width="wrap_content"
+        <Button
+            style="@style/pencil_button"
+            android:onClick="recommencer"
+            android:text="@string/recommencer" />
+
+        <Button
+            style="@style/pencil_button"
+            android:onClick="solution"
+            android:text="@string/solution" />
+
+        <Button
+            style="@style/pencil_button"
+            android:onClick="quitter"
+            android:text="@string/sortir" />
+    </LinearLayout>
+    
+    <View
+        android:layout_width="0dip"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/but3"
-        android:layout_below="@+id/but3"
-        android:layout_marginTop="6dp"
-        android:layout_gravity="center"
-        android:background="@drawable/boutons2"
-        android:gravity="center"
-        android:onClick="quitter"
-        android:text="@string/sortir"
-        android:textColor="@android:color/white"
-        android:textSize="16sp" />
+        android:layout_weight="1" />
+    
+    </LinearLayout>
 
 </RelativeLayout>

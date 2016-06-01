@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/cyan" >
+    android:background="@color/theme_gris_alpha" >
     
     <TextView
         android:id="@+id/bravo_txt"
@@ -10,85 +10,106 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="4dp"
+        android:paddingRight="30dp"
+        android:paddingLeft="30dp"
+        android:background="@drawable/papier"
         android:text="@string/bravo"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/bleu"
-        android:textSize="32sp"
-        android:fontFamily="serif"
-        android:textStyle="italic"
-        android:shadowColor="@color/rose_doux"
-        android:shadowDy="3"
-        android:shadowRadius="2" />
-    
-    <TextView
-        android:id="@+id/resultats"
-        android:layout_width="440dp"
-        android:layout_height="wrap_content"
-        android:minHeight="100dp"
-        android:layout_below="@+id/bravo_txt"
-        android:layout_centerHorizontal="true"
-        android:paddingLeft="40dp"
-        android:gravity="center_vertical"
+        android:textColor="@color/theme_vert"
         android:textSize="25sp"
-        android:fontFamily="sans-serif-condensed"
-        android:textColor="@color/saumon"
-        android:text="@string/app_name"
-        android:background="@android:drawable/alert_light_frame" />
-
-    <Button
-        android:id="@+id/continuer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/resultats"
-        android:layout_centerHorizontal="true"
-        android:background="@drawable/continuer"
-        android:onClick="suivant"
-        android:textColor="@android:color/white"
-        android:textSize="16sp" />
+        android:shadowColor="@color/choco"
+        android:shadowDy="4"
+        android:shadowRadius="3" />
     
     <Button
-        android:layout_width="wrap_content"
+        android:id="@+id/gagne_quit"
+        style="@style/bouton_papier"
+        android:layout_width="140dp"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_marginBottom="4dp"
         android:layout_marginRight="12dp"
-        android:background="@drawable/button"
-        android:gravity="center"
         android:onClick="quitter"
-        android:text="@string/sortir"
-        android:textColor="@android:color/white"
-        android:textSize="16sp" />
+        android:text="@string/sortir" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/resultats"
-        android:layout_below="@+id/resultats"
-        android:layout_toLeftOf="@+id/continuer"
-        android:layout_marginLeft="12dp"
-        android:layout_marginRight="12dp"
-        android:background="@drawable/button"
-        android:text="@string/recommencer"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"
-        android:textStyle="italic"
-        android:onClick="recommencer" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignRight="@+id/resultats"
-        android:layout_below="@+id/resultats"
-        android:layout_toRightOf="@+id/continuer"
-        android:layout_marginLeft="12dp"
-        android:layout_marginRight="12dp"
-        android:background="@drawable/button"
-        android:text="@string/solution"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"
-        android:textStyle="italic"
-        android:onClick="solution" />
+    <LinearLayout
+        android:layout_width="440dp"
+        android:layout_height="230dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:orientation="vertical"
+        android:background="@drawable/affiche" >
+        
+        <LinearLayout
+            android:id="@+id/gagne_resultats"
+            android:layout_width="wrap_content"
+            android:layout_height="0dip"
+            android:layout_weight="1"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/coins" >
+            
+            <TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="match_parent"
+		        android:gravity="center_vertical|left"
+		        android:textSize="20sp"
+		        android:textColor="@color/theme_gris"
+		        android:text="@string/app_name" />
+            
+            <TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="match_parent"
+		        android:layout_marginLeft="50dp"
+		        android:gravity="center_vertical|right"
+		        android:textSize="20sp"
+		        android:textColor="@color/theme_gris"
+		        android:text="@string/app_name" />
+            
+        </LinearLayout>
+        
+        <TextView
+            android:id="@+id/gagne_resultats_phrase"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:textSize="16sp"
+	        android:textColor="@color/theme_gris"
+	        android:visibility="gone" />
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+            
+            <Button
+                android:id="@+id/gagne_recom"
+		        style="@style/pencil_button"
+		        android:layout_width="0dip"
+		        android:layout_weight="2"
+		        android:layout_marginTop="0dp"
+		        android:text="@string/recommencer"
+		        android:onClick="recommencer" />
+            
+            <Button
+                android:id="@+id/continuer"
+		        android:layout_width="0dip"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="1"
+		        android:background="@drawable/bouton_continuer"
+		        android:onClick="suivant"
+		        android:textColor="@android:color/white"
+		        android:textSize="16sp" />
+            
+            <Button
+                android:id="@+id/gagne_sol"
+		        style="@style/pencil_button"
+		        android:layout_width="0dip"
+		        android:layout_weight="2"
+		        android:layout_marginTop="0dp"
+		        android:text="@string/solution"
+		        android:onClick="solution" />
+            
+        </LinearLayout>
+        
+    </LinearLayout>
     
 </RelativeLayout>

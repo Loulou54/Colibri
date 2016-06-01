@@ -19,16 +19,16 @@ import android.widget.TextView;
 public class DefiExpandableAdapter extends BaseExpandableListAdapter {
 	
 	private Context context;
-	private String user;
+	private int user;
 	private ArrayList<Defi> adversaires;
 	private boolean launchEnabled = true;
 	private Typeface font1, font2;
 	
-	public DefiExpandableAdapter(Context c, String user, ArrayList<Defi> defis) {
+	public DefiExpandableAdapter(Context c, int user, ArrayList<Defi> defis) {
 		context = c;
 		this.user = user;
 		adversaires = defis;
-		font1 = Typeface.createFromAsset(c.getAssets(),"fonts/cookies&milk-regular.ttf");
+		font1 = Typeface.createFromAsset(c.getAssets(),"fonts/YummyCupcakes.ttf");
 		font2 = Typeface.createFromAsset(c.getAssets(),"fonts/Passing Notes.ttf");
 	}
 	
@@ -38,7 +38,7 @@ public class DefiExpandableAdapter extends BaseExpandableListAdapter {
 	
 	@Override
 	public Object getChild(int groupPosition, int childPosition) {
-		return adversaires.get(groupPosition).participants.values().toArray(new Participation[0])[childPosition];
+		return adversaires.get(groupPosition).participants.valueAt(childPosition);
 	}
 
 	@Override
@@ -68,7 +68,7 @@ public class DefiExpandableAdapter extends BaseExpandableListAdapter {
 		h.nom.setText(p.joueur.getPseudo());
 		h.score.setText(""+p.win);
 		h.etat.setImageResource((p.t_cours==0) ? R.drawable.horloge : R.drawable.check);
-		h.exp.setText(""+p.joueur.getExp());
+		h.exp.setText(String.format("%,d", p.joueur.getExp()));
 		return convertView;
 	}
 	

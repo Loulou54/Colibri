@@ -162,7 +162,7 @@ public class Classements extends Activity {
 		} catch (IOException e) {
 			pays.setVisibility(View.INVISIBLE);
 		}
-		((TextView) lay.findViewById(R.id.expAdv)).setText(""+j.getExp());
+		((TextView) lay.findViewById(R.id.expAdv)).setText(String.format("%,d", j.getExp()));
 		((TextView) lay.findViewById(R.id.defisAdv)).setText(""+j.getDefis());
 		((TextView) lay.findViewById(R.id.winDefisAdv)).setText(""+j.getWin());
 		((TextView) lay.findViewById(R.id.winLostAdv)).setText(""+(j.getWin() - j.getLost()));

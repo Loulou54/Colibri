@@ -52,7 +52,7 @@
 	<string name="solution_bloque">You didn\'t unlock the solution of this level yet!</string>
 	<string name="aleatoire">Random</string>
 	<string name="choix_campagne">Select a level: flower = not solved yet</string>
-	<string name="joueur_suivant">\u0009\u21AA This level and your results will be sent to your opponent.</string>
+	<string name="joueur_suivant">\u21AA This level and your results will be sent to your opponent.</string>
 	<string name="forfait">Forfeit</string>
 	<string name="forfait_msg">Do you wish to abandon by forfeit?</string>
 	<string name="c_est_parti">Let\'s go</string>

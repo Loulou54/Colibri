@@ -30,7 +30,7 @@ import android.widget.Toast;
 
 public class ClassementAdapter extends ArrayAdapter<Joueur> {
 	
-	public static String userName;
+	public static int userId;
 	
 	private Classements classements;
 	private AsyncHttpClient client;
@@ -80,7 +80,7 @@ public class ClassementAdapter extends ArrayAdapter<Joueur> {
 		} catch (IOException e) {
 			h.pays.setVisibility(View.INVISIBLE);
 		}
-		h.exp.setText(""+j.getExp());
+		h.exp.setText(String.format("%,d", j.getExp()));
 		h.defis.setText(""+j.getDefis());
 		h.wins.setText(""+j.getWin());
 		h.winLost.setText(""+(j.getWin() - j.getLost()));
@@ -112,7 +112,7 @@ public class ClassementAdapter extends ArrayAdapter<Joueur> {
 		if(isLoading || endOfList)
 			return null;
 		RequestParams params = new RequestParams();
-		params.put("pseudo", userName==null ? "" : userName);
+		params.put("joueur", userId==0 ? "" : ""+userId);
 		params.put("type", ""+type);
 		if(filterFriends)
 			params.put("amis", "OUI");

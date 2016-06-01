@@ -17,11 +17,11 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 import android.widget.ViewFlipper;
 import android.app.Activity;
 import android.app.NotificationManager;
@@ -51,7 +51,7 @@ public class MenuPrinc extends Activity {
 	private ViewFlipper MenuSel;
 	private Carte carte; // L'instance de carte permettant de faire un apercu dans le menu de sélection de niveaux.
 	private LinearLayout opt_aleat;
-	private LinearLayout opt_reglages;
+	private LinearLayout opt_infos;
 	private float initialX;
 	private double[][] points = new double[][] {{0.07625, 0.8145833333333333}, {0.18875, 0.7645833333333333}, {0.31625, 0.7354166666666667}, {0.24875, 0.8208333333333333}, {0.1125, 0.94375}, {0.25, 0.9458333333333333}, {0.405, 0.9208333333333333}, {0.52, 0.9416666666666667}, {0.6275, 0.9333333333333333}, {0.765, 0.9354166666666667}, {0.765, 0.8166666666666667}, {0.83, 0.74375}};
 	
@@ -63,16 +63,13 @@ public class MenuPrinc extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_menu_princ);
 		root=(RelativeLayout) findViewById(R.id.root);
-		displayMenu();
 		pref = PreferenceManager.getDefaultSharedPreferences(this);
 		editor = pref.edit();
 		Jeu.opt = new Bundle(); // On va contourner le fait que startActivity(Intent i, Bundle b) ne soit pas supporté sur API < 16, en utilisant un Bundle de classe.
 		Jeu.menu=this;
 		Multijoueur.menu=this;
 		loadData();
-		if(avancement==1) {
-			((TextView) findViewById(R.id.bout1)).setText(R.string.commencer);
-		}
+		displayMenu();
 		if(intro==null && boucle==null) {
 			intro = MediaPlayer.create(this, R.raw.intro);
 			intro.setLooping(false);
@@ -101,7 +98,7 @@ public class MenuPrinc extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if(requestCode==1 && screen==0) { // On met à jour le niveau d'expérience.
 			TextView exp = (TextView) findViewById(R.id.exp_menu);
-			exp.setText(getString(R.string.exp)+" : "+experience);
+			exp.setText(getString(R.string.exp)+" : "+String.format("%,d", experience));
 			exp.startAnimation(AnimationUtils.loadAnimation(MenuPrinc.this, R.anim.aleat_opt_anim));
 		}
 		super.onActivityResult(requestCode, resultCode, data);
@@ -114,16 +111,22 @@ public class MenuPrinc extends Activity {
 		delReferences();
 		screen=0;
 		root.removeAllViews();
+		System.gc();
 		root.addView(View.inflate(this, R.layout.menu_princ, null));
 		opt_aleat = (LinearLayout) findViewById(R.id.opt_aleat);
-		opt_reglages = (LinearLayout) findViewById(R.id.opt_reglages);
+		opt_infos = (LinearLayout) findViewById(R.id.opt_infos);
 		placeButton();
-		if(avancement==Jeu.NIV_MAX+1) {
+		if(avancement==1) {
+			((TextView) findViewById(R.id.bout1)).setText(R.string.commencer);
+		} else if(avancement==Jeu.NIV_MAX+1) {
 			findViewById(R.id.coupe).setVisibility(View.VISIBLE);
 		}
+		if(!pref.getBoolean("musique", true))
+			((ImageButton) findViewById(R.id.bout_musique)).setImageResource(R.drawable.nosound);
 		TextView exp = (TextView) findViewById(R.id.exp_menu);
-		exp.setText(getString(R.string.exp)+" : "+experience);
-		exp.setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Sketch_Block.ttf"));
+		exp.setText(getString(R.string.exp)+" : "+String.format("%,d", experience));
+		exp.setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Passing Notes.ttf"));
+		((TextView) findViewById(R.id.main_title)).setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Sketch_Block.ttf"));
 	}
 	
 	/**
@@ -166,7 +169,7 @@ public class MenuPrinc extends Activity {
 	
 	private void delReferences() {
 		opt_aleat = null;
-		opt_reglages = null;
+		opt_infos = null;
 		MenuSel = null;
 		carte = null;
 	}
@@ -182,8 +185,6 @@ public class MenuPrinc extends Activity {
 		if(brandNew) {
 			brandNew=false;
 			displayMenu();
-			ToggleButton tb = (ToggleButton) findViewById(R.id.bout_musique);
-			tb.setChecked(pref.getBoolean("musique", true));
 		}
 		if(screen==1 && hasFocus)
 			campagne(carte); // Permet de rafraîchir la progression lorsque l'on quitte le jeu et revient au menu de sélection.
@@ -199,13 +200,16 @@ public class MenuPrinc extends Activity {
 			Button btn_lay = (Button)findViewById(boutons[i]);
 			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) btn_lay.getLayoutParams();
 			if(i==0) {
-				layoutParams.leftMargin = ww*4/9;
-			    layoutParams.topMargin = 3*wh/8;
+				layoutParams.leftMargin = ww*5/9;
+			    layoutParams.topMargin = wh/4;
 			}
 		    layoutParams.width = 4*ww/10;
 		    layoutParams.height = 128*ww/2320;
 		    btn_lay.setLayoutParams(layoutParams);
 		    btn_lay.setTypeface(font);
+		}
+		for(int i=0; i<opt_aleat.getChildCount(); i++) {
+			((Button) opt_aleat.getChildAt(i)).setTypeface(font);
 		}
 	}
 	
@@ -215,8 +219,8 @@ public class MenuPrinc extends Activity {
 			if(screen!=0) {
 				displayMenu();
 			}
-			else if (opt_reglages.getVisibility()==View.VISIBLE) {
-				opt_reglages.setVisibility(View.INVISIBLE);
+			else if (opt_infos.getVisibility()==View.VISIBLE) {
+				opt_infos.setVisibility(View.INVISIBLE);
 			}
 			else if(opt_aleat.getVisibility()==View.INVISIBLE) {
 				if (intro!=null) {
@@ -251,13 +255,11 @@ public class MenuPrinc extends Activity {
 						((Button)findViewById(R.id.bout2)).startAnimation(a);
 						((Button)findViewById(R.id.bout4)).startAnimation(a);
 						((Button)findViewById(R.id.bout5)).startAnimation(a);
-						((Button)findViewById(R.id.bout6)).startAnimation(a);
 						((Button)findViewById(R.id.bout1)).setClickable(true);
 						((Button)findViewById(R.id.bout2)).setClickable(true);
 						((Button)findViewById(R.id.bout3)).setClickable(true);
 						((Button)findViewById(R.id.bout4)).setClickable(true);
 						((Button)findViewById(R.id.bout5)).setClickable(true);
-						((Button)findViewById(R.id.bout6)).setClickable(true);
     	    		}
     	    	});
 			}
@@ -319,7 +321,7 @@ public class MenuPrinc extends Activity {
 			e.printStackTrace();
 		}
 		if(versionActuelle!=versionCode) {
-			editor.putString("adversaires", "[]");
+			editor.putString("adversaires", null);
 			editor.putInt("versionCode", versionActuelle);
 			editor.commit();
 		}
@@ -357,7 +359,7 @@ public class MenuPrinc extends Activity {
 	 * 		@param v le bouton appuyé.
 	 */
 	public void continuer(View v) {
-		opt_reglages.setVisibility(View.INVISIBLE);
+		opt_infos.setVisibility(View.INVISIBLE);
 		if(avancement==1)
 			((TextView) findViewById(R.id.bout1)).setText(R.id.continuer);
 		Jeu.opt.putInt("mode", Niveau.CAMPAGNE);
@@ -450,18 +452,16 @@ public class MenuPrinc extends Activity {
 	}
 	
 	public void aleatoire(View v) {
-		opt_reglages.setVisibility(View.INVISIBLE);
+		opt_infos.setVisibility(View.INVISIBLE);
 		((Button)findViewById(R.id.bout1)).setClickable(false);
 		((Button)findViewById(R.id.bout2)).setClickable(false);
 		((Button)findViewById(R.id.bout4)).setClickable(false);
 		((Button)findViewById(R.id.bout5)).setClickable(false);
-		((Button)findViewById(R.id.bout6)).setClickable(false);
 		Animation a = AnimationUtils.loadAnimation(this, R.anim.menu_right);
 		((Button)findViewById(R.id.bout1)).startAnimation(a);
 		((Button)findViewById(R.id.bout2)).startAnimation(a);
 		((Button)findViewById(R.id.bout4)).startAnimation(a);
 		((Button)findViewById(R.id.bout5)).startAnimation(a);
-		((Button)findViewById(R.id.bout6)).startAnimation(a);
 		Button btn_aleat = (Button)findViewById(R.id.bout3);
 		btn_aleat.setClickable(false);
 		btn_aleat.startAnimation(AnimationUtils.loadAnimation(this, R.anim.bouton_aleat_up));
@@ -524,20 +524,20 @@ public class MenuPrinc extends Activity {
 	}
 	
 	public void multijoueur(View v) {
-		opt_reglages.setVisibility(View.INVISIBLE);
+		opt_infos.setVisibility(View.INVISIBLE);
 		startActivityForResult(new Intent(this, Multijoueur.class), 1);
 	}
 	
 	public void classements(View v) {
-		opt_reglages.setVisibility(View.INVISIBLE);
-		ClassementAdapter.userName = pref.getString("pseudo",null);
+		opt_infos.setVisibility(View.INVISIBLE);
+		ClassementAdapter.userId = pref.getInt("id",0);
 		startActivityForResult(new Intent(this, Classements.class), 1);
 	}
 	
 	public void reglages(View v) {
-		if (opt_reglages.getVisibility()==View.INVISIBLE)
-			opt_reglages.setVisibility(View.VISIBLE);
-		else opt_reglages.setVisibility(View.INVISIBLE);
+		if (opt_infos.getVisibility()==View.INVISIBLE)
+			opt_infos.setVisibility(View.VISIBLE);
+		else opt_infos.setVisibility(View.INVISIBLE);
 		
 	}
 	
@@ -554,13 +554,15 @@ public class MenuPrinc extends Activity {
 	}
 	
 	public void musique(View v) {
-		ToggleButton tb = (ToggleButton) v;
-		opt_reglages.setVisibility(View.INVISIBLE);
-		if (tb.isChecked()) {
+		ImageButton iv = (ImageButton) v;
+		opt_infos.setVisibility(View.INVISIBLE);
+		if(!pref.getBoolean("musique", true)) {
 			startMusic();
+			iv.setImageResource(R.drawable.sound);
 			editor.putBoolean("musique", true);
 		} else {
 			stopMusic();
+			iv.setImageResource(R.drawable.nosound);
 			editor.putBoolean("musique", false);
 		}
 		editor.commit();

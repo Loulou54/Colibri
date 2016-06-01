@@ -6,7 +6,6 @@ import static com.network.colibri.CommonUtilities.SENDER_ID;
 import static com.network.colibri.CommonUtilities.SERVER_URL;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Random;
 
 import org.json.JSONArray;
@@ -32,10 +31,12 @@ import android.content.IntentFilter;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
@@ -47,7 +48,7 @@ public class Multijoueur extends Activity {
 	
 	private ExpandableListView lv;
 	private DefiExpandableAdapter adapt;
-	private HashMap<String,Joueur> joueurs;
+	private SparseArray<Joueur> joueurs;
 	private ArrayList<Defi> adversaires;
 	private AlertDialog boxNiv;
 	private ViewSwitcher loader;
@@ -56,6 +57,7 @@ public class Multijoueur extends Activity {
 	public ConnectionDetector connect;
 	public AsyncHttpClient client;
 	public DBController base;
+	private boolean gcmActive = true;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -65,12 +67,12 @@ public class Multijoueur extends Activity {
 		connect = new ConnectionDetector(this);
 		client = new AsyncHttpClient();
 		base = new DBController(this);
-		joueurs = new HashMap<String, Joueur>();
+		joueurs = new SparseArray<Joueur>();
 		adversaires = new ArrayList<Defi>();
 		((TextView) findViewById(R.id.titreMulti)).setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Adventure.otf"));
 		((TextView) findViewById(R.id.nvDefi)).setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Sketch_Block.ttf"));
 		((TextView) findViewById(R.id.nvPRapide)).setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Sketch_Block.ttf"));
-		((TextView) findViewById(R.id.user_name)).setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Sketch_Block.ttf"));
+		((TextView) findViewById(R.id.user_name)).setTypeface(Typeface.createFromAsset(getAssets(),"fonts/YummyCupcakes.ttf"), Typeface.BOLD);
 		lv = (ExpandableListView) findViewById(R.id.listView1);
 		lv.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
 			@Override
@@ -87,6 +89,7 @@ public class Multijoueur extends Activity {
 			GCMRegistrar.checkManifest(this);
 			registerReceiver(mHandleMessageReceiver, new IntentFilter(BROADCAST_MESSAGE_ACTION));
 		} catch (Exception e) {
+			gcmActive = false;
 			System.out.println("No GCM : Notification system disabled.");
 		}
 		loadData();
@@ -109,28 +112,26 @@ public class Multijoueur extends Activity {
 	 */
 	private void loadData() {
 		loadJoueurs();
-		String userName = menu.pref.getString("pseudo",null);
-		if(userName==null) { // Utilisateur non inscrit !
+		int userId = menu.pref.getInt("id",0);
+		if(userId==0) { // Utilisateur non inscrit !
 			if(!connect.isConnectedToInternet()) {
 				Toast.makeText(this, R.string.connexion_register, Toast.LENGTH_LONG).show();
 				finish();
 				return;
 			}
-			String regId;
-			try {
+			String regId = null;
+			if(gcmActive) {
 				regId = GCMRegistrar.getRegistrationId(this);
-			} catch(Exception e) {
-				regId = "No GCM";
 			}
-			if(regId.equals("")) {
+			if(regId!=null && regId.equals("")) {
 				Toast.makeText(this, R.string.gcm_register, Toast.LENGTH_SHORT).show();
 				GCMRegistrar.register(this, SENDER_ID);
 			} else { // Si jamais l'enregistrement GCM a fonctionné mais pas l'enregistrement à notre serveur
 				registerUser();
 			}
 		} else {
-			base.getDefis(userName,joueurs,adversaires);
-			adapt = new DefiExpandableAdapter(this, userName, adversaires);
+			base.getDefis(userId,joueurs,adversaires);
+			adapt = new DefiExpandableAdapter(this, userId, adversaires);
 			lv.setAdapter(adapt);
 			dispUser();
 			if(!connect.isConnectedToInternet()) {
@@ -142,20 +143,21 @@ public class Multijoueur extends Activity {
 	}
 	
 	private void loadJoueurs() {
-		String userName = menu.pref.getString("pseudo",null);
+		int userId = menu.pref.getInt("id",0);
 		base.getJoueurs(joueurs);
 		System.out.println("Nombre de Joueurs : "+joueurs.size());
-		for(Joueur j : joueurs.values()) {
-			System.out.println(j.getPseudo());
+		for(int i=0, length=joueurs.size(); i<length; i++) {
+			Joueur j = joueurs.valueAt(i);
+			System.out.println(j.getId()+" : "+j.getPseudo());
 		}
-		user = joueurs.get(userName);
+		user = joueurs.get(userId);
 		if(user==null) {
 			if(!connect.isConnectedToInternet()) {
 				Toast.makeText(this, R.string.hors_connexion, Toast.LENGTH_SHORT).show();
 				finish();
 			} else {
-				user = new Joueur(userName, "", 0, 0, 0, 0, 0, 0, 0);
-				base.taskSyncTotale(userName);
+				user = new Joueur(userId, menu.pref.getString("pseudo",null), "", 0, 0, 0, 0, 0, 0, 0);
+				base.taskSyncTotale(userId);
 			}
 		}
 	}
@@ -164,7 +166,14 @@ public class Multijoueur extends Activity {
 	public void choixNiveau() {
 		boxNiv = new AlertDialog.Builder(this).create();
 		boxNiv.setTitle("Défi : "+defi.nom);
-		boxNiv.setView(LayoutInflater.from(this).inflate(R.layout.choix_niveau_multi, null));
+		LinearLayout lay = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.choix_niveau_multi, null);
+		Typeface font = Typeface.createFromAsset(getAssets(),"fonts/Passing Notes.ttf");
+		((TextView) lay.getChildAt(0)).setTypeface(font);
+		LinearLayout opt_aleat = (LinearLayout) lay.getChildAt(1);
+		for(int i=0; i<opt_aleat.getChildCount(); i++) {
+			((TextView) opt_aleat.getChildAt(i)).setTypeface(font);
+		}
+		boxNiv.setView(lay);
 		boxNiv.show();
 	}
 	
@@ -227,7 +236,7 @@ public class Multijoueur extends Activity {
 		}
 		if(menu.expToSync!=0)
 			syncData();
-		(new NewDefi(this, client, user.getPseudo(), new NewDefi.callBackInterface() {
+		(new NewDefi(this, client, user.getId(), new NewDefi.callBackInterface() {
 			@Override
 			public void create(String jsonData) {
 				insertJSONData(jsonData);
@@ -245,7 +254,7 @@ public class Multijoueur extends Activity {
 		prgDialog.setCancelable(false);
 		prgDialog.show();
 		RequestParams params = new RequestParams();
-		params.put("pseudo", menu.pref.getString("pseudo", ""));
+		params.put("joueur", ""+menu.pref.getInt("id", 0));
 		client.post(SERVER_URL+"/partie_rapide.php", params, new AsyncHttpResponseHandler() {
 			@Override
 			public void onSuccess(String response) {
@@ -276,7 +285,7 @@ public class Multijoueur extends Activity {
 			.setPositiveButton(R.string.accept, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					base.removeDefi(adversaires.remove(groupPosition), user.getPseudo());
+					base.removeDefi(adversaires.remove(groupPosition), user.getId());
 					syncData();
 				}
 			})
@@ -287,7 +296,7 @@ public class Multijoueur extends Activity {
 	public void actionDefi(View v) {
 		final int groupPosition = (Integer) v.getTag();
 		defi = adversaires.get(groupPosition);
-		switch(defi.getEtat(user.getPseudo())) {
+		switch(defi.getEtat(user.getId())) {
 		case Defi.ATTENTE: // Send POKE
 			// TODO: Poke.
 			break;
@@ -296,7 +305,7 @@ public class Multijoueur extends Activity {
 				@Override
 				public void suite() {
 					if(defi.type>0) { // Partie rapide
-						base.removeDefi(adversaires.remove(groupPosition), user.getPseudo());
+						base.removeDefi(adversaires.remove(groupPosition), user.getId());
 						syncData();
 					} else {
 						base.setResultatsVus(defi.id,defi.nMatch);
@@ -324,14 +333,14 @@ public class Multijoueur extends Activity {
 			Toast.makeText(this, R.string.hors_connexion, Toast.LENGTH_SHORT).show();
 			return;
 		}
-		base.taskSyncTotale(user.getPseudo());
+		base.taskSyncTotale(user.getId());
 		syncData();
 	}
 	
 	private void dispUser() {
 		((ImageView) findViewById(R.id.user_avatar)).setImageResource(user.getAvatar());
 		((TextView) findViewById(R.id.user_name)).setText(user.getPseudo());
-		((TextView) findViewById(R.id.user_exp)).setText(getString(R.string.exp)+" :\n"+user.getExp());
+		((TextView) findViewById(R.id.user_exp)).setText(getString(R.string.exp)+" :\n"+String.format("%,d", user.getExp()));
 		((TextView) findViewById(R.id.user_defis)).setText(getString(R.string.defis_joues)+" : "+user.getDefis());
 		((TextView) findViewById(R.id.user_wins)).setText(getString(R.string.defis_gagnés)+" : "+user.getWin());
 	}
@@ -384,12 +393,14 @@ public class Multijoueur extends Activity {
 			@Override
 			public boolean registered(String JSONresponse, String name) {
 				try {
-					base.insertJSONJoueurs(new JSONArray(JSONresponse));
+					JSONArray j = new JSONArray(JSONresponse);
+					base.insertJSONJoueurs(j);
 					menu.editor.putString("pseudo", name);
+					menu.editor.putInt("id", j.getJSONObject(0).getInt("id"));
 					menu.editor.commit();
 					loadJoueurs();
-					base.getDefis(user.getPseudo(),joueurs,adversaires);
-					adapt = new DefiExpandableAdapter(Multijoueur.this, user.getPseudo(), adversaires);
+					base.getDefis(user.getId(),joueurs,adversaires);
+					adapt = new DefiExpandableAdapter(Multijoueur.this, user.getId(), adversaires);
 					lv.setAdapter(adapt);
 					menu.expToSync = 0;
 					menu.saveData();
@@ -413,7 +424,7 @@ public class Multijoueur extends Activity {
 		loader.showNext();
 		loader.setEnabled(false);
 		RequestParams params = new RequestParams();
-		params.put("pseudo", menu.pref.getString("pseudo", ""));
+		params.put("joueur", ""+menu.pref.getInt("id", 0));
 		params.put("tasks", base.getTasks());
 		System.out.println(base.getTasks());
 		params.put("expToSync", ""+menu.expToSync);
@@ -475,7 +486,7 @@ public class Multijoueur extends Activity {
 				if(o.has("participations"))
 					base.insertJSONParticipations((JSONArray) o.get("participations"));
 				if(o.has("tasks"))
-					base.execJSONTasks(this, (JSONArray) o.get("tasks"), user.getPseudo());
+					base.execJSONTasks(this, (JSONArray) o.get("tasks"), user.getId());
 				res = true;
 			} catch (JSONException e) {
 				e.printStackTrace();
@@ -483,7 +494,7 @@ public class Multijoueur extends Activity {
 			}
 		} else
 			res = true;
-		int pRapide = base.getDefis(user.getPseudo(),joueurs,adversaires);
+		int pRapide = base.getDefis(user.getId(),joueurs,adversaires);
 		adapt.notifyDataSetChanged();
 		if(pRapide!=-1) {
 			View v = new View(this);

@@ -79,7 +79,7 @@ public class JoueursAdapter extends ArrayAdapter<Joueur> {
 		} catch (IOException e) {
 			h.pays.setVisibility(View.INVISIBLE);
 		}
-		h.exp.setText(""+j.getExp());
+		h.exp.setText(String.format("%,d", j.getExp()));
 		h.defis.setText(j.getWin()+"/"+j.getDefis());
 		h.poubelle.setVisibility(View.GONE);
 		h.poubelle.setClickable(false);

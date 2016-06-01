@@ -9,9 +9,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.SpannableString;
+import android.text.style.RelativeSizeSpan;
 import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -21,6 +24,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -76,15 +80,40 @@ public class Jeu extends Activity {
 				return true;
 			}
 		});
+		final Typeface font = Typeface.createFromAsset(getAssets(),"fonts/Passing Notes.ttf");
 		pause= findViewById(R.id.pause);
 		((ViewStub) pause).setOnInflateListener(new ViewStub.OnInflateListener() {
 			@Override
 			public void onInflate(ViewStub stub, View inflated) {
 				pause = inflated;
+				((TextView) pause.findViewById(R.id.titlePause)).setTypeface(font);
+				LinearLayout buts = (LinearLayout) pause.findViewById(R.id.pause_buttons);
+				for(int i=0; i<buts.getChildCount(); i++) {
+					((TextView) buts.getChildAt(i)).setTypeface(font);
+				}
 			}
 		});
         perdu= findViewById(R.id.perdu);
+        ((ViewStub) perdu).setOnInflateListener(new ViewStub.OnInflateListener() {
+			@Override
+			public void onInflate(ViewStub stub, View inflated) {
+				((TextView) inflated.findViewById(R.id.perdu_txt)).setTypeface(font);
+			}
+		});
 		gagne= findViewById(R.id.gagner);
+		((ViewStub) gagne).setOnInflateListener(new ViewStub.OnInflateListener() {
+			@Override
+			public void onInflate(ViewStub stub, View inflated) {
+				((TextView) inflated.findViewById(R.id.bravo_txt)).setTypeface(font);
+				LinearLayout res = (LinearLayout) inflated.findViewById(R.id.gagne_resultats);
+				for(int i=0; i<2; i++)
+					((TextView) res.getChildAt(i)).setTypeface(Typeface.createFromAsset(getAssets(),"fonts/YummyCupcakes.ttf"));
+				((TextView) inflated.findViewById(R.id.gagne_resultats_phrase)).setTypeface(Typeface.createFromAsset(getAssets(),"fonts/YummyCupcakes.ttf"));
+				((TextView) inflated.findViewById(R.id.gagne_recom)).setTypeface(font);
+				((TextView) inflated.findViewById(R.id.gagne_sol)).setTypeface(font);
+				((TextView) inflated.findViewById(R.id.gagne_quit)).setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Sketch_Block.ttf"));
+			}
+		});
 		play = new MoteurJeu(this,carte);
 		if(MenuPrinc.intro!=null)
 			music=MenuPrinc.intro.isPlaying();
@@ -141,6 +170,7 @@ public class Jeu extends Activity {
 				play.pause();
 				menuLateral(0,null);
 				pause.setVisibility(View.VISIBLE);
+				pause.startAnimation(AnimationUtils.loadAnimation(this, R.anim.aleat_opt_anim));
 			} else
 				return false;
 		} else if(pause.getVisibility()==View.VISIBLE) { // Jeu en pause
@@ -202,23 +232,33 @@ public class Jeu extends Activity {
 		play.total_frames = 0;
 		if(carte.n_dyna>0) hideDyna();
 		menuLateral(0,null);
-		TextView txt = (TextView) findViewById(R.id.resultats);
+		LinearLayout res = (LinearLayout) findViewById(R.id.gagne_resultats);
+		TextView phrase = (TextView) findViewById(R.id.gagne_resultats_phrase);
 		if (multi != null) { // Mode multijoueur
 			if(!solved) {
-				finipartous = multi.defi.finMatch(multi.user.getPseudo(), temps_total_ms, (solUsed) ? niv.solution.length*500 : 0);
+				finipartous = multi.defi.finMatch(multi.user.getId(), temps_total_ms, (solUsed) ? niv.solution.length*500 : 0);
 				multi.syncData();
 			} else {
-				Participation p = multi.defi.participants.get(multi.user.getPseudo());
+				Participation p = multi.defi.participants.get(multi.user.getId());
 				temps_total_ms = finipartous ? p.t_fini : p.t_cours;
 				solUsed = (finipartous ? p.penalite_fini : p.penalite_cours)!=0;
 			}
-			String s;
-			if(temps_total_ms==Participation.FORFAIT)
-				s=getString(R.string.forfait)+" !";
-			else
-				s=getString(R.string.temps)+" : "+getFormattedTime(temps_total_ms)
-						+"\n"+getString(R.string.aide)+" : "+(solUsed ? getString(R.string.oui) : getString(R.string.non));
-			txt.setText(s+(!finipartous ? "\n"+getString(R.string.joueur_suivant) : "\n"+getString(R.string.resultats)));
+			String s1;
+			SpannableString s2;
+			if(temps_total_ms==Participation.FORFAIT) {
+				s1 = getString(R.string.forfait)+" !";
+				s2 = new SpannableString("");
+			} else {
+				s1 = getString(R.string.temps)+" :\n"+getString(R.string.aide)+" :";
+				String s = getFormattedTime(temps_total_ms)+"\n"+(solUsed ? getString(R.string.oui) : getString(R.string.non));
+				s2 = new SpannableString(s);
+				int virgule = s.indexOf(".");
+				s2.setSpan(new RelativeSizeSpan(0.75f), virgule+1, virgule+3, 0);
+			}
+			((TextView) res.getChildAt(0)).setText(s1);
+			((TextView) res.getChildAt(1)).setText(s2);
+			phrase.setText(!finipartous ? getString(R.string.joueur_suivant) : getString(R.string.resultats));
+			phrase.setVisibility(View.VISIBLE);
 		}
 		else {
 			int exp=0;
@@ -236,9 +276,13 @@ public class Jeu extends Activity {
 				menu.expToSync+=exp;
 				menu.saveData(); // On sauvegarde la progression.
 			}
-			txt.setText(getString(R.string.temps)+" : "+getFormattedTime(temps_total_ms)
-					+"\n"+getString(R.string.exp)+" : + "+exp
-					+"\n"+getString(R.string.aide)+" : "+(solUsed ? getString(R.string.oui) : getString(R.string.non)));
+			((TextView) res.getChildAt(0)).setText(getString(R.string.temps)+" :\n"+getString(R.string.exp)+" :\n"+getString(R.string.aide)+" :");
+			String s = getFormattedTime(temps_total_ms)+"\n + "+exp+"\n "+(solUsed ? getString(R.string.oui) : getString(R.string.non));
+			SpannableString s2 = new SpannableString(s);
+			int virgule = s.indexOf(".");
+			s2.setSpan(new RelativeSizeSpan(0.75f), virgule+1, virgule+3, 0);
+			((TextView) res.getChildAt(1)).setText(s2);
+			phrase.setVisibility(View.GONE);
 		}
 		solved = true;
 	}
@@ -356,12 +400,16 @@ public class Jeu extends Activity {
 	 */
 	
 	public void reprendre(View v) {
+		pause.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right));
 		pause.setVisibility(View.GONE);
         play.start(); 
 	}
 	
 	public void recommencer(View v) {
-		pause.setVisibility(View.GONE);
+		if(pause.getVisibility()==View.VISIBLE) {
+			pause.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right));
+			pause.setVisibility(View.GONE);
+		}
 		gagne.setVisibility(View.GONE);
 		perdu.setVisibility(View.GONE);
     	if(carte.n_dyna>0) hideDyna();

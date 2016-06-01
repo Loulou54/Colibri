@@ -4,51 +4,19 @@
     android:layout_height="wrap_content"
     android:orientation="vertical" >
     <Button
-        android:id="@+id/facile"
-        android:layout_width="match_parent"
-       	android:layout_height="fill_parent"
-       	android:layout_weight="1"
-       	android:layout_marginTop="6dp"
-        android:background="@drawable/boutons2"
-        android:gravity="center"
+        style="@style/button_green"
         android:text="@string/fac"
-        android:textColor="@android:color/white"
-        android:onClick="facile"
-        android:textSize="14sp" />
+        android:onClick="facile" />
     <Button
-        android:id="@+id/moyen"
-        android:layout_width="match_parent"
-       	android:layout_height="fill_parent"
-       	android:layout_weight="1"
-        android:layout_marginTop="6dp"
-        android:background="@drawable/boutons2"
-        android:gravity="center"
+        style="@style/button_green"
         android:text="@string/moy"
-        android:textColor="@android:color/white"
-        android:onClick="moyen"
-        android:textSize="14sp" />
+        android:onClick="moyen" />
     <Button
-        android:id="@+id/difficile"
-        android:layout_width="match_parent"
-       	android:layout_height="fill_parent"
-       	android:layout_weight="1"
-        android:layout_marginTop="6dp"
-        android:background="@drawable/boutons2"
-        android:gravity="center"
+        style="@style/button_green"
         android:text="@string/dif"
-        android:textColor="@android:color/white"
-        android:onClick="difficile"
-        android:textSize="14sp" />
+        android:onClick="difficile" />
     <Button
-        android:id="@+id/perso"
-        android:layout_width="match_parent"
-       	android:layout_height="fill_parent"
-       	android:layout_weight="1"
-        android:layout_marginTop="6dp"
-        android:background="@drawable/boutons2"
-        android:gravity="center"
+        style="@style/button_green"
         android:text="@string/perso"
-        android:textColor="@android:color/white"
-        android:onClick="paramAleat"
-        android:textSize="14sp" />
+        android:onClick="paramAleat" />
 </LinearLayout>

@@ -4,6 +4,7 @@ import static com.network.colibri.CommonUtilities.SERVER_URL;
 
 import java.util.ArrayList;
 
+import com.game.colibri.DropDownAdapter.NameAndId;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.loopj.android.http.AsyncHttpClient;
@@ -36,15 +37,15 @@ public class NewDefi {
 	
 	private Context context;
 	private callBackInterface callback;
-	private String user, nomDefi;
-	private int t_max;
+	private String nomDefi;
+	private int user, t_max;
 	private DropDownAdapter dropDownAdapter;
 	private JoueursAdapter jAdapter;
 	private AsyncHttpClient client;
 	private ProgressDialog prgDialog;
 	
 	@SuppressLint("InlinedApi")
-	public NewDefi(Context context, AsyncHttpClient client, String user, callBackInterface callback) {
+	public NewDefi(Context context, AsyncHttpClient client, int user, callBackInterface callback) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			this.context = new ContextThemeWrapper(context, android.R.style.Theme_Holo_Light_Dialog);
 		} else {
@@ -55,7 +56,7 @@ public class NewDefi {
 		this.user = user;
 		ArrayList<Joueur> joueurs = new ArrayList<Joueur>();
 		jAdapter = new JoueursAdapter(context, R.layout.element_joueur, joueurs);
-		dropDownAdapter = new DropDownAdapter(context, R.layout.simple_list_element, new ArrayList<String>(), user, joueurs);
+		dropDownAdapter = new DropDownAdapter(context, R.layout.simple_list_element, user, joueurs);
 		prgDialog = new ProgressDialog(this.context);
 		prgDialog.setMessage(context.getString(R.string.progress));
 		prgDialog.setCancelable(false);
@@ -147,19 +148,19 @@ public class NewDefi {
 		StringBuilder joueurs = new StringBuilder("\""+user+"\",");
 		int fin = jAdapter.getCount();
 		for(int i=0; i<fin; i++) {
-			joueurs.append("\""+jAdapter.getItem(i).getPseudo()+"\",");
+			joueurs.append("\""+jAdapter.getItem(i).getId()+"\",");
 		}
 		joueurs.deleteCharAt(joueurs.length()-1);
 		return joueurs.toString();
 	}
 	
-	private void addJoueur(String name) {
+	private void addJoueur(NameAndId j) {
 		prgDialog.show();
 		RequestParams params = new RequestParams();
-		if(name==null) // Mode auto. On spécifie la liste des joueurs déjà pris.
+		if(j==null) // Mode auto. On spécifie la liste des joueurs déjà pris.
 			params.put("auto", "["+getStringListOfJoueurs()+"]");
 		else
-			params.put("joueur", name);
+			params.put("joueur", ""+j.id);
 		client.post(SERVER_URL+"/get_joueur.php", params, new AsyncHttpResponseHandler() {
 			@Override
 			public void onSuccess(String response) {
@@ -187,7 +188,7 @@ public class NewDefi {
 	private void createDefi() {
 		prgDialog.show();
 		RequestParams params = new RequestParams();
-		params.put("pseudo", user);
+		params.put("joueur", ""+user);
 		params.put("nom", nomDefi);
 		params.put("participants", "["+getStringListOfJoueurs()+"]");
 		params.put("t_max", ""+t_max);

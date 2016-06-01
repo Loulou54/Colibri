@@ -17,31 +17,47 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.Context;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
 
-public class DropDownAdapter extends ArrayAdapter<String> {
+public class DropDownAdapter extends ArrayAdapter<DropDownAdapter.NameAndId> {
 	
 	private HttpClient client;
 	private HttpPost post;
-	private String user;
+	private int user;
 	private List<Joueur> joueurs;
 	
-	public DropDownAdapter(Context context, int resource, List<String> objects, String user, List<Joueur> joueurs) {
-		super(context, resource, objects);
+	public class NameAndId {
+		public int id;
+		public String name;
+		
+		public NameAndId(JSONObject j) throws JSONException {
+			id = j.getInt("id");
+			name = j.getString("pseudo");
+		}
+		
+		@Override
+		public String toString() {
+			return name;
+		}
+	}
+	
+	public DropDownAdapter(Context context, int resource, int user, List<Joueur> joueurs) {
+		super(context, resource, new ArrayList<NameAndId>());
 		client = new DefaultHttpClient();
 		post = new HttpPost(SERVER_URL+"/suggestions.php");
 		this.user = user;
 		this.joueurs = joueurs;
 	}
 	
-	private boolean dejaPris(String nom) {
-		if(nom.equals(user))
+	private boolean dejaPris(int id) {
+		if(id==user)
 			return true;
 		for(Joueur j : joueurs) {
-			if(nom.equals(j.getPseudo()))
+			if(id==j.getId())
 				return true;
 		}
 		return false;
@@ -58,9 +74,9 @@ public class DropDownAdapter extends ArrayAdapter<String> {
 					JSONArray sug = new JSONArray((String) results.values);
 			        clear();
 			        for(int i=0; i<sug.length(); i++) {
-			        	String s = sug.getString(i);
-			        	if(!dejaPris(s)) {
-			        		add(s);
+			        	NameAndId j = new NameAndId(sug.getJSONObject(i));
+			        	if(!dejaPris(j.id)) {
+			        		add(j);
 			        	}
 			        }
 					DropDownAdapter.this.notifyDataSetChanged();

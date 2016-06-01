@@ -4,49 +4,44 @@
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/menu"
+    android:background="@drawable/menu_nv"
     tools:context=".MenuPrinc" >
     
-    <Button
-        android:id="@+id/bout1"
+    <TextView
+        android:id="@+id/main_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="14dp"
+        android:layout_marginRight="130dp"
+        android:textSize="60sp"
+        android:textColor="@color/theme_gris"
+        android:text="@string/app_name" />
+    
+    <Button
+        style="@style/button_blue"
+        android:id="@+id/bout1"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:background="@drawable/boutons"
-        android:gravity="center"
         android:text="@string/jouer"
-        android:textColor="@android:color/white"
-        android:onClick="continuer"
-        android:textSize="16sp" />
+        android:onClick="continuer" />
     
     <Button
+        style="@style/button_blue"
         android:id="@+id/bout2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/bout1"
         android:layout_below="@+id/bout1"
-        android:layout_marginTop="4dp"
-        android:background="@drawable/boutons"
-        android:gravity="center"
         android:text="@string/campagne"
-        android:textColor="@android:color/white"
-        android:onClick="campagne"
-        android:textSize="16sp" />
+        android:onClick="campagne" />
     
     <Button
+        style="@style/button_blue"
         android:id="@+id/bout3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/bout2"
         android:layout_below="@+id/bout2"
-        android:layout_marginTop="4dp"
-        android:background="@drawable/boutons"
-        android:gravity="center"
         android:text="@string/aleat"
-        android:textColor="@android:color/white"
-        android:onClick="aleatoire"
-        android:textSize="16sp" />
+        android:onClick="aleatoire" />
     
     <include
         layout="@layout/choix_niveau_aleat"
@@ -59,91 +54,34 @@
 	    android:visibility="invisible"/>
     
     <Button
+        style="@style/button_blue"
         android:id="@+id/bout4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/bout3"
         android:layout_below="@+id/bout3"
-        android:layout_marginTop="4dp"
-        android:background="@drawable/boutons"
-        android:gravity="center"
         android:text="@string/multi"
-        android:textColor="@android:color/white"
-        android:onClick="multijoueur"
-        android:textSize="16sp" />
+        android:onClick="multijoueur" />
     
     <Button
+        style="@style/button_blue"
         android:id="@+id/bout5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/bout4"
         android:layout_below="@+id/bout4"
-        android:layout_marginTop="4dp"
-        android:background="@drawable/boutons"
-        android:gravity="center"
         android:text="@string/classements"
-        android:textColor="@android:color/white"
-        android:onClick="classements"
-        android:textSize="16sp" />
+        android:onClick="classements" />
 	
-    <Button
-        android:id="@+id/bout6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginRight="4dp"
-        android:layout_marginBottom = "4dp"
-        android:onClick="reglages"
-        android:background="@drawable/reglages" />
-    
-    <LinearLayout
-        android:id="@+id/opt_reglages"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignRight="@+id/bout5"
-        android:layout_above="@+id/bout5"
-        android:orientation="vertical"
-        android:visibility="invisible" >
-
-	    <Button
-	        android:id="@+id/info"
-	        android:layout_width="match_parent"
-	        android:layout_height="match_parent"
-	        android:layout_marginTop="1dp"
-	        android:background="@drawable/bouton_params"
-	        android:gravity="center"
-	        android:onClick="info"
-	        android:text="@string/info"
-	        android:textColor="@android:color/white"
-	        android:textSize="14sp" />
-
-	    <Button
-	        android:id="@+id/instru"
-	        android:layout_width="match_parent"
-	        android:layout_height="match_parent"
-	        android:layout_marginTop="1dp"
-	        android:background="@drawable/bouton_params"
-	        android:gravity="center"
-	        android:onClick="instru"
-	        android:text="@string/instru"
-	        android:textColor="@android:color/white"
-	        android:textSize="14sp" />
-
-	</LinearLayout>
-	
-    <ToggleButton
+    <ImageButton
         android:id="@+id/bout_musique"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
-        android:background="@drawable/bouton_musique"
         android:layout_marginLeft="6dp"
         android:layout_marginBottom="6dp"
-        android:onClick="musique"
-        android:textOn=""
-        android:textOff="" />
+        android:background="@drawable/bouton_papier"
+        android:src="@drawable/sound"
+        android:contentDescription="@string/app_name"
+        android:scaleType="fitXY"
+        android:onClick="musique" />
 
     <TextView
         android:id="@+id/exp_menu"
@@ -151,20 +89,63 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="6dp"
+        android:gravity="center_vertical"
         android:text="@string/app_name"
         android:textSize="16sp"
-        android:textColor="@color/orange" />
+        android:textColor="@android:color/white"
+        android:shadowColor="@color/choco"
+        android:shadowDy="4"
+        android:shadowRadius="3" />
 
     <ImageView
         android:id="@+id/coupe"
-        android:layout_width="50dp"
-        android:layout_height="70dp"
-        android:layout_above="@+id/boutmusique"
-        android:layout_alignLeft="@+id/boutmusique"
+        android:layout_width="42dp"
+        android:layout_height="56dp"
+        android:layout_above="@+id/bout_musique"
+        android:layout_alignLeft="@+id/bout_musique"
         android:src="@drawable/coupe"
         android:contentDescription="@string/victoire"
         android:onClick="finCampagne"
         android:visibility="gone" />
+
+    <ImageButton
+        android:id="@+id/infos"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom = "4dp"
+        android:onClick="reglages"
+        android:background="@drawable/bouton_papier"
+        android:src="@drawable/info"
+        android:scaleType="fitXY"
+        android:contentDescription="@string/info" />
+    
+    <LinearLayout
+        android:id="@+id/opt_infos"
+        android:layout_width="130dp"
+        android:layout_height="60dp"
+        android:layout_alignBottom="@+id/infos"
+        android:layout_toLeftOf="@+id/infos"
+        android:background="@drawable/papier"
+        android:orientation="vertical"
+        android:visibility="invisible" >
+
+        <Button
+            style="@style/button_green"
+            android:layout_marginTop="0dp"
+            android:onClick="info"
+            android:text="@string/info"
+            android:textSize="12sp" />
+
+        <Button
+            style="@style/button_green"
+            android:layout_marginTop="2dp"
+            android:onClick="instru"
+            android:text="@string/instru"
+            android:textSize="12sp" />
+    </LinearLayout>
 
 </RelativeLayout>

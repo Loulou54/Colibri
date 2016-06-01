@@ -37,7 +37,11 @@ public class Resultats extends Activity {
 		ResultatsAdapter.prog=0;
 		ResultatsAdapter.etape=0;
 		handler = new RefreshHandler();
-		adapt = new ResultatsAdapter(this, multi.defi.participants.values().toArray(new Participation[0]));
+		Participation[] parts = new Participation[multi.defi.participants.size()];
+		for(int i=0; i<parts.length; i++) {
+			parts[i] = multi.defi.participants.valueAt(i);
+		}
+		adapt = new ResultatsAdapter(this, parts);
 		((ListView) findViewById(R.id.listRes)).setAdapter(adapt);
 		((TextView) findViewById(R.id.nomDefiRes)).setText(multi.defi.nom);
 		handler.sendMessageDelayed(handler.obtainMessage(0), 1200); // Commence les animations après 1200ms
@@ -72,7 +76,7 @@ public class Resultats extends Activity {
 			} else {
 				ResultatsAdapter.etape = msg.what;
 				if(msg.what==4) {
-					if(multi.defi.participants.get(multi.user.getPseudo()).gagne==1)
+					if(multi.defi.participants.get(multi.user.getId()).gagne==1)
 						((Artifices) findViewById(R.id.artifices)).setVisibility(View.VISIBLE);
 				}
 				if(msg.what==5) {

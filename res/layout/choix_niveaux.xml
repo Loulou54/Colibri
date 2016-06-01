@@ -47,7 +47,7 @@
 	    android:id="@+id/apercu"
 	    android:layout_width="400dp"
 	    android:layout_height="200dp"
-	    android:background="@drawable/herbe"
+	    android:background="@drawable/herbe_nv"
 	    android:onClick="launchNiv" />
 	
 	<TextView

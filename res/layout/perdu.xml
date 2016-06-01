@@ -2,49 +2,34 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/cyan" >
+    android:background="@color/theme_gris_alpha" >
 
     <TextView
+        android:id="@+id/perdu_txt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="4dp"
+        android:paddingRight="30dp"
+        android:paddingLeft="30dp"
+        android:background="@drawable/papier"
         android:text="@string/did_he_dieded"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/bleu"
-        android:textSize="32sp"
-        android:fontFamily="serif"
-        android:textStyle="italic"
-        android:shadowColor="@color/rose_doux"
-        android:shadowDy="3"
-        android:shadowRadius="2" />
+        android:textColor="@color/theme_vert"
+        android:textSize="25sp"
+        android:shadowColor="@color/choco"
+        android:shadowDy="4"
+        android:shadowRadius="3" />
     
-    <Button
-        android:id="@+id/replay"
+    <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:background="@drawable/replay"
-        android:gravity="center"
+        android:padding="10dp"
+        android:background="@drawable/bouton_papier"
         android:onClick="recommencer"
-        android:textColor="@android:color/white"
-        android:textSize="16sp" />
-
-    <Button
-        android:id="@+id/sortie"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="4dp"
-        android:layout_marginRight="12dp"
-        android:background="@drawable/button"
-        android:gravity="center"
-        android:onClick="quitter"
-        android:text="@string/sortir"
-        android:textColor="@android:color/white"
-        android:textSize="16sp" />
+        android:src="@drawable/restart"
+        android:contentDescription="@string/recommencer" />
 
 </RelativeLayout>

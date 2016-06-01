@@ -2,7 +2,8 @@ package com.game.colibri;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
+
+import android.util.SparseArray;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -15,7 +16,7 @@ public class Defi {
 	
 	public int id;
 	public String nom;
-	public HashMap<String,Participation> participants;
+	public SparseArray<Participation> participants;
 	public int nMatch;
 	public Match match; // Le match en cours
 	public Match matchFini; // Le dernier match terminé
@@ -23,7 +24,7 @@ public class Defi {
 	public long limite;
 	public int type;
 	
-	public Defi(int id, String nom, HashMap<String,Participation> p, int nMatch, String nivCours, String nivFini, int t_m, int lim, int type) {
+	public Defi(int id, String nom, SparseArray<Participation> p, int nMatch, String nivCours, String nivFini, int t_m, int lim, int type) {
 		this.id = id;
 		this.nom = nom;
 		participants = p;
@@ -48,9 +49,12 @@ public class Defi {
 	 * Appelé en fin de match pour incrémenter les différents scores, etc
 	 * @param user
 	 */
-	public boolean finMatch(String user, int temps, int penalite) {
+	public boolean finMatch(int user, int temps, int penalite) {
 		participants.get(user).solved(temps,penalite);
-		Participation[] classement = participants.values().toArray(new Participation[0]);
+		Participation[] classement = new Participation[participants.size()];
+		for(int i=0; i<classement.length; i++) {
+			classement[i] = participants.valueAt(i);
+		}
 		Arrays.sort(classement, new Comparator<Participation>() {
 			@Override
 			public int compare(Participation lhs, Participation rhs) {
@@ -63,10 +67,6 @@ public class Defi {
 				partEffectives++;
 		}
 		boolean result = (classement[0].t_cours!=0 && classement.length>=type);
-		System.out.println(result);
-		System.out.println(classement[0].t_cours);
-		System.out.println(classement.length);
-		System.out.println(type);
 		if(result) { // Tous les participants ont fini.
 			int ligne=0, pos=0, t_pos=0;
 			for(Participation p : classement) {
@@ -85,7 +85,7 @@ public class Defi {
 		return result;
 	}
 	
-	public int getEtat(String user) {
+	public int getEtat(int user) {
 		Participation p = participants.get(user);
 		if(matchFini!=null && base.getResultatsVus(id)!=nMatch)
 			return RESULTATS;
@@ -105,9 +105,9 @@ public class Defi {
 	 */
 	public int getProgressMin() {
 		int m = Integer.MAX_VALUE;
-		for(Participation p : participants.values()) {
-			if(p.joueur.getProgress()<m) {
-				m = p.joueur.getProgress();
+		for(int i=0, length=participants.size(); i<length; i++) {
+			if(participants.valueAt(i).joueur.getProgress()<m) {
+				m = participants.valueAt(i).joueur.getProgress();
 			}
 		}
 		return m;
