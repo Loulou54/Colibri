@@ -96,5 +96,24 @@
 	        android:layout_height="match_parent" />
 
     </LinearLayout>
+    
+    <com.game.colibri.Carte
+	    android:id="@+id/apercuResMini"
+	    android:layout_width="100dp"
+	    android:layout_height="55dp"
+	    android:layout_alignParentTop="true"
+	    android:layout_alignParentRight="true"
+	    android:layout_margin="6dp"
+	    android:background="@drawable/herbe_nv"
+	    android:onClick="clickApercu" />
+    
+    <com.game.colibri.Carte
+	    android:id="@+id/apercuResMaxi"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:layout_margin="6dp"
+	    android:background="@drawable/herbe_nv"
+	    android:onClick="clickApercu"
+	    android:visibility="invisible" />
 
 </RelativeLayout>

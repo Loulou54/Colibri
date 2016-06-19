@@ -47,7 +47,7 @@ public class Multijoueur extends Activity {
 	public static boolean active = false;
 	
 	private ExpandableListView lv;
-	private DefiExpandableAdapter adapt;
+	public DefiExpandableAdapter adapt;
 	private SparseArray<Joueur> joueurs;
 	private ArrayList<Defi> adversaires;
 	private AlertDialog boxNiv;
@@ -111,8 +111,18 @@ public class Multijoueur extends Activity {
 	 * Crée toutes les instances de Joueur pour l'utilisateur du jeu et pour tous ses adversaires en liste.
 	 */
 	private void loadData() {
-		loadJoueurs();
 		int userId = menu.pref.getInt("id",0);
+		if(menu.pref.contains("defi_fuit")) { // L'application a été quittée de force pendant un défi.
+			int defiId = menu.pref.getInt("defi_fuit", 0);
+			base.forfaitDefi(defiId, userId);
+			menu.editor.remove("defi_fuit");
+			menu.editor.commit();
+			AlertDialog.Builder box = new AlertDialog.Builder(this);
+			box.setTitle(R.string.forfait);
+			box.setMessage(R.string.force_quit_msg);
+			box.show();
+		}
+		loadJoueurs();
 		if(userId==0) { // Utilisateur non inscrit !
 			if(!connect.isConnectedToInternet()) {
 				Toast.makeText(this, R.string.connexion_register, Toast.LENGTH_LONG).show();
@@ -236,7 +246,7 @@ public class Multijoueur extends Activity {
 		}
 		if(menu.expToSync!=0)
 			syncData();
-		(new NewDefi(this, client, user.getId(), new NewDefi.callBackInterface() {
+		(new NewDefi(this, client, user.getId(), menu.pref.getInt("appareil", 0), new NewDefi.callBackInterface() {
 			@Override
 			public void create(String jsonData) {
 				insertJSONData(jsonData);
@@ -255,6 +265,7 @@ public class Multijoueur extends Activity {
 		prgDialog.show();
 		RequestParams params = new RequestParams();
 		params.put("joueur", ""+menu.pref.getInt("id", 0));
+		params.put("appareil", ""+menu.pref.getInt("appareil", 0));
 		client.post(SERVER_URL+"/partie_rapide.php", params, new AsyncHttpResponseHandler() {
 			@Override
 			public void onSuccess(String response) {
@@ -306,11 +317,12 @@ public class Multijoueur extends Activity {
 				public void suite() {
 					if(defi.type>0) { // Partie rapide
 						base.removeDefi(adversaires.remove(groupPosition), user.getId());
-						syncData();
 					} else {
+						defi.resVus = defi.nMatch;
 						base.setResultatsVus(defi.id,defi.nMatch);
 						adapt.notifyDataSetChanged();
 					}
+					syncData();
 				}
 			};
 			Resultats.multi = this;
@@ -337,10 +349,59 @@ public class Multijoueur extends Activity {
 		syncData();
 	}
 	
+	private void disconnect() {
+		final ProgressDialog prgDialog = new ProgressDialog(this);
+		prgDialog.setMessage(getString(R.string.progress));
+		prgDialog.setCancelable(false);
+		prgDialog.show();
+		RequestParams params = new RequestParams();
+		params.put("joueur", ""+menu.pref.getInt("id", 0));
+		params.put("appareil", ""+menu.pref.getInt("appareil", 0));
+		params.put("tasks", base.getTasks());
+		System.out.println(base.getTasks());
+		params.put("expToSync", ""+menu.expToSync);
+		params.put("progress", ""+menu.avancement);
+		client.post(SERVER_URL+"/disconnect.php", params, new AsyncHttpResponseHandler() {
+			@Override
+			public void onSuccess(String response) {
+				prgDialog.dismiss();
+				if(response.equalsIgnoreCase("OK")) {
+					base.clearDB();
+					menu.editor.remove("id");
+					menu.editor.commit();
+					registerUser();
+				} else {
+					System.out.println(response);
+				}
+			}
+
+			@Override
+			public void onFailure(int statusCode, Throwable error, String content) {
+				prgDialog.dismiss();
+				Toast.makeText(Multijoueur.this, R.string.sync_fail, Toast.LENGTH_SHORT).show();
+			}
+		});
+	}
+	
+	public void profileClick(View v) {
+		new AlertDialog.Builder(this)
+			.setIcon(android.R.drawable.ic_dialog_alert)
+			.setTitle(R.string.disconnect_title)
+			.setMessage(this.getString(R.string.disconnect))
+			.setPositiveButton(R.string.accept, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					disconnect();
+				}
+			})
+			.setNegativeButton(R.string.annuler, null)
+			.show();
+	}
+	
 	private void dispUser() {
 		((ImageView) findViewById(R.id.user_avatar)).setImageResource(user.getAvatar());
 		((TextView) findViewById(R.id.user_name)).setText(user.getPseudo());
-		((TextView) findViewById(R.id.user_exp)).setText(getString(R.string.exp)+" :\n"+String.format("%,d", user.getExp()));
+		((TextView) findViewById(R.id.user_exp)).setText(getString(R.string.exp)+" :\n\u0009"+String.format("%,d", user.getExp()));
 		((TextView) findViewById(R.id.user_defis)).setText(getString(R.string.defis_joues)+" : "+user.getDefis());
 		((TextView) findViewById(R.id.user_wins)).setText(getString(R.string.defis_gagnés)+" : "+user.getWin());
 	}
@@ -355,7 +416,7 @@ public class Multijoueur extends Activity {
 				registerUser();
 				return;
 			} else {
-				String title = context.getString(R.string.app_name), msg="";
+				String title = context.getString(R.string.app_name), msg=newMessage;
 				try {
 					JSONObject o = new JSONObject(newMessage);
 					String typ = o.getString("type");
@@ -369,6 +430,8 @@ public class Multijoueur extends Activity {
 						else
 							msg = context.getString(R.string.notif_results_exp);
 					} else if(typ.equals("message")) {
+						if(o.has("title"))
+							title = o.getString("title");
 						msg = o.getString("message");
 					}
 				} catch (JSONException e) {
@@ -391,12 +454,13 @@ public class Multijoueur extends Activity {
 				return menu.avancement;
 			}
 			@Override
-			public boolean registered(String JSONresponse, String name) {
+			public boolean registered(String JSONresponse, String name, boolean sync) {
 				try {
 					JSONArray j = new JSONArray(JSONresponse);
 					base.insertJSONJoueurs(j);
 					menu.editor.putString("pseudo", name);
 					menu.editor.putInt("id", j.getJSONObject(0).getInt("id"));
+					menu.editor.putInt("appareil", j.getJSONObject(0).getInt("appareil"));
 					menu.editor.commit();
 					loadJoueurs();
 					base.getDefis(user.getId(),joueurs,adversaires);
@@ -405,6 +469,8 @@ public class Multijoueur extends Activity {
 					menu.expToSync = 0;
 					menu.saveData();
 					dispUser();
+					if(sync)
+						syncData();
 					return true;
 				} catch (JSONException e) {
 					e.printStackTrace();
@@ -425,6 +491,7 @@ public class Multijoueur extends Activity {
 		loader.setEnabled(false);
 		RequestParams params = new RequestParams();
 		params.put("joueur", ""+menu.pref.getInt("id", 0));
+		params.put("appareil", ""+menu.pref.getInt("appareil", 0));
 		params.put("tasks", base.getTasks());
 		System.out.println(base.getTasks());
 		params.put("expToSync", ""+menu.expToSync);
@@ -473,6 +540,8 @@ public class Multijoueur extends Activity {
 		if(def.length()>=4) { // Dans le cas où def vaut []
 			try {
 				JSONObject o = new JSONObject(def);
+				if(o.has("tasks"))
+					base.execJSONTasks(this, (JSONArray) o.get("tasks"), user.getId());
 				if(o.has("joueurs")) {
 					base.insertJSONJoueurs((JSONArray) o.get("joueurs"));
 					loadJoueurs();
@@ -485,8 +554,6 @@ public class Multijoueur extends Activity {
 					base.insertJSONDefis((JSONArray) o.get("defis"));
 				if(o.has("participations"))
 					base.insertJSONParticipations((JSONArray) o.get("participations"));
-				if(o.has("tasks"))
-					base.execJSONTasks(this, (JSONArray) o.get("tasks"), user.getId());
 				res = true;
 			} catch (JSONException e) {
 				e.printStackTrace();

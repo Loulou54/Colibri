@@ -65,12 +65,13 @@
 	<string name="the_end">THE END</string>
 	<string name="toast_fin">Awesome! You beat the Campaign mode!!</string>
 	<string name="toast_fin2">Improve your Experience with the Random Maps!\nA ranking and network challenges coming soon&#8230;</string>
-	<string name="enter_pseudo">\u0009Please enter your nickname for the multiplayer mode:</string>
+	<string name="enter_pseudo">Please enter your nickname and your password:</string>
 	<string name="register">Register</string>
 	<string name="progress">Transfer&#8230;</string>
 	<string name="err404">Error 404: resource not found.</string>
 	<string name="err500">Error 500: something went wrong at server end.</string>
 	<string name="err">Unknown error. Are you connected to Internet?</string>
+	<string name="errServ">Oops, error on the servor side!</string>
 	<string name="deja_pris">This username is already taken.\nTry something else!</string>
 	<string name="enregistre">You\'ve been successfully registered!</string>
 	<string name="pas_connect_register">You must be connected to Internet to Register.</string>
@@ -78,7 +79,7 @@
 	<string name="gcm_register">Registering to Google Cloud Messaging service&#8230;</string>
 	<string name="gcm_success">Done!</string>
 	<string name="sync_fail">Synchronization with remote database failed!</string>
-	<string name="nom_invalide">Invalid name.</string>
+	<string name="nom_invalide">Invalid name (3 to 14 characters)</string>
 	<string name="etat_attente">Waiting</string>
 	<string name="etat_resultats">Results!</string>
 	<string name="etat_relever">Solve</string>
@@ -104,6 +105,7 @@
 	<string name="obsolete_txt">The deadline has been surpassed.\nConnect to the network and refresh!</string>
 	<string name="newNivDejaCree">Another participant in the challenge %1$s has already submitted a new level. Yours has been therefore discarded.</string>
 	<string name="partObsolete">Your last participation to the challenge %1$s has been submitted after the deadline!</string>
+	<string name="triche">CHEATER spotted! Seems like you used two devices to solve one level of the challenge "%1$s"&#8230; You get a 10000 exp penalty! Don\'t do that again ;)</string>
 	<string name="messageServeur">Message from the creator!\n %1$s</string>
 	<string name="connexion_register">You must be connected to register for multiplayer mode!</string>
 	<string name="nodefis">No challenge yet!\n\nCreate a new challenge with\nthe button on the left.</string>
@@ -137,5 +139,15 @@
 	<string name="hoursAgo">%1$d hour%2$s ago</string>
 	<string name="daysAgo">%1$d day%2$s ago</string>
 	<string name="partie_rapide">Quick match</string>
+	<string name="disconnect_title">Disconnection</string>
+	<string name="disconnect">Do you want to disconnect from this account?\nYou won\'t loose any data and you can reconnect later with your name and password.</string>
+	<string name="multi_pres">\u0009Welcome to the multiplayer mode!</string>
+	<string name="connect">Connect</string>
+	<string name="mdp">Password</string>
+	<string name="mdp_invalide">Invalid password (6 characters at least)</string>
+	<string name="not_registered">This nickname is not registered. Switch to "Register" if you want to register this name.</string>
+	<string name="wrong_password">Wrong password!</string>
+	<string name="connected">You\'ve been successfully connected!</string>
+	<string name="force_quit_msg">You killed the application during a challenge: Forfeit.</string>
 	
 </resources>

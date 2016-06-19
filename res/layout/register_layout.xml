@@ -1,47 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    tools:context=".RegisterUser" >
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:paddingTop="10dp"
+        android:paddingBottom="5dp"
+        android:text="@string/multi_pres"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="5dp"
+        android:background="@color/theme_beige" />
+    
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:padding="1dp"
+        android:background="@color/theme_beige" >
+
+        <TextView
+            android:id="@+id/sw_reg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="3dp"
+            android:background="@color/theme_gris_alpha"
+            android:text="@string/register"
+            android:textColor="@color/theme_gris"
+            android:clickable="false" />
+
+        <TextView
+            android:id="@+id/sw_con"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="3dp"
+            android:background="@color/theme_vert"
+            android:text="@string/connect"
+            android:textColor="@color/theme_gris" />
+
+    </LinearLayout>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingEnd="10dp"
         android:paddingLeft="10dp"
         android:paddingStart="10dp"
-        android:paddingEnd="10dp"
-        android:text="@string/enter_pseudo"
-        android:textSize="20sp"
-        android:textStyle="italic"
-        android:textColor="@color/vert_fonce" />
+        android:text="@string/enter_pseudo" />
 
     <EditText
         android:id="@+id/pseudo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:hint="@string/name"
         android:ems="10"
-        android:inputType="textPersonName" >
-
+        android:hint="@string/name"
+        android:inputType="textPersonName"
+        android:imeOptions="flagNoExtractUi" >
         <requestFocus />
     </EditText>
+    
+    <EditText
+        android:id="@+id/mdp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:ems="10"
+        android:hint="@string/mdp"
+        android:inputType="textPassword"
+        android:imeOptions="flagNoExtractUi" >
+    </EditText>
+
+    <LinearLayout
+        android:id="@+id/pickAvatar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
     
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/pick_avatar"
-        android:textSize="20sp"
-        android:textStyle="italic"
-        android:textColor="@color/vert_fonce" />
-    
+        android:text="@string/pick_avatar" />
+
     <ImageView
         android:id="@+id/avatarReg"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:layout_gravity="center"
-        android:src="@drawable/colibri_d1"
-        android:contentDescription="@string/pick_avatar" />
+        android:contentDescription="@string/pick_avatar"
+        android:src="@drawable/colibri_d1" />
 
     <HorizontalScrollView
         android:layout_width="match_parent"
@@ -52,11 +108,13 @@
             android:id="@+id/imagePicker"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
-            android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
             android:orientation="horizontal"
             android:visibility="gone" >
         </LinearLayout>
     </HorizontalScrollView>
+    
+    </LinearLayout>
 
 </LinearLayout>

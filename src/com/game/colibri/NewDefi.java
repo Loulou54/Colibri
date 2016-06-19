@@ -38,14 +38,14 @@ public class NewDefi {
 	private Context context;
 	private callBackInterface callback;
 	private String nomDefi;
-	private int user, t_max;
+	private int user, appareil, t_max;
 	private DropDownAdapter dropDownAdapter;
 	private JoueursAdapter jAdapter;
 	private AsyncHttpClient client;
 	private ProgressDialog prgDialog;
 	
 	@SuppressLint("InlinedApi")
-	public NewDefi(Context context, AsyncHttpClient client, int user, callBackInterface callback) {
+	public NewDefi(Context context, AsyncHttpClient client, int user, int app, callBackInterface callback) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			this.context = new ContextThemeWrapper(context, android.R.style.Theme_Holo_Light_Dialog);
 		} else {
@@ -54,6 +54,7 @@ public class NewDefi {
 		this.client = client;
 		this.callback= callback;
 		this.user = user;
+		this.appareil = app;
 		ArrayList<Joueur> joueurs = new ArrayList<Joueur>();
 		jAdapter = new JoueursAdapter(context, R.layout.element_joueur, joueurs);
 		dropDownAdapter = new DropDownAdapter(context, R.layout.simple_list_element, user, joueurs);
@@ -189,6 +190,7 @@ public class NewDefi {
 		prgDialog.show();
 		RequestParams params = new RequestParams();
 		params.put("joueur", ""+user);
+		params.put("appareil", ""+appareil);
 		params.put("nom", nomDefi);
 		params.put("participants", "["+getStringListOfJoueurs()+"]");
 		params.put("t_max", ""+t_max);

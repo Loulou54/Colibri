@@ -91,7 +91,8 @@
 	        android:layout_weight="1"
 	        android:layout_gravity="center"
 	        android:contentDescription="@string/app_name"
-	        android:src="@drawable/colibri_d1" />
+	        android:src="@drawable/colibri_d1"
+	        android:onClick="profileClick" />
         
         <TextView
 	        android:id="@+id/user_name"
@@ -108,11 +109,11 @@
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_marginTop="4dp"
-	        android:layout_marginLeft="2dp"
-	        android:layout_marginStart="2dp"
+	        android:layout_marginLeft="12dp"
+	        android:layout_marginStart="12dp"
 	        android:text="@string/app_name"
 	        android:textStyle="bold"
-	        android:textColor="@color/theme_rouge"
+	        android:textColor="@android:color/white"
 	        android:textSize="12sp" />
         
         <TextView

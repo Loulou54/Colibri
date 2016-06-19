@@ -24,6 +24,7 @@ public class Resultats extends Activity {
 	
 	private RefreshHandler handler;
 	private ResultatsAdapter adapt;
+	private Niveau niv;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +46,7 @@ public class Resultats extends Activity {
 		((ListView) findViewById(R.id.listRes)).setAdapter(adapt);
 		((TextView) findViewById(R.id.nomDefiRes)).setText(multi.defi.nom);
 		handler.sendMessageDelayed(handler.obtainMessage(0), 1200); // Commence les animations après 1200ms
+		niv = new Niveau(multi.defi.matchFini.mode, multi.defi.matchFini.seed, multi.defi.matchFini.param, multi.defi.matchFini.progressMin);
 	}
 	
 	public interface callBackInterface {
@@ -53,12 +55,30 @@ public class Resultats extends Activity {
 	
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
-		if(hasFocus && !DISPLAY_RES) {
-			((TextView) findViewById(R.id.the_end)).startAnimation(AnimationUtils.loadAnimation(this, R.anim.artifice_anim_spin));
-			Toast toast = Toast.makeText(this, R.string.toast_fin, Toast.LENGTH_SHORT);
-	    	TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
-	    	if( v != null) v.setGravity(Gravity.CENTER);
-	    	toast.show();
+		if(hasFocus) {
+			if(!DISPLAY_RES) {
+				((TextView) findViewById(R.id.the_end)).startAnimation(AnimationUtils.loadAnimation(this, R.anim.artifice_anim_spin));
+				Toast toast = Toast.makeText(this, R.string.toast_fin, Toast.LENGTH_SHORT);
+		    	TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
+		    	if( v != null) v.setGravity(Gravity.CENTER);
+		    	toast.show();
+			} else {
+				((Carte) findViewById(R.id.apercuResMini)).loadNiveau(niv);
+				Carte c = ((Carte) findViewById(R.id.apercuResMaxi));
+				c.loadNiveau(niv);
+				c.setVisibility(View.GONE);
+			}
+	    	
+		}
+	}
+	
+	public void clickApercu(View v) {
+		View c = findViewById(R.id.apercuResMaxi);
+		if(c.getVisibility()==View.GONE) {
+			c.setVisibility(View.VISIBLE);
+			c.startAnimation(AnimationUtils.loadAnimation(this, R.anim.aleat_opt_anim));
+		} else {
+			c.setVisibility(View.GONE);
 		}
 	}
 	
@@ -97,15 +117,19 @@ public class Resultats extends Activity {
 		}
 	};
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-    	if(keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE) {
-	    	finish();
-	    	callback.suite();
-	    	DISPLAY_RES = false;
-	        return true;
-    	}
-    	return false;
-    }
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if(keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE) {
+			if(DISPLAY_RES && findViewById(R.id.apercuResMaxi).getVisibility()==View.VISIBLE) {
+				findViewById(R.id.apercuResMaxi).setVisibility(View.GONE);
+			} else {
+				finish();
+				callback.suite();
+				DISPLAY_RES = false;
+			}
+			return true;
+		}
+		return false;
+	}
     
 }

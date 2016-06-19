@@ -49,7 +49,7 @@ public class GCMIntentService extends GCMBaseIntentService {
     @Override
     protected void onMessage(Context context, Intent intent) {
         Log.i(TAG, "Received message");
-        String message = intent.getExtras().getString("price");
+        String message = intent.getExtras().getString("msg");
          
         broadcastMessage(context, message);
         // notifies user
@@ -100,6 +100,8 @@ public class GCMIntentService extends GCMBaseIntentService {
 				else
 					msg = context.getString(R.string.notif_results_exp);
 			} else if(typ.equals("message")) {
+				if(o.has("title"))
+					title = o.getString("title");
 				msg = o.getString("message");
 			}
 		} catch (JSONException e) {

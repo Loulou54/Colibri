@@ -23,8 +23,9 @@ public class Defi {
 	public int t_max;
 	public long limite;
 	public int type;
+	public int resVus;
 	
-	public Defi(int id, String nom, SparseArray<Participation> p, int nMatch, String nivCours, String nivFini, int t_m, int lim, int type) {
+	public Defi(int id, String nom, SparseArray<Participation> p, int nMatch, String nivCours, String nivFini, int t_m, int lim, int type, int resVus) {
 		this.id = id;
 		this.nom = nom;
 		participants = p;
@@ -43,6 +44,7 @@ public class Defi {
 		t_max = t_m;
 		limite = lim;
 		this.type = type;
+		this.resVus = resVus;
 	}
 	
 	/**
@@ -87,7 +89,7 @@ public class Defi {
 	
 	public int getEtat(int user) {
 		Participation p = participants.get(user);
-		if(matchFini!=null && base.getResultatsVus(id)!=nMatch)
+		if(matchFini!=null && resVus!=nMatch)
 			return RESULTATS;
 		else if(match!=null && t_max!=0 && limite-System.currentTimeMillis()/1000<0)
 			return OBSOLETE;

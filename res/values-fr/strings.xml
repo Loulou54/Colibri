@@ -65,12 +65,13 @@
 	<string name="the_end">FIN</string>
 	<string name="toast_fin">Excellent ! Vous avez fini le mode Campagne !!</string>
 	<string name="toast_fin2">Améliorez votre Expérience avec les Niveaux Aléatoires !\nUn classement et des défis en réseau prochainement&#8230; ;)</string>
-	<string name="enter_pseudo">\u0009Entrez votre pseudonyme pour le mode multijoueur :</string>
-	<string name="register">Enregistrement</string>
+	<string name="enter_pseudo">Entrez votre pseudonyme et mot de passe :</string>
+	<string name="register">S\'inscrire</string>
 	<string name="progress">Transfert&#8230;</string>
 	<string name="err404">Erreur 404: ressource non trouvée.</string>
 	<string name="err500">Erreur 500: quelque chose cloche sur notre serveur !</string>
 	<string name="err">Erreur inconnue. Êtes-vous bien connectés à Internet ?</string>
+	<string name="errServ">Oups, erreur côté serveur !</string>
 	<string name="deja_pris">Ce pseudo est déjà pris.\nEssayez un autre !</string>
 	<string name="enregistre">Vous vous êtes inscrits avec succès !</string>
 	<string name="pas_connect_register">Vous devez être connectés à Internet pour vous inscrire.</string>
@@ -78,7 +79,7 @@
 	<string name="gcm_register">Enregistrement au service Google Cloud Messaging&#8230;</string>
 	<string name="gcm_success">Fait !</string>
 	<string name="sync_fail">La synchronisation avec la base de données distante a échoué !</string>
-	<string name="nom_invalide">Nom invalide.</string>
+	<string name="nom_invalide">Nom invalide (3 à 14 caractères)</string>
 	<string name="etat_attente">Attente</string>
 	<string name="etat_resultats">Résultats</string>
 	<string name="etat_relever">Relever</string>
@@ -104,6 +105,7 @@
 	<string name="obsolete_txt">La date limite a été dépassée.\nConnectez vous au réseau et rafraîchissez !</string>
 	<string name="newNivDejaCree">Un autre participant au défi %1$s a déjà soumi un nouveau niveau. Le vôtre a donc été abandonné.</string>
 	<string name="partObsolete">Votre dernière participation au défi %1$s a été soumise après la limite temporelle !</string>
+	<string name="triche">TRICHEUR repéré ! Il semblerait que vous avez utilisé deux appareils pour résoudre un niveau du défi "%1$s"&#8230; Vous obtenez une pénalité d\'expérience de 10000 ! Ne recommencez pas ;)</string>
 	<string name="messageServeur">Message du créateur !\n %1$s</string>
 	<string name="connexion_register">Vous devez être connecté pour vous inscrire au mode multijoueur !</string>
 	<string name="nodefis">Aucun défi !\n\nCréez un nouveau défi à l\'aide\ndu bouton à gauche.</string>
@@ -137,5 +139,15 @@
 	<string name="hoursAgo">Il y a %1$d heure%2$s</string>
 	<string name="daysAgo">Il y a %1$d jour%2$s</string>
 	<string name="partie_rapide">Partie rapide</string>
+	<string name="disconnect_title">Déconnexion</string>
+	<string name="disconnect">\u0009Voulez-vous vous déconnecter ?\nVous ne perdrez aucune donnée et pourrez vous reconnecter plus tard avec votre nom et mot de passe.</string>
+	<string name="multi_pres">\u0009Bienvenue dans le mode multijoueur !</string>
+	<string name="connect">Se connecter</string>
+	<string name="mdp">Mot de passe</string>
+	<string name="mdp_invalide">Mot de passe invalide (au moins 6 caractères)</string>
+	<string name="not_registered">Ce pseudo n\'est pas inscrit. Cliquez sur "S'inscrire" pour vous inscrire sous ce nom.</string>
+	<string name="wrong_password">Mauvais mot de passe !</string>
+	<string name="connected">Vous vous êtes connecté avec succès !</string>
+	<string name="force_quit_msg">Vous avez forcé l\'arrêt de l\'application pendant un défi : vous faites Forfait.</string>
 	
 </resources>

@@ -20,6 +20,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewStub;
+import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
@@ -58,6 +59,9 @@ public class Jeu extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		if(multi!=null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) { // Interdire Screenshots
+			getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+		}
 		setContentView(R.layout.activity_jeu);
 		n_niv=opt.getInt("n_niv", 1);
 		carte = (Carte) findViewById(R.id.carte);
@@ -77,7 +81,7 @@ public class Jeu extends Activity {
 				default:
 					break;
 				}
-				return true;
+				return false;
 			}
 		});
 		final Typeface font = Typeface.createFromAsset(getAssets(),"fonts/Passing Notes.ttf");
@@ -119,6 +123,10 @@ public class Jeu extends Activity {
 			music=MenuPrinc.intro.isPlaying();
 		else
 			music=MenuPrinc.boucle.isPlaying();
+		if(multi!=null) { // On sauvegarde le fait que ce défi a été entammé.
+			menu.editor.putInt("defi_fuit", multi.defi.id);
+			menu.editor.commit();
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -236,6 +244,8 @@ public class Jeu extends Activity {
 		TextView phrase = (TextView) findViewById(R.id.gagne_resultats_phrase);
 		if (multi != null) { // Mode multijoueur
 			if(!solved) {
+				menu.editor.remove("defi_fuit");
+				menu.editor.commit();
 				finipartous = multi.defi.finMatch(multi.user.getId(), temps_total_ms, (solUsed) ? niv.solution.length*500 : 0);
 				multi.syncData();
 			} else {
@@ -418,9 +428,13 @@ public class Jeu extends Activity {
 	}
 	
 	public void quitter(View v) {
-		music=false;
-		multi=null;
-    	this.finish();
+		if(multi!=null && !solved) {
+			forfaitBox();
+		} else {
+			music=false;
+			multi=null;
+			this.finish();
+		}
 	}
 	
 	public void solution(View v) {
@@ -504,7 +518,10 @@ public class Jeu extends Activity {
 		Resultats.callback = new Resultats.callBackInterface() {
 			@Override
 			public void suite() {
+				multi.defi.resVus = multi.defi.nMatch;
 				multi.base.setResultatsVus(multi.defi.id,multi.defi.nMatch);
+				multi.adapt.notifyDataSetChanged();
+				multi.syncData();
 				quitter(null);
 				//multi.choixNiveau();
 			}

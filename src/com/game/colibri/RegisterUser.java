@@ -11,6 +11,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
@@ -21,6 +22,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import static com.network.colibri.CommonUtilities.SERVER_URL;
 
@@ -31,6 +33,7 @@ public class RegisterUser {
 	private callBackInterface callback;
 	private AsyncHttpClient client;
 	private int avatar=0;
+	private boolean register;
 	
 	@SuppressLint("InlinedApi")
 	public RegisterUser(Context context, AsyncHttpClient client, callBackInterface callback) {
@@ -44,10 +47,11 @@ public class RegisterUser {
 		prgDialog = new ProgressDialog(this.context);
 		prgDialog.setMessage(context.getString(R.string.progress));
 		prgDialog.setCancelable(false);
+		register = true;
 	}
 	
 	/**
-	 * Affiche la boîte de dialogue d'inscription.
+	 * Affiche la boîte de dialogue d'inscription / connexion.
 	 * @param content le contenu de la ligne de saisie. Doit être null à la première saisie.
 	 * 			Permet d'afficher l'essai précédent en cas de pseudo déjà pris.
 	 * @param editor les SharedPreferences dans lesquels stocker l'inscription de l'utilisateur.
@@ -55,8 +59,42 @@ public class RegisterUser {
 	@SuppressLint("InflateParams")
 	public void show(String content) {
 		final LinearLayout lay = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.register_layout, null);
+		((TextView) lay.getChildAt(0)).setTypeface(Typeface.createFromAsset(context.getAssets(),"fonts/Passing Notes.ttf"));
 		if(content!=null)
 			((EditText) lay.findViewById(R.id.pseudo)).setText(content);
+		final View reg = lay.findViewById(R.id.sw_reg), con = lay.findViewById(R.id.sw_con);
+		reg.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				register = true;
+				reg.setClickable(false);
+				reg.setBackgroundColor(context.getResources().getColor(R.color.theme_gris_alpha));
+				con.setClickable(true);
+				con.setBackgroundColor(context.getResources().getColor(R.color.theme_vert));
+				View layAv = lay.findViewById(R.id.pickAvatar);
+				layAv.setVisibility(View.VISIBLE);
+				layAv.startAnimation(AnimationUtils.loadAnimation(context, R.anim.aleat_opt_anim));
+			}
+		});
+		con.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				register = false;
+				con.setClickable(false);
+				con.setBackgroundColor(context.getResources().getColor(R.color.theme_gris_alpha));
+				reg.setClickable(true);
+				reg.setBackgroundColor(context.getResources().getColor(R.color.theme_vert));
+				lay.findViewById(R.id.pickAvatar).setVisibility(View.GONE);
+			}
+		});
+		if(!register) {
+			con.setClickable(false);
+			con.setBackgroundColor(context.getResources().getColor(R.color.theme_gris_alpha));
+			reg.setClickable(true);
+			reg.setBackgroundColor(context.getResources().getColor(R.color.theme_vert));
+			lay.findViewById(R.id.pickAvatar).setVisibility(View.GONE);
+		} else
+			reg.setClickable(false);
 		final LinearLayout imagePicker = (LinearLayout) lay.findViewById(R.id.imagePicker);
 		final ImageView avatarReg = (ImageView) lay.findViewById(R.id.avatarReg);
 		avatarReg.setImageResource(Joueur.img[avatar]);
@@ -87,18 +125,23 @@ public class RegisterUser {
 			imagePicker.addView(iv);
 		}
 		AlertDialog.Builder boxRegister = new AlertDialog.Builder(context);
-		boxRegister.setTitle(R.string.register);
 		boxRegister.setCancelable(false);
 		DialogInterface.OnClickListener check = new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				if(which==DialogInterface.BUTTON_POSITIVE) {
 					String name = ((EditText) lay.findViewById(R.id.pseudo)).getText().toString().trim();
-					if (!name.contains(",") && !name.contains(";") && name.length()>2 && name.length()<15)
-						registerUser(name);
-					else {
+					String mdp = ((EditText) lay.findViewById(R.id.mdp)).getText().toString();
+					if(name.length()<3 || name.length()>14) {
 						Toast.makeText(context, R.string.nom_invalide, Toast.LENGTH_LONG).show();
 						show(name);
+					} else if(mdp.length()<6) {
+						Toast.makeText(context, R.string.mdp_invalide, Toast.LENGTH_LONG).show();
+						show(name);
+					} else if(register) {
+						registerUser(name, mdp);
+					} else {
+						connectUser(name, mdp);
 					}
 				} else {
 					callback.cancelled();
@@ -114,13 +157,14 @@ public class RegisterUser {
 	public interface callBackInterface {
 		int getExp();
 		int getProgress();
-		boolean registered(String JSONresponse, String name);
+		boolean registered(String JSONresponse, String name, boolean sync);
 		void cancelled();
 	}
 	
-	private void registerUser(final String name) {
+	private void registerUser(final String name, String mdp) {
 		RequestParams params = new RequestParams();
 		params.put("pseudo", name);
+		params.put("password", mdp);
 		params.put("avatar", ""+avatar);
 		params.put("exp", ""+callback.getExp());
 		params.put("progress", ""+callback.getProgress());
@@ -135,12 +179,13 @@ public class RegisterUser {
 					Toast.makeText(context, R.string.deja_pris, Toast.LENGTH_LONG).show();
 					show(name);
 				} else if(response.equalsIgnoreCase("error")) { // Erreur
-					Toast.makeText(context, R.string.err, Toast.LENGTH_LONG).show();
+					Toast.makeText(context, R.string.errServ, Toast.LENGTH_LONG).show();
+					show(name);
 				} else { // Succès
-					if(callback.registered(response, name))
+					if(callback.registered(response, name, false))
 						Toast.makeText(context, R.string.enregistre, Toast.LENGTH_LONG).show();
 					else {
-						Toast.makeText(context, R.string.err, Toast.LENGTH_LONG).show();
+						Toast.makeText(context, R.string.errServ, Toast.LENGTH_LONG).show();
 						show(name);
 					}
 				}
@@ -161,18 +206,45 @@ public class RegisterUser {
 		});
 	}
 	
-	/*private boolean isNicknameTaken(String response, String name) {
-		try {
-			JSONArray arr = new JSONArray(response);
-			for (int i = 0; i < arr.length(); i++) {
-				JSONObject user = (JSONObject) arr.get(i);
-				if(user.get("userName")==name)
-					return true;
+	private void connectUser(final String name, String mdp) {
+		RequestParams params = new RequestParams();
+		params.put("pseudo", name);
+		params.put("password", mdp);
+		params.put("regId", GCMRegistrar.getRegistrationId(context));
+		prgDialog.show();
+		client.post(SERVER_URL+"/connect.php", params, new AsyncHttpResponseHandler() {
+			@Override
+			public void onSuccess(String response) {
+				prgDialog.dismiss();
+				if(response.equalsIgnoreCase("not registered")) { // Le pseudo n'existe pas
+					Toast.makeText(context, R.string.not_registered, Toast.LENGTH_LONG).show();
+					show(name);
+				} else if(response.equalsIgnoreCase("wrong password")) { // Mauvais mot de passe
+					Toast.makeText(context, R.string.wrong_password, Toast.LENGTH_LONG).show();
+					show(name);
+				} else { // Succès
+					if(callback.registered(response, name, true))
+						Toast.makeText(context, R.string.connected, Toast.LENGTH_LONG).show();
+					else {
+						Toast.makeText(context, R.string.errServ, Toast.LENGTH_LONG).show();
+						show(name);
+					}
+				}
 			}
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		return false;
-	}*/
+
+			@Override
+			public void onFailure(int statusCode, Throwable error, String content) {
+				prgDialog.dismiss();
+				if (statusCode == 404) {
+					Toast.makeText(context, R.string.err404, Toast.LENGTH_LONG).show();
+				} else if (statusCode == 500 || statusCode == 503) {
+					Toast.makeText(context, R.string.err500, Toast.LENGTH_LONG).show();
+				} else {
+					Toast.makeText(context, R.string.err, Toast.LENGTH_LONG).show();
+				}
+				show(name);
+			}
+		});
+	}
 	
 }

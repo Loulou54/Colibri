@@ -23,7 +23,7 @@ import android.util.SparseArray;
 public class DBController  extends SQLiteOpenHelper {
 		
 	public DBController(Context applicationcontext) {
-        super(applicationcontext, "Colibri.db", null, 8);
+        super(applicationcontext, "Colibri.db", null, 9);
         Defi.base = this;
     }
 	
@@ -40,6 +40,7 @@ public class DBController  extends SQLiteOpenHelper {
 				+ " t_max int NOT NULL,"
 				+ " limite int NOT NULL,"
 				+ " type int NOT NULL,"
+				+ " resVus int NOT NULL,"
 				+ " PRIMARY KEY (`id`)"
 				+ ")";
         database.execSQL(query);
@@ -72,13 +73,6 @@ public class DBController  extends SQLiteOpenHelper {
 				+ "FOREIGN KEY(joueur) REFERENCES joueurs(pseudo) ON DELETE CASCADE ON UPDATE CASCADE"
 				+ ")";
         database.execSQL(query);
-        query = "CREATE TABLE IF NOT EXISTS resultatsVus ("
-        		+ " defi int NOT NULL,"
-				+ " nMatch int NOT NULL DEFAULT 0,"
-				+ " PRIMARY KEY (defi),"
-				+ "FOREIGN KEY(defi) REFERENCES defis(id) ON DELETE CASCADE ON UPDATE CASCADE"
-				+ ")";
-        database.execSQL(query);
         query = "CREATE TABLE IF NOT EXISTS tasks ("
 				+ " id INTEGER PRIMARY KEY,"
 				+ " task text NOT NULL"
@@ -94,8 +88,6 @@ public class DBController  extends SQLiteOpenHelper {
 		query = "DROP TABLE IF EXISTS joueurs";
 		database.execSQL(query);
 		query = "DROP TABLE IF EXISTS participations";
-		database.execSQL(query);
-		query = "DROP TABLE IF EXISTS resultatsVus";
 		database.execSQL(query);
 		query = "DROP TABLE IF EXISTS tasks";
 		database.execSQL(query);
@@ -121,6 +113,7 @@ public class DBController  extends SQLiteOpenHelper {
 				values.put("t_max", d.getInt("t_max"));
 				values.put("limite", d.getInt("t_restant")+System.currentTimeMillis()/1000);
 				values.put("type", d.getInt("type"));
+				values.put("resVus", d.getInt("resVus"));
 				database.insertWithOnConflict("defis", null, values, SQLiteDatabase.CONFLICT_REPLACE);
 			} catch (JSONException e) {
 				e.printStackTrace();
@@ -173,6 +166,18 @@ public class DBController  extends SQLiteOpenHelper {
 				e.printStackTrace();
 			}
 		}
+		database.close();
+	}
+	
+	/**
+	 * Efface le contenu de la base de donnée (lors d'une déconnexion).
+	 */
+	public void clearDB() {
+		SQLiteDatabase database = this.getWritableDatabase();
+		database.delete("defis", null, null);
+		database.delete("joueurs", null, null);
+		database.delete("participations", null, null);
+		database.delete("tasks", null, null);
 		database.close();
 	}
 	
@@ -232,9 +237,9 @@ public class DBController  extends SQLiteOpenHelper {
 		int pRapideIndice = -1; // Pour lancer la partie rapide juste reçue le cas échéant.
 		l.clear();
 		String selectQuery = ""
-				+ "SELECT id,nom,d.nMatch,nivCours,nivFini,t_max,limite,type,"
-				+ "(CASE WHEN nivFini IS NOT NULL AND (rv.nMatch IS NULL OR d.nMatch<>rv.nMatch) THEN 1 ELSE (CASE WHEN t_cours>0 THEN 3 ELSE (CASE WHEN nivCours IS NULL THEN 2 ELSE 0 END) END) END) AS ordre "
-				+ "FROM `defis` AS d LEFT OUTER JOIN `resultatsVus` AS rv ON id=rv.defi JOIN `participations` AS p ON id=p.defi WHERE joueur=? ORDER BY ordre, id";
+				+ "SELECT id,nom,d.nMatch,nivCours,nivFini,t_max,limite,type,resVus,"
+				+ "(CASE WHEN nivFini IS NOT NULL AND d.nMatch<>resVus THEN 1 ELSE (CASE WHEN t_cours>0 THEN 3 ELSE (CASE WHEN nivCours IS NULL THEN 2 ELSE 0 END) END) END) AS ordre "
+				+ "FROM `defis` AS d JOIN `participations` AS p ON id=p.defi WHERE joueur=? ORDER BY ordre, id";
 	    SQLiteDatabase database = this.getWritableDatabase();
 	    Cursor cursor = database.rawQuery(selectQuery, new String[] {""+user});
 	    if (cursor.moveToFirst()) {
@@ -248,9 +253,9 @@ public class DBController  extends SQLiteOpenHelper {
 		        		part.put(cursor2.getInt(0), p);
 		        	} while(cursor2.moveToNext());
 	        	}
-	        	if(cursor.getInt(7)>0 && cursor.getInt(8)%2==0) // Partie rapide non jouée (donc à lancer) (type>0 && etat=Lancer ou Relever)
+	        	if(cursor.getInt(7)>0 && cursor.getInt(9)%2==0) // Partie rapide non jouée (donc à lancer) (type>0 && etat=Lancer ou Relever)
 	        		pRapideIndice = l.size();
-	        	l.add(new Defi(cursor.getInt(0), cursor.getString(1), part, cursor.getInt(2), cursor.getString(3), cursor.getString(4), cursor.getInt(5), cursor.getInt(6), cursor.getInt(7)));
+	        	l.add(new Defi(cursor.getInt(0), cursor.getString(1), part, cursor.getInt(2), cursor.getString(3), cursor.getString(4), cursor.getInt(5), cursor.getInt(6), cursor.getInt(7), cursor.getInt(8)));
 	        } while (cursor.moveToNext());
 	    }
 	    database.close();
@@ -402,31 +407,57 @@ public class DBController  extends SQLiteOpenHelper {
 	}
 	
 	/**
-	 * Détermine si les résultats du défi id ont été vus pour le match nMatch. Seulement local.
+	 * Update la participation de user à defi avec Forfait. (Utilisé lorsque le défi a été fuit en forçant la fermeture du jeu)
+	 * @param defi id du défi
+	 * @param user id du joueur
+	 */
+	public void forfaitDefi(int defi, int user) {
+		SQLiteDatabase database = this.getWritableDatabase();
+		ContentValues values = new ContentValues();
+		values.put("t_cours", Participation.FORFAIT);
+		database.update("participations", values, "defi="+defi+" AND joueur="+user, null);
+		// Requète serveur
+		values = new ContentValues();
+		JSONObject o = new JSONObject();
+		Cursor cursor = database.rawQuery("SELECT nMatch FROM `defis` WHERE id="+defi, null);
+		cursor.moveToFirst();
+		try {
+			o.put("task","finMatch");
+			o.put("defi",defi);
+			o.put("temps",Participation.FORFAIT);
+			o.put("penalite",0);
+			o.put("nMatch", cursor.getInt(0));
+			values.put("task", o.toString());
+			database.insert("tasks", null, values);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		database.close();
+	}
+	
+	/**
+	 * Enregistre que les résultats du défi ont été vus pour le match nMatch puis notifie le serveur.
 	 * @param id le défi
 	 * @param nMatch la valeur
 	 */
 	public void setResultatsVus(int id, int nMatch) {
 		SQLiteDatabase database = this.getWritableDatabase();
 		ContentValues values = new ContentValues();
-		values.put("defi", id);
-		values.put("nMatch", nMatch);
-		database.insertWithOnConflict("resultatsVus", null, values, SQLiteDatabase.CONFLICT_REPLACE);
+		values.put("resVus", nMatch);
+		database.update("defis", values, "id="+id, null);
+		// Requète Serveur
+		values = new ContentValues();
+		JSONObject o = new JSONObject();
+		try {
+			o.put("task","resultatsVus");
+			o.put("defi",id);
+			o.put("nMatch", nMatch);
+			values.put("task", o.toString());
+			database.insert("tasks", null, values);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 		database.close();
-	}
-	
-	/**
-	 * Retourne le nMatch des derniers résultats vus.
-	 */
-	public int getResultatsVus(int id) {
-		String selectQuery = "SELECT nMatch FROM resultatsVus WHERE defi="+id;
-	    SQLiteDatabase database = this.getWritableDatabase();
-	    Cursor cursor = database.rawQuery(selectQuery, null);
-	    int res = 0;
-	    if(cursor.moveToFirst())
-	    	res = cursor.getInt(0);
-	    database.close();
-	    return res;
 	}
 	
 	/**
@@ -437,7 +468,6 @@ public class DBController  extends SQLiteOpenHelper {
 		database.delete("participations", null, null);
 		database.delete("defis", null, null);
 		database.delete("joueurs", "id<>"+user, null);
-		database.delete("tasks", null, null);
 		ContentValues values = new ContentValues();
 		values = new ContentValues();
 		JSONObject o = new JSONObject();
@@ -459,9 +489,14 @@ public class DBController  extends SQLiteOpenHelper {
 				JSONObject d = jsonArray.getJSONObject(i);
 				String task = d.getString("task");
 				if(task.equalsIgnoreCase("delPart")) {
-					database.delete("participations", "defi="+d.getInt("part_defi")+" AND joueur=?", new String[] {d.getString("part_joueur")});
+					if(d.getInt("part_joueur")==user) { // Cas où la suppression vient du même joueur sur un autre appareil.
+						database.delete("defis", "id="+d.getInt("part_defi"), null);
+						database.delete("participations", "defi="+d.getInt("part_defi"), null);
+					} else {
+						database.delete("participations", "defi="+d.getInt("part_defi")+" AND joueur="+d.getInt("part_joueur"), null);
+						liste+=context.getResources().getString(R.string.deletedPart, d.getString("part_joueur_nom"), d.getString("part_defi_nom"))+"\n";
+					}
 					cleanJoueurs(database, user);
-					liste+=context.getResources().getString(R.string.deletedPart, d.getString("part_joueur"), d.getString("part_defi_nom"))+"\n";
 				} else if(task.equalsIgnoreCase("delDefi")) {
 					database.delete("defis", "id="+d.getInt("defi"), null);
 					database.delete("participations", "defi="+d.getInt("defi"), null);
@@ -471,6 +506,8 @@ public class DBController  extends SQLiteOpenHelper {
 					liste+=context.getResources().getString(R.string.newNivDejaCree, d.getString("nomDefi"))+"\n";
 				} else if(task.equalsIgnoreCase("partObsolete")) {
 					liste+=context.getResources().getString(R.string.partObsolete, d.getString("nomDefi"))+"\n";
+				} else if(task.equalsIgnoreCase("triche")) {
+					liste+=context.getResources().getString(R.string.triche, d.getString("nomDefi"))+"\n";
 				} else if(task.equalsIgnoreCase("message")) {
 					liste+=context.getResources().getString(R.string.messageServeur, d.getString("message"))+"\n";
 				}
@@ -479,10 +516,12 @@ public class DBController  extends SQLiteOpenHelper {
 			}
 		}
 		database.close();
-		AlertDialog.Builder box = new AlertDialog.Builder(context);
-		box.setTitle(R.string.notification);
-		box.setMessage(liste);
-		box.show();
+		if(liste.length()>0) {
+			AlertDialog.Builder box = new AlertDialog.Builder(context);
+			box.setTitle(R.string.notification);
+			box.setMessage(liste);
+			box.show();
+		}
 	}
 
 }
