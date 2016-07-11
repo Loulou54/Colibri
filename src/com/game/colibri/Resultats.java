@@ -11,6 +11,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,7 +44,15 @@ public class Resultats extends Activity {
 			parts[i] = multi.defi.participants.valueAt(i);
 		}
 		adapt = new ResultatsAdapter(this, parts);
-		((ListView) findViewById(R.id.listRes)).setAdapter(adapt);
+		ListView lv = (ListView) findViewById(R.id.listRes);
+		lv.setAdapter(adapt);
+		lv.setOnItemClickListener(new ListView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+				Joueur j = ((Participation) arg0.getAdapter().getItem(arg2)).joueur;
+				(new DispJoueur(Resultats.this, j)).show();
+			}
+		});
 		((TextView) findViewById(R.id.nomDefiRes)).setText(multi.defi.nom);
 		handler.sendMessageDelayed(handler.obtainMessage(0), 1200); // Commence les animations après 1200ms
 		niv = new Niveau(multi.defi.matchFini.mode, multi.defi.matchFini.seed, multi.defi.matchFini.param, multi.defi.matchFini.progressMin);
@@ -92,7 +101,7 @@ public class Resultats extends Activity {
 				if(ResultatsAdapter.prog<1)
 					sleep(PERIODE);
 				else
-					sendMessageDelayed(obtainMessage(1), 800);
+					sendMessageDelayed(obtainMessage(1), 600);
 			} else {
 				ResultatsAdapter.etape = msg.what;
 				if(msg.what==4) {
@@ -103,12 +112,13 @@ public class Resultats extends Activity {
 					adapt.sort(new Comparator<Participation>() {
 						@Override
 						public int compare(Participation lhs, Participation rhs) {
-							return lhs.t_cours+lhs.penalite_cours - (rhs.t_cours+rhs.penalite_cours);
+							return lhs.t_fini+lhs.penalite_fini - (rhs.t_fini+rhs.penalite_fini);
 						}
 					});
-				} else
-					sendMessageDelayed(obtainMessage(msg.what+1), 800);
-				adapt.notifyDataSetChanged();
+				} else {
+					sendMessageDelayed(obtainMessage(msg.what+1), 600);
+					adapt.notifyDataSetChanged();
+				}
 			}
 		}
 		public void sleep(long delayMillis) {

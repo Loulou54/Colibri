@@ -7,6 +7,7 @@ import java.util.Locale;
 
 import android.content.Context;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,9 +19,11 @@ import android.widget.TextView;
 public class JoueursAdapter extends ArrayAdapter<Joueur> {
 	
 	private TextView adv;
+	private Typeface font;
 	
 	public JoueursAdapter(Context context, int resource, List<Joueur> objects) {
 		super(context, resource, objects);
+		font = Typeface.createFromAsset(context.getAssets(),"fonts/Passing Notes.ttf");
 	}
 	
 	public void setTextView(TextView tv) {
@@ -41,6 +44,7 @@ public class JoueursAdapter extends ArrayAdapter<Joueur> {
 			h = new ViewHolder();
 			h.avatar = (ImageView) convertView.findViewById(R.id.avatarAdv);
 			h.nom = (TextView) convertView.findViewById(R.id.nomAdv);
+			h.nom.setTypeface(font);
 			h.pays = (ImageView) convertView.findViewById(R.id.paysAdv);
 			h.exp = (TextView) convertView.findViewById(R.id.expAdv);
 			h.defis = (TextView) convertView.findViewById(R.id.winDefisAdv);

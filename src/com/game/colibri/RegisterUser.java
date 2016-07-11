@@ -22,6 +22,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import static com.network.colibri.CommonUtilities.SERVER_URL;
@@ -58,10 +59,16 @@ public class RegisterUser {
 	 */
 	@SuppressLint("InflateParams")
 	public void show(String content) {
-		final LinearLayout lay = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.register_layout, null);
+		ScrollView root = (ScrollView) LayoutInflater.from(context).inflate(R.layout.register_layout, null);
+		final LinearLayout lay = (LinearLayout) root.getChildAt(0);
 		((TextView) lay.getChildAt(0)).setTypeface(Typeface.createFromAsset(context.getAssets(),"fonts/Passing Notes.ttf"));
 		if(content!=null)
 			((EditText) lay.findViewById(R.id.pseudo)).setText(content);
+		if(callback.getExp()!=0) {
+			TextView expTV = (TextView) lay.findViewById(R.id.expToSyncMsg);
+			expTV.setText(context.getString(R.string.expToSyncMsg, String.format("%,d", callback.getExp())));
+			expTV.setVisibility(View.VISIBLE);
+		}
 		final View reg = lay.findViewById(R.id.sw_reg), con = lay.findViewById(R.id.sw_con);
 		reg.setOnClickListener(new OnClickListener() {
 			@Override
@@ -132,14 +139,18 @@ public class RegisterUser {
 				if(which==DialogInterface.BUTTON_POSITIVE) {
 					String name = ((EditText) lay.findViewById(R.id.pseudo)).getText().toString().trim();
 					String mdp = ((EditText) lay.findViewById(R.id.mdp)).getText().toString();
+					String mail = ((EditText) lay.findViewById(R.id.mail)).getText().toString();
 					if(name.length()<3 || name.length()>14) {
 						Toast.makeText(context, R.string.nom_invalide, Toast.LENGTH_LONG).show();
 						show(name);
 					} else if(mdp.length()<6) {
 						Toast.makeText(context, R.string.mdp_invalide, Toast.LENGTH_LONG).show();
 						show(name);
+					} else if(register && !android.util.Patterns.EMAIL_ADDRESS.matcher(mail).matches()) {
+						Toast.makeText(context, R.string.mail_invalide, Toast.LENGTH_LONG).show();
+						show(name);
 					} else if(register) {
-						registerUser(name, mdp);
+						registerUser(name, mdp, mail);
 					} else {
 						connectUser(name, mdp);
 					}
@@ -150,7 +161,7 @@ public class RegisterUser {
 		};
 		boxRegister.setPositiveButton(R.string.accept, check);
 		boxRegister.setNegativeButton(R.string.annuler, check);
-		boxRegister.setView(lay);
+		boxRegister.setView(root);
 		boxRegister.show();
 	}
 	
@@ -161,10 +172,11 @@ public class RegisterUser {
 		void cancelled();
 	}
 	
-	private void registerUser(final String name, String mdp) {
+	private void registerUser(final String name, String mdp, String mail) {
 		RequestParams params = new RequestParams();
 		params.put("pseudo", name);
 		params.put("password", mdp);
+		params.put("mail", mail);
 		params.put("avatar", ""+avatar);
 		params.put("exp", ""+callback.getExp());
 		params.put("progress", ""+callback.getProgress());

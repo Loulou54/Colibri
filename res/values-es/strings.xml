@@ -50,7 +50,6 @@
 	<string name="bloque">¡No has desbloqueado el próximo nivel todavía!</string>
 	<string name="solution_bloque">¡No has desbloqueado la próxima solución todavía!</string>
 	<string name="aleatoire">Aleatorio</string>
-	<string name="choix_campagne">Seleccione un nivel: flor = no resuelto todavía</string>
 	<string name="joueur_suivant">\u0009\u21AA ¿Jugador 2: Listo?</string>
 	<string name="forfait">Abandonar</string>
 	<string name="forfait_msg">¿Quieres abandonar?</string>

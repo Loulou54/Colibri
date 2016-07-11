@@ -266,6 +266,7 @@ public class Multijoueur extends Activity {
 		RequestParams params = new RequestParams();
 		params.put("joueur", ""+menu.pref.getInt("id", 0));
 		params.put("appareil", ""+menu.pref.getInt("appareil", 0));
+		params.put("expToSync", ""+menu.expToSync);
 		client.post(SERVER_URL+"/partie_rapide.php", params, new AsyncHttpResponseHandler() {
 			@Override
 			public void onSuccess(String response) {
@@ -310,6 +311,7 @@ public class Multijoueur extends Activity {
 		switch(defi.getEtat(user.getId())) {
 		case Defi.ATTENTE: // Send POKE
 			// TODO: Poke.
+			poke(defi);
 			break;
 		case Defi.RESULTATS: // Afficher les résultats
 			Resultats.callback = new Resultats.callBackInterface() {
@@ -338,6 +340,39 @@ public class Multijoueur extends Activity {
 		case Defi.OBSOLETE: // Deadline dépassée -> il faudrait synchroniser.
 			Toast.makeText(this, R.string.obsolete_txt, Toast.LENGTH_LONG).show();
 		}
+	}
+	
+	private void poke(final Defi defi) {
+		/*new AlertDialog.Builder(this)
+			.setIcon(android.R.drawable.ic_dialog_info)
+			.setTitle(R.string.sendPoke)
+			.setMessage(this.getString(R.string.sendPokeConf, defi.nom))
+			.setPositiveButton(R.string.accept, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					RequestParams params = new RequestParams();
+					params.put("joueur", ""+menu.pref.getInt("id", 0));
+					params.put("defi", ""+defi.id);
+					client.post(SERVER_URL+"/disconnect.php", params, new AsyncHttpResponseHandler() {
+						@Override
+						public void onSuccess(String response) {
+							if(response.equalsIgnoreCase("OK")) {
+								Toast.makeText(Multijoueur.this, R.string.pokeSent, Toast.LENGTH_SHORT).show();
+							} else {
+								System.out.println(response);
+							}
+						}
+
+						@Override
+						public void onFailure(int statusCode, Throwable error, String content) {
+							prgDialog.dismiss();
+							Toast.makeText(Multijoueur.this, R.string.sync_fail, Toast.LENGTH_SHORT).show();
+						}
+					});
+				}
+			})
+			.setNegativeButton(R.string.annuler, null)
+			.show();*/
 	}
 	
 	public void syncTotale(View v) {
@@ -447,11 +482,11 @@ public class Multijoueur extends Activity {
 		(new RegisterUser(this, client, new RegisterUser.callBackInterface() {
 			@Override
 			public int getExp() {
-				return menu.experience;
+				return menu.expToSync;
 			}
 			@Override
 			public int getProgress() {
-				return menu.avancement;
+				return menu.expToSync==menu.experience ? menu.avancement : 1;
 			}
 			@Override
 			public boolean registered(String JSONresponse, String name, boolean sync) {
@@ -467,6 +502,8 @@ public class Multijoueur extends Activity {
 					adapt = new DefiExpandableAdapter(Multijoueur.this, user.getId(), adversaires);
 					lv.setAdapter(adapt);
 					menu.expToSync = 0;
+					menu.experience = user.getExp();
+					menu.avancement = user.getProgress();
 					menu.saveData();
 					dispUser();
 					if(sync)
@@ -485,8 +522,10 @@ public class Multijoueur extends Activity {
 	}
 	
 	public void syncData() {
-		adapt.setLaunchEnabled(false);
 		adapt.notifyDataSetChanged();
+		if(!connect.isConnectedToInternet())
+			return;
+		adapt.setLaunchEnabled(false);
 		loader.showNext();
 		loader.setEnabled(false);
 		RequestParams params = new RequestParams();
@@ -547,6 +586,7 @@ public class Multijoueur extends Activity {
 					loadJoueurs();
 					menu.expToSync = 0;
 					menu.experience = user.getExp();
+					menu.avancement = user.getProgress();
 					menu.saveData();
 					dispUser();
 				}

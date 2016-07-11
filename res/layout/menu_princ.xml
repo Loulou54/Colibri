@@ -125,8 +125,8 @@
     
     <LinearLayout
         android:id="@+id/opt_infos"
-        android:layout_width="130dp"
-        android:layout_height="60dp"
+        android:layout_width="136dp"
+        android:layout_height="64dp"
         android:layout_alignBottom="@+id/infos"
         android:layout_toLeftOf="@+id/infos"
         android:background="@drawable/papier"
@@ -135,17 +135,36 @@
 
         <Button
             style="@style/button_green"
-            android:layout_marginTop="0dp"
-            android:onClick="info"
-            android:text="@string/info"
-            android:textSize="12sp" />
-
+            android:layout_marginTop="2dp"
+            android:onClick="instrus"
+            android:text="@string/instru" />
+        
         <Button
             style="@style/button_green"
             android:layout_marginTop="2dp"
-            android:onClick="instru"
-            android:text="@string/instru"
-            android:textSize="12sp" />
+            android:onClick="infos"
+            android:text="@string/info" />
+
     </LinearLayout>
+    
+    <ViewStub
+	    android:id="@+id/instrus"
+	    android:layout="@layout/activity_instru"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:layout_marginTop="20dp"
+	    android:layout_marginBottom="20dp"
+	    android:layout_marginLeft="40dp"
+	    android:layout_marginRight="40dp" />
+    
+    <ViewStub
+	    android:id="@+id/a_propos"
+	    android:layout="@layout/activity_info"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:layout_marginTop="20dp"
+	    android:layout_marginBottom="20dp"
+	    android:layout_marginLeft="40dp"
+	    android:layout_marginRight="40dp" />
 
 </RelativeLayout>

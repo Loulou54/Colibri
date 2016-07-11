@@ -3,13 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/wood_tiles" >
-
-    <com.game.colibri.Artifices
-        android:id="@+id/artifices"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/transparent"
-        android:visibility="gone" />
     
     <TextView
         android:id="@+id/the_res"
@@ -96,6 +89,13 @@
 	        android:layout_height="match_parent" />
 
     </LinearLayout>
+    
+    <com.game.colibri.Artifices
+        android:id="@+id/artifices"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:visibility="gone" />
     
     <com.game.colibri.Carte
 	    android:id="@+id/apercuResMini"

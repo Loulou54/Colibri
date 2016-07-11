@@ -51,6 +51,7 @@ public class NewDefi {
 		} else {
 			this.context = context;
 		}
+		nomDefi = "";
 		this.client = client;
 		this.callback= callback;
 		this.user = user;
@@ -77,10 +78,16 @@ public class NewDefi {
 				if(which==DialogInterface.BUTTON_POSITIVE) {
 					nomDefi = ((EditText) lay.findViewById(R.id.defiName)).getText().toString().trim();
 					t_max = fetchTimeSecond(((Spinner) lay.findViewById(R.id.defiLimit)).getSelectedItemPosition());
-					showParticipants();
+					if(nomDefi.length()>15) {
+						Toast.makeText(context, R.string.nom_invalide_defi, Toast.LENGTH_LONG).show();
+						show();
+					} else {
+						showParticipants();
+					}
 				}
 			}
 		};
+		((EditText) lay.findViewById(R.id.defiName)).setText(nomDefi);
 		boxParticipants.setPositiveButton(R.string.accept, check);
 		boxParticipants.setNegativeButton(R.string.annuler, check);
 		boxParticipants.setView(lay);
@@ -173,6 +180,7 @@ public class NewDefi {
 					jAdapter.updateTextView();
 					jAdapter.notifyDataSetChanged();
 				} catch (JsonSyntaxException e) {
+					System.out.println(response);
 					Toast.makeText(context, R.string.nojoueurfound, Toast.LENGTH_LONG).show();
 					return;
 				}

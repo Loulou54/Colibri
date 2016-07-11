@@ -50,7 +50,6 @@
 	<string name="bloque">Sie haben die nächste Niveau noch nicht entsperren!</string>
 	<string name="solution_bloque">You didn\'t unlock the solution of this level yet!</string>
 	<string name="aleatoire">Zufällig</string>
-	<string name="choix_campagne">Wählen Sie eine Niveau: Blume = nicht gelöst</string>
 	<string name="joueur_suivant">\u0009\u21AA Spieler 2: Bereit?</string>
 	<string name="forfait">Verwirken</string>
 	<string name="forfait_msg">Wollen Sie verwirken?</string>

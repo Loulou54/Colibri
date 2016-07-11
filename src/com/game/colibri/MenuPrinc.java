@@ -10,6 +10,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewStub;
 import android.view.View.OnClickListener;
 import android.view.animation.Animation;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -52,6 +53,7 @@ public class MenuPrinc extends Activity {
 	private Carte carte; // L'instance de carte permettant de faire un apercu dans le menu de sélection de niveaux.
 	private LinearLayout opt_aleat;
 	private LinearLayout opt_infos;
+	private View instrus, infos;
 	private float initialX;
 	private double[][] points = new double[][] {{0.07625, 0.8145833333333333}, {0.18875, 0.7645833333333333}, {0.31625, 0.7354166666666667}, {0.24875, 0.8208333333333333}, {0.1125, 0.94375}, {0.25, 0.9458333333333333}, {0.405, 0.9208333333333333}, {0.52, 0.9416666666666667}, {0.6275, 0.9333333333333333}, {0.765, 0.9354166666666667}, {0.765, 0.8166666666666667}, {0.83, 0.74375}};
 	
@@ -69,7 +71,7 @@ public class MenuPrinc extends Activity {
 		Jeu.menu=this;
 		Multijoueur.menu=this;
 		loadData();
-		displayMenu();
+		//displayMenu();
 		if(intro==null && boucle==null) {
 			intro = MediaPlayer.create(this, R.raw.intro);
 			intro.setLooping(false);
@@ -115,6 +117,32 @@ public class MenuPrinc extends Activity {
 		root.addView(View.inflate(this, R.layout.menu_princ, null));
 		opt_aleat = (LinearLayout) findViewById(R.id.opt_aleat);
 		opt_infos = (LinearLayout) findViewById(R.id.opt_infos);
+		final Typeface font = Typeface.createFromAsset(getAssets(),"fonts/Passing Notes.ttf");
+		// Instrus
+		instrus = findViewById(R.id.instrus);
+		((ViewStub) instrus).setOnInflateListener(new ViewStub.OnInflateListener() {
+			@Override
+			public void onInflate(ViewStub stub, View inflated) {
+				((TextView) inflated.findViewById(R.id.titreInstru)).setTypeface(font);
+				((TextView) inflated.findViewById(R.id.instru1)).setTypeface(font);
+				((TextView) inflated.findViewById(R.id.instru2)).setTypeface(font);
+				((TextView) inflated.findViewById(R.id.instru3)).setTypeface(font);
+				((TextView) inflated.findViewById(R.id.quitInstru)).setTypeface(font);
+				instrus = inflated;
+			}
+		});
+		// Infos / A propos
+		infos = findViewById(R.id.a_propos);
+		((ViewStub) infos).setOnInflateListener(new ViewStub.OnInflateListener() {
+			@Override
+			public void onInflate(ViewStub stub, View inflated) {
+				((TextView) inflated.findViewById(R.id.titreInfos)).setTypeface(font);
+				((TextView) inflated.findViewById(R.id.infos1)).setTypeface(font);
+				((TextView) inflated.findViewById(R.id.infos2)).setTypeface(font);
+				((TextView) inflated.findViewById(R.id.quitInfos)).setTypeface(font);
+				infos = inflated;
+			}
+		});
 		placeButton();
 		if(avancement==1) {
 			((TextView) findViewById(R.id.bout1)).setText(R.string.commencer);
@@ -126,7 +154,11 @@ public class MenuPrinc extends Activity {
 		TextView exp = (TextView) findViewById(R.id.exp_menu);
 		exp.setText(getString(R.string.exp)+" : "+String.format("%,d", experience));
 		exp.setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Passing Notes.ttf"));
-		((TextView) findViewById(R.id.main_title)).setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Sketch_Block.ttf"));
+		TextView title = (TextView) findViewById(R.id.main_title);
+		title.setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Sketch_Block.ttf"));
+		Animation a = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
+		a.setDuration(4000);
+		title.setAnimation(a);
 	}
 	
 	/**
@@ -147,29 +179,11 @@ public class MenuPrinc extends Activity {
 	    carte.setLayoutParams(params);
 	}
 	
-	/**
-	 * Pour afficher l'écran d'informations dans root
-	 */
-	private void displayInfos() {
-		delReferences();
-		screen=2;
-		root.removeAllViews();
-		root.addView(View.inflate(this, R.layout.activity_info, null));
-	}
-	
-	/**
-	 * Pour afficher l'écran d'informations dans root
-	 */
-	private void displayInstrus() {
-		delReferences();
-		screen=3;
-		root.removeAllViews();
-		root.addView(View.inflate(this, R.layout.activity_instru, null));
-	}
-	
 	private void delReferences() {
 		opt_aleat = null;
 		opt_infos = null;
+		instrus = null;
+		infos = null;
 		MenuSel = null;
 		carte = null;
 	}
@@ -207,9 +221,16 @@ public class MenuPrinc extends Activity {
 		    layoutParams.height = 128*ww/2320;
 		    btn_lay.setLayoutParams(layoutParams);
 		    btn_lay.setTypeface(font);
+		    Animation a = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
+		    a.setStartOffset(800+i*150);
+		    a.setDuration(1000);
+		    btn_lay.setAnimation(a);
 		}
 		for(int i=0; i<opt_aleat.getChildCount(); i++) {
 			((Button) opt_aleat.getChildAt(i)).setTypeface(font);
+		}
+		for(int i=0; i<opt_infos.getChildCount(); i++) {
+			((Button) opt_infos.getChildAt(i)).setTypeface(font);
 		}
 	}
 	
@@ -221,6 +242,12 @@ public class MenuPrinc extends Activity {
 			}
 			else if (opt_infos.getVisibility()==View.VISIBLE) {
 				opt_infos.setVisibility(View.INVISIBLE);
+			}
+			else if (instrus.getVisibility()==View.VISIBLE) {
+				quitInstrus(null);
+			}
+			else if (infos.getVisibility()==View.VISIBLE) {
+				quitInfos(null);
 			}
 			else if(opt_aleat.getVisibility()==View.INVISIBLE) {
 				if (intro!=null) {
@@ -274,32 +301,53 @@ public class MenuPrinc extends Activity {
 	@Override
     public boolean onTouchEvent(MotionEvent touchevent) {
         if (screen==1) {
-        int a=MenuSel.getDisplayedChild();
-        switch (touchevent.getAction()) {
-        
-        case MotionEvent.ACTION_DOWN:
-            initialX = touchevent.getX();
-            break;
-        case MotionEvent.ACTION_UP:
-            float finalX = touchevent.getX();
-            if (initialX-finalX > 10) {
-                if (a == 2)
-                    break;
-                MenuSel.showNext();
-            } else if (initialX-finalX < -10) {
-                if (a == 0)
-                    break;
-                MenuSel.showPrevious();
-            }
-            break;
-        }
-        if(carte.getVisibility()==View.VISIBLE && MenuSel.getDisplayedChild()!=a) {
-            carte.setAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_out));
-			carte.setVisibility(View.INVISIBLE);
-			deplaceColibri(new double[] {0.1,0.6},true);
-        }
+	        switch (touchevent.getAction()) {
+	        case MotionEvent.ACTION_DOWN:
+	            initialX = touchevent.getX();
+	            break;
+	        case MotionEvent.ACTION_UP:
+	            float finalX = touchevent.getX();
+	            if (initialX-finalX > 10) {
+	            	nextScreen(findViewById(R.id.nextScreen));
+	            } else if (initialX-finalX < -10) {
+	                prevScreen(findViewById(R.id.prevScreen));
+	            }
+	        }
         }
         return false;
+	}
+	
+	public void prevScreen(View v) {
+		int a=MenuSel.getDisplayedChild();
+		if(a>0) {
+			if(a==1)
+				v.setVisibility(View.GONE);
+			else
+				findViewById(R.id.nextScreen).setVisibility(View.VISIBLE);
+			MenuSel.showPrevious();
+			hideApercu();
+		}
+	}
+	
+	public void nextScreen(View v) {
+		int a=MenuSel.getDisplayedChild();
+		if(a<2) {
+			if(a==1)
+				v.setVisibility(View.GONE);
+			else
+				findViewById(R.id.prevScreen).setVisibility(View.VISIBLE);
+			MenuSel.showNext();
+			hideApercu();
+		}
+	}
+	
+	private void hideApercu() {
+		if(carte.getVisibility()==View.VISIBLE) {
+            carte.setAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_out));
+			carte.setVisibility(View.INVISIBLE);
+			findViewById(R.id.n_niv).setVisibility(View.GONE);
+			deplaceColibri(new double[] {0.1,0.6},true);
+        }
 	}
 	
 	/**
@@ -308,7 +356,7 @@ public class MenuPrinc extends Activity {
 	private void loadData() {
 		avancement=pref.getInt("niveau", 1);
 		experience=pref.getInt("exp", 0);
-		expToSync=pref.getInt("expToSync", 0);
+		expToSync=pref.getInt("expToSync", experience);
 		n_niv=avancement;
 		ParamAleat.loadParams(pref);
 		Log.i("Avancement :","Niv "+avancement);
@@ -369,7 +417,7 @@ public class MenuPrinc extends Activity {
 	
 	public void campagne(View v) {
 		displayChoixNiveaux();
-		carte.setVisibility(View.INVISIBLE);
+		((TextView) findViewById(R.id.n_niv)).setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Sketch_Block.ttf"));
 		RelativeLayout lay_sel;
 		Button img;
 		RelativeLayout.LayoutParams params;
@@ -388,16 +436,15 @@ public class MenuPrinc extends Activity {
 			lay_sel.removeAllViews();
 			for(int i=0; i<points.length; i++) {
 				img = new Button(this);
-				if(ecran*points.length+i+1>=avancement)
+				if(ecran*points.length+i+1 >= avancement)
 					img.setBackgroundResource(R.drawable.fleur);
 				else if(Math.random()<0.5)
 					img.setBackgroundResource(R.drawable.emplacement1);
 				else
 					img.setBackgroundResource(R.drawable.emplacement2);
-				lay_sel.addView(img);
 				int d;
-				if(i<6) d=ww/24;
-				else d=ww/20;
+				if(i<6) d=ww/20;
+				else d=ww/16;
 				params = new RelativeLayout.LayoutParams(d,d);
 				params.leftMargin = (int) (ww*points[i][0]-d/2);
 			    params.topMargin = (int) (wh*points[i][1]-d/2);
@@ -409,9 +456,19 @@ public class MenuPrinc extends Activity {
 						if(v.getId()<=avancement) setApercu(v.getId());
 					}
 			    });
+			    if(ecran*points.length+i+1 <= avancement) {
+					Animation a = AnimationUtils.loadAnimation(this, R.anim.dilat_anim);
+					a.setStartOffset(i*10);
+					img.startAnimation(a);
+			    }
+			    lay_sel.addView(img);
 			}
 		}
-		MenuSel.setDisplayedChild((n_niv-1)/points.length);
+		int iEcran = (n_niv-1)/points.length;
+		if(iEcran>2) iEcran=0;
+		MenuSel.setDisplayedChild(iEcran);
+		findViewById(R.id.prevScreen).setVisibility(iEcran==0 ? View.GONE : View.VISIBLE);
+		findViewById(R.id.nextScreen).setVisibility(iEcran==2 ? View.GONE : View.VISIBLE);
 	}
 	
 	/**
@@ -425,7 +482,9 @@ public class MenuPrinc extends Activity {
 			carte.setVisibility(View.VISIBLE);
 		}
 		n_niv=n;
-		((TextView) findViewById(R.id.n_niv)).setText(n_niv+" / "+Jeu.NIV_MAX);
+		TextView textN_niv = (TextView) findViewById(R.id.n_niv);
+		textN_niv.setVisibility(View.VISIBLE);
+		textN_niv.setText(n_niv+" / "+Jeu.NIV_MAX);
 		Niveau niv;
 		try {
 			niv = new Niveau(MenuPrinc.this.getAssets().open("niveaux/niveau"+n_niv+".txt"));
@@ -524,7 +583,8 @@ public class MenuPrinc extends Activity {
 	}
 	
 	public void multijoueur(View v) {
-		opt_infos.setVisibility(View.INVISIBLE);
+		if(opt_infos!=null)
+			opt_infos.setVisibility(View.INVISIBLE);
 		startActivityForResult(new Intent(this, Multijoueur.class), 1);
 	}
 	
@@ -535,22 +595,33 @@ public class MenuPrinc extends Activity {
 	}
 	
 	public void reglages(View v) {
-		if (opt_infos.getVisibility()==View.INVISIBLE)
+		if (opt_infos.getVisibility()==View.INVISIBLE) {
 			opt_infos.setVisibility(View.VISIBLE);
-		else opt_infos.setVisibility(View.INVISIBLE);
-		
+			opt_infos.startAnimation(AnimationUtils.loadAnimation(this, R.anim.aleat_opt_anim));
+		} else
+			opt_infos.setVisibility(View.INVISIBLE);
 	}
 	
-	public void retour(View v) {
-		displayMenu();
+	public void infos(View v) {
+		opt_infos.setVisibility(View.INVISIBLE);
+		infos.setVisibility(View.VISIBLE);
+		infos.startAnimation(AnimationUtils.loadAnimation(this, R.anim.aleat_opt_anim));
 	}
 	
-	public void info(View v) {
-		displayInfos();
+	public void quitInfos(View v) {
+		infos.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right));
+		infos.setVisibility(View.GONE);
 	}
 	
-	public void instru(View v) {
-		displayInstrus();
+	public void instrus(View v) {
+		opt_infos.setVisibility(View.INVISIBLE);
+		instrus.setVisibility(View.VISIBLE);
+		instrus.startAnimation(AnimationUtils.loadAnimation(this, R.anim.aleat_opt_anim));
+	}
+	
+	public void quitInstrus(View v) {
+		instrus.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right));
+		instrus.setVisibility(View.GONE);
 	}
 	
 	public void musique(View v) {

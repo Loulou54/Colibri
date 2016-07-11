@@ -23,7 +23,7 @@
         android:paddingStart="5dp"
         android:paddingEnd="5dp"
         android:textSize="18sp"
-        android:textColor="@color/rose_doux"
+        android:textColor="@color/theme_gris"
         android:text="@string/joueur" />
     
     <ImageView

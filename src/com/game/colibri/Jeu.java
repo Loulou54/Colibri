@@ -186,6 +186,13 @@ public class Jeu extends Activity {
 				reprendre(null);
 			else
 				return false;
+		} else if(gagne.getVisibility()!=View.VISIBLE) { // Mort
+			if(keyCode == KeyEvent.KEYCODE_BACK) {
+				carte.sang.clearAnimation();
+				carte.mort.clearAnimation();
+				recommencer(null);
+			} else
+				return false;
 		} else {
 			return false;
 		}

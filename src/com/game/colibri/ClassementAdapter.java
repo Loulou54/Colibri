@@ -19,6 +19,7 @@ import com.loopj.android.http.RequestParams;
 
 import android.content.Context;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,12 +39,14 @@ public class ClassementAdapter extends ArrayAdapter<Joueur> {
 	private boolean filterFriends;
 	private String search;
 	private boolean endOfList, isLoading;
+	private Typeface font;
 	
 	public ClassementAdapter(Classements c, int t, boolean f, String s) {
 		super(c, R.layout.element_classement, new ArrayList<Joueur>());
 		client = new AsyncHttpClient();
 		classements = c;
 		type = t;
+		font = Typeface.createFromAsset(c.getAssets(),"fonts/Passing Notes.ttf");
 		initRanking(f, s);
 	}
 	
@@ -61,6 +64,7 @@ public class ClassementAdapter extends ArrayAdapter<Joueur> {
 			h.rank = (TextView) convertView.findViewById(R.id.classAdv);
 			h.avatar = (ImageView) convertView.findViewById(R.id.avatarAdv);
 			h.nom = (TextView) convertView.findViewById(R.id.nomAdv);
+			h.nom.setTypeface(font);
 			h.pays = (ImageView) convertView.findViewById(R.id.paysAdv);
 			h.exp = (TextView) convertView.findViewById(R.id.expAdv);
 			h.defis = (TextView) convertView.findViewById(R.id.defisAdv);
@@ -133,7 +137,7 @@ public class ClassementAdapter extends ArrayAdapter<Joueur> {
 						classements.nJoueurs = o.getInt("nJoueurs");
 						if(o.has("user"))
 							classements.userRanks[type] = g.fromJson(o.getString("user").toString(), Joueur.class);
-						classements.setUserInfos(type);
+						classements.setUserInfos();
 					}
 					Joueur[] classement = g.fromJson(o.getString("ranking"), Joueur[].class);
 					endOfList = (classement.length<6);

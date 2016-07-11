@@ -75,7 +75,13 @@ public class Artifices extends RelativeLayout {
 	public boolean onTouchEvent(MotionEvent event) {
 		if(event.getAction()==MotionEvent.ACTION_DOWN)
 			newExplo(event.getX(), event.getY());
-		return true;
+		performClick();
+		return false;
+	}
+	
+	@Override
+	public boolean performClick() {
+		return super.performClick();
 	}
 	
 	@Override

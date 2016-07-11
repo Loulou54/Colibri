@@ -15,13 +15,15 @@
     <string name="recommencer">Start over</string>
     <string name="sortir">Quit</string>
     <string name="solution">Solution</string>
-    <string name="info">Informations</string>
+    <string name="info">About</string>
 	<string name="instru">Instructions</string>
 	<string name="nouveau_defi">New Challenge</string>
-	<string name="score">Score :</string>
-	<string name="info_text">Application developed during the development project in Telecom Bretagne by the following students :\n Durand Louis, Guyard Valentin, Jacquemod Laura and Thiam Mariam\n </string>
-	<string name="info_text2">We wanted to thank our tutor, Gwenaël Brunet, information and network technician at the department Image and Treatment of Information.</string>
-	<string name="instru_text">You are a little hummingbird in a field full of menhirs in Brittany and you have to taste all the flowers covering the meadow.\n\n You can only fly straight and change direction when you are in front of an obstacle (menhir or fence). \n \n BEWARE the magical flowers which, once fecundated by the pollen your beak carries, transforms into a menhir !</string>
+	<string name="score">Score :</string>	
+	<string name="info_text">C o l i b r i © 2014&#8211;2016\n\nOriginal concept and maintenance: Louis DURAND\nlouis.dur54@gmail.com\n</string>
+	<string name="info_text2">\u0009Application launched during the development project in Telecom Bretagne by the following students:\nDurand Louis, Guyard Valentin, Jacquemod Laura et Thiam Mariam\n\n\u0009We wanted to thank our tutor, Gwenaël Brunet, information and network technician at the department Image and Information Analysis.</string>
+	<string name="instru_text">\u0009You are a hummingbird in a field full of menhirs in Brittany and you have to taste all the flowers covering the meadow.\n\nYou can only fly straight and change direction when you are in front of an obstacle (menhir, cow or edge).</string>
+	<string name="instru_text2">\u0009It\'s up to you to discover the different elements of the game along your progression, like the magical flowers, the dynamites, the cows, the cats and the rainbows! (You unlock them in the Campaign.)</string>
+	<string name="instru_text3">\u0009Start with some Campaign levels, then you could try the Multiplayer Challenges to confront your friends or other players from around the world!\n\nHave fun!!</string>
 	<string name="ajout">New player :</string>
 	<string name="accept">OK</string>
 	<string name="annuler">Cancel</string>
@@ -51,7 +53,6 @@
 	<string name="bloque">You didn\'t unlock the next level yet!</string>
 	<string name="solution_bloque">You didn\'t unlock the solution of this level yet!</string>
 	<string name="aleatoire">Random</string>
-	<string name="choix_campagne">Select a level: flower = not solved yet</string>
 	<string name="joueur_suivant">\u21AA This level and your results will be sent to your opponent.</string>
 	<string name="forfait">Forfeit</string>
 	<string name="forfait_msg">Do you wish to abandon by forfeit?</string>
@@ -64,7 +65,7 @@
 	<string name="resultats">\u0009\u21D2 Press continue for the results!</string>
 	<string name="the_end">THE END</string>
 	<string name="toast_fin">Awesome! You beat the Campaign mode!!</string>
-	<string name="toast_fin2">Improve your Experience with the Random Maps!\nA ranking and network challenges coming soon&#8230;</string>
+	<string name="toast_fin2">Congratulations!\nHave you tried the Random Levels and the Multiplayer Challenges yet? ;)</string>
 	<string name="enter_pseudo">Please enter your nickname and your password:</string>
 	<string name="register">Register</string>
 	<string name="progress">Transfer&#8230;</string>
@@ -80,6 +81,7 @@
 	<string name="gcm_success">Done!</string>
 	<string name="sync_fail">Synchronization with remote database failed!</string>
 	<string name="nom_invalide">Invalid name (3 to 14 characters)</string>
+	<string name="nom_invalide_defi">Invalid name (no more than 15 characters)</string>
 	<string name="etat_attente">Waiting</string>
 	<string name="etat_resultats">Results!</string>
 	<string name="etat_relever">Solve</string>
@@ -149,5 +151,11 @@
 	<string name="wrong_password">Wrong password!</string>
 	<string name="connected">You\'ve been successfully connected!</string>
 	<string name="force_quit_msg">You killed the application during a challenge: Forfeit.</string>
+	<string name="left_arrow">&#9664;</string>
+	<string name="right_arrow">&#9654;</string>
+	<string name="expToSyncMsg">%1$s of experience earned offline will be synchronized with this account!</string>
+	<string name="mail">Mail address *</string>
+	<string name="mail_exp">\u0009* In case of lost password. No commercial use.</string>
+	<string name="mail_invalide">Invalid e-mail address.</string>
 	
 </resources>

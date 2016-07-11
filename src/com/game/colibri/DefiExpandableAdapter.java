@@ -119,7 +119,14 @@ public class DefiExpandableAdapter extends BaseExpandableListAdapter {
 			h = (GroupViewHolder) convertView.getTag();
 		}
 		h.nom.setText(d.nom);
-		h.nMatch.setText(""+d.nMatch);
+		if(d.type!=0) {
+			SpannableString nPart = new SpannableString(d.participants.size()+"/"+d.type);
+			nPart.setSpan(new RelativeSizeSpan(0.75f), 0, nPart.length(), 0);
+			nPart.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.choco)), 0, nPart.length(), 0);
+			h.nMatch.setText(nPart);
+		} else {
+			h.nMatch.setText(""+d.nMatch);
+		}
 		SpannableString etat;
 		int color=0;
 		long t_restant = d.limite-System.currentTimeMillis()/1000;
@@ -160,6 +167,7 @@ public class DefiExpandableAdapter extends BaseExpandableListAdapter {
 		h.etat.setTag(groupPosition);
 		h.etat.setEnabled(launchEnabled);
 		h.fermer.setTag(groupPosition);
+		h.fermer.setVisibility(d.type==0 ? View.VISIBLE : View.INVISIBLE);
 		return convertView;
 	}
 	

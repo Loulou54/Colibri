@@ -9,6 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/nom_defi"
+        android:inputType="textFilter"
         android:imeOptions="flagNoExtractUi"
         android:ems="10" >
 

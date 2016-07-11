@@ -1,6 +1,7 @@
 package com.game.colibri;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,9 +14,11 @@ public class ResultatsAdapter extends ArrayAdapter<Participation> {
 	
 	public static double prog;
 	public static int etape;
+	private Typeface font;
 	
 	public ResultatsAdapter(Context context, Participation[] joueurs) {
 		super(context, R.layout.element_resultat, joueurs);
+		font = Typeface.createFromAsset(context.getAssets(),"fonts/Passing Notes.ttf");
 	}
 	
 	@Override
@@ -29,6 +32,7 @@ public class ResultatsAdapter extends ArrayAdapter<Participation> {
 			h.rang = (TextView) convertView.findViewById(R.id.rangJoueurRes);
 			h.avatar = (ImageView) convertView.findViewById(R.id.avatarRes);
 			h.nom = (TextView) convertView.findViewById(R.id.nomJoueurRes);
+			h.nom.setTypeface(font);
 			h.temps = (TextView) convertView.findViewById(R.id.tempsJoueurRes);
 			h.penalite = (TextView) convertView.findViewById(R.id.penaliteJoueurRes);
 			h.exp = (TextView) convertView.findViewById(R.id.expJoueurRes);

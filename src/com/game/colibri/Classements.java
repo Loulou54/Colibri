@@ -10,6 +10,7 @@ import com.network.colibri.ConnectionDetector;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -72,6 +73,7 @@ public class Classements extends Activity {
 			@Override
 			public void afterTextChanged(Editable s) {}
 		});
+		((TextView) findViewById(R.id.nomAdv)).setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Passing Notes.ttf"));
 		userRanks = new Joueur[vf.getChildCount()];
 		dispClassement(0);
 	}
@@ -103,7 +105,7 @@ public class Classements extends Activity {
 				public void onScrollStateChanged(AbsListView view, int scrollState) {}
 				@Override
 				public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-					if(firstVisibleItem+visibleItemCount == totalItemCount)
+					if(firstVisibleItem+visibleItemCount == totalItemCount && (rh==null || rh.isFinished() || rh.isCancelled()))
 						rh = ((ClassementAdapter) lv.getAdapter()).loadNext();
 				}
 			});
@@ -111,7 +113,8 @@ public class Classements extends Activity {
 				@Override
 				public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 					Joueur j = (Joueur) arg0.getAdapter().getItem(arg2);
-					(new DispJoueur(Classements.this, j)).show();
+					if(j!=null)
+						(new DispJoueur(Classements.this, j)).show();
 				}
 			});
 		} else {
@@ -144,7 +147,11 @@ public class Classements extends Activity {
 		refresh();
 	}
 	
-	public void setUserInfos(int cl) {
+	public void setUserInfos() {
+		setUserInfos(vf.getDisplayedChild());
+	}
+	
+	private void setUserInfos(int cl) {
 		((TextView) findViewById(R.id.nJoueurs)).setText("/"+nJoueurs);
 		Joueur j = userRanks[cl];
 		if(j==null)

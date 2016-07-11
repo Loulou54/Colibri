@@ -15,13 +15,15 @@
     <string name="recommencer">Recommencer</string>
     <string name="sortir">Quitter</string>
     <string name="solution">Solution</string>
-    <string name="info">Informations</string>
+    <string name="info">À propos</string>
 	<string name="instru">Instructions</string>
 	<string name="nouveau_defi">Nouveau Défi</string>
 	<string name="score">Score :</string>
-	<string name="info_text">Application développée au sein du projet développement à Télécom Bretagne par les élèves suivants :\n Durand Louis, Guyard Valentin, Jacquemod Laura et Thiam Mariam\n </string>
-	<string name="info_text2">Nous tenons à remercier notre tuteur, Gwenaël Brunet, technicien informatique et réseau au département Image et Traitement de l\'Information </string>
-	<string name="instru_text">Vous êtes un petit colibri dans un champ de menhirs en Bretagne et vous devez goûter à toutes les fleurs qui jonchent la prairie.\n\n Vous ne pouvez voler qu\'en ligne droite et changer de direction seulement lorsque vous faites face à un obstacle (menhir ou clôture). \n \n ATTENTION aux fleurs magiques qui dès qu\'elles sont fécondées par le pollen que transporte votre bec, se transforment en menhir !</string>
+	<string name="info_text">C o l i b r i © 2014&#8211;2016\n\nConcept original et maintenance : Louis DURAND\nlouis.dur54@gmail.com\n</string>
+	<string name="info_text2">\u0009Application lancée au sein du projet développement à Télécom Bretagne par les élèves suivants :\nDurand Louis, Guyard Valentin, Jacquemod Laura et Thiam Mariam\n\n\u0009Nous tenons à remercier notre tuteur, Gwenaël Brunet, technicien informatique et réseau au département Image et Traitement de l\'Information.</string>
+	<string name="instru_text">\u0009Vous êtes un colibri dans un champ de menhirs en Bretagne et vous devez goûter à chacune des fleurs qui jonchent la prairie.\n\n\u0009Vous ne pouvez voler qu\'en ligne droite et changer de direction seulement lorsque vous faites face à un obstacle (menhir, vache ou bord).</string>
+	<string name="instru_text2">\u0009À vous de découvrir les différents éléments de jeu tout au long de votre progression, comme les fleurs magiques, les dynamites, les vaches, les chats et les arcs-en-ciel ! (À débloquer dans Campagne.)</string>
+	<string name="instru_text3">\u0009Commencez par quelques niveaux Campagne, puis vous pourrez tenter les Défis Multijoueur pour affronter des amis ou d\'autres joueurs du monde entier !\n\nAmusez-vous bien !!</string>
 	<string name="ajout">Nouveau joueur :</string>
 	<string name="accept">OK</string>
 	<string name="annuler">Annuler</string>
@@ -51,7 +53,6 @@
 	<string name="bloque">Vous n\'avez pas encore débloqué le prochain niveau !</string>
 	<string name="solution_bloque">Vous n\'avez pas encore débloqué la solution de ce niveau !</string>
 	<string name="aleatoire">Aléatoire</string>
-	<string name="choix_campagne">Sélectionnez un niveau : fleur = non résolu</string>
 	<string name="joueur_suivant">\u21AA Ce niveau et vos résultats vont être envoyés à votre adversaire.</string>
 	<string name="forfait">Forfait</string>
 	<string name="forfait_msg">Voulez-vous abandonner par forfait ?</string>
@@ -64,7 +65,7 @@
 	<string name="resultats">\u0009\u21D2 Continuez pour les Résultats !</string>
 	<string name="the_end">FIN</string>
 	<string name="toast_fin">Excellent ! Vous avez fini le mode Campagne !!</string>
-	<string name="toast_fin2">Améliorez votre Expérience avec les Niveaux Aléatoires !\nUn classement et des défis en réseau prochainement&#8230; ;)</string>
+	<string name="toast_fin2">Bravo!\n\nAvez-vous déjà essayé les Niveaux Aléatoires et les Défis Multijoueurs ? ;)</string>
 	<string name="enter_pseudo">Entrez votre pseudonyme et mot de passe :</string>
 	<string name="register">S\'inscrire</string>
 	<string name="progress">Transfert&#8230;</string>
@@ -80,6 +81,7 @@
 	<string name="gcm_success">Fait !</string>
 	<string name="sync_fail">La synchronisation avec la base de données distante a échoué !</string>
 	<string name="nom_invalide">Nom invalide (3 à 14 caractères)</string>
+	<string name="nom_invalide_defi">Nom invalide (pas plus de 15 caractères)</string>
 	<string name="etat_attente">Attente</string>
 	<string name="etat_resultats">Résultats</string>
 	<string name="etat_relever">Relever</string>
@@ -149,5 +151,9 @@
 	<string name="wrong_password">Mauvais mot de passe !</string>
 	<string name="connected">Vous vous êtes connecté avec succès !</string>
 	<string name="force_quit_msg">Vous avez forcé l\'arrêt de l\'application pendant un défi : vous faites Forfait.</string>
+	<string name="expToSyncMsg">%1$s d\'expérience gagnée hors ligne sera synchronisée avec ce compte !</string>
+	<string name="mail">Adresse mail *</string>
+	<string name="mail_exp">\u0009* En cas d\'oubli de mot de passe. Aucune utilisation commerciale.</string>
+	<string name="mail_invalide">Adresse e-mail invalide.</string>
 	
 </resources>

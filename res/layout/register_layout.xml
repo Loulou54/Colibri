@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".RegisterUser" >
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
 
     <TextView
         android:layout_width="match_parent"
@@ -79,12 +82,32 @@
         android:inputType="textPassword"
         android:imeOptions="flagNoExtractUi" >
     </EditText>
-
+    
+    <TextView
+        android:id="@+id/expToSyncMsg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/expToSyncMsg"
+        android:textColor="@color/red"
+        android:visibility="gone" />
+    
     <LinearLayout
         android:id="@+id/pickAvatar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
+    
+    <EditText
+        android:id="@+id/mail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:ems="10"
+        android:hint="@string/mail"
+        android:inputType="textEmailAddress"
+        android:imeOptions="flagNoExtractUi" >
+    </EditText>
     
     <TextView
         android:layout_width="wrap_content"
@@ -115,6 +138,13 @@
         </LinearLayout>
     </HorizontalScrollView>
     
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/mail_exp"
+        android:textStyle="italic" />
+    
     </LinearLayout>
 
 </LinearLayout>
+</ScrollView>

@@ -9,6 +9,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -36,6 +37,7 @@ public class DispJoueur {
 	public void show() {
 		LinearLayout lay = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.details_joueur_layout, null);
 		((TextView) lay.findViewById(R.id.nomDetails)).setText(j.getPseudo());
+		((TextView) lay.findViewById(R.id.nomDetails)).setTypeface(Typeface.createFromAsset(context.getAssets(),"fonts/Passing Notes.ttf"));
 		((ImageView) lay.findViewById(R.id.avatarDetails)).setImageResource(j.getAvatar());
 		((TextView) lay.findViewById(R.id.paysDetails)).setText((new Locale("", j.getPays())).getDisplayCountry(Resources.getSystem().getConfiguration().locale));
 		ImageView pays = (ImageView) lay.findViewById(R.id.flagDetails);
