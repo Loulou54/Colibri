@@ -24,11 +24,9 @@
 	<string name="instru_text">\u0009You are a hummingbird in a field full of menhirs in Brittany and you have to taste all the flowers covering the meadow.\n\nYou can only fly straight and change direction when you are in front of an obstacle (menhir, cow or edge).</string>
 	<string name="instru_text2">\u0009It\'s up to you to discover the different elements of the game along your progression, like the magical flowers, the dynamites, the cows, the cats and the rainbows! (You unlock them in the Campaign.)</string>
 	<string name="instru_text3">\u0009Start with some Campaign levels, then you could try the Multiplayer Challenges to confront your friends or other players from around the world!\n\nHave fun!!</string>
-	<string name="ajout">New player :</string>
 	<string name="accept">OK</string>
 	<string name="annuler">Cancel</string>
 	<string name="name">Name</string>
-	<string name="fin">Challenge finished :)</string>
 	<string name="bravo">Well played !</string>
 	<string name="temps">Time</string>
 	<string name="exp">Experience</string>
@@ -58,7 +56,6 @@
 	<string name="forfait_msg">Do you wish to abandon by forfeit?</string>
 	<string name="c_est_parti">Let\'s go</string>
 	<string name="joueur">Player</string>
-	<string name="vous">You</string>
 	<string name="the_results">The Results&#8230;</string>
 	<string name="penalite_aide">Help penalty</string>
 	<string name="victoire">Victory!!</string>
@@ -75,7 +72,6 @@
 	<string name="errServ">Oops, error on the servor side!</string>
 	<string name="deja_pris">This username is already taken.\nTry something else!</string>
 	<string name="enregistre">You\'ve been successfully registered!</string>
-	<string name="pas_connect_register">You must be connected to Internet to Register.</string>
 	<string name="hors_connexion">You\'re currently offline.</string>
 	<string name="gcm_register">Registering to Google Cloud Messaging service&#8230;</string>
 	<string name="gcm_success">Done!</string>
@@ -89,7 +85,6 @@
 	<string name="etat_obsolete">Obsolete</string>
 	<string name="tiret"> - </string>
 	<string name="chercher_adv">Search for a player&#8230;</string>
-	<string name="ajouter">Add</string>
 	<string name="adversaires">Opponents:</string>
 	<string name="ajout_part">Add opponents.</string>
 	<string name="nojoueur">No opponent yet.</string>
@@ -134,7 +129,7 @@
 	<string name="avatar">Avatar</string>
 	<string name="pays">Country</string>
 	<string name="global">Global</string>
-	<string name="amis">Friends</string>
+	<string name="amis">Opponents</string>
 	<string name="connexion_ranking">You must be connected to view the rankings!</string>
 	<string name="commencer">Start</string>
 	<string name="minutesAgo">%1$d minute%2$s ago</string>
@@ -157,5 +152,11 @@
 	<string name="mail">Mail address *</string>
 	<string name="mail_exp">\u0009* In case of lost password. No commercial use.</string>
 	<string name="mail_invalide">Invalid e-mail address.</string>
+	<string name="lost_mdp_chk">I forgot my password!</string>
+	<string name="lost_mdp_expl">\u0009(i) You will receive an e-mail at the address you specified when creating the account. Please follow the instructions in it then.</string>
+	<string name="lost_mdp_already_sent">Already sent less than a day ago!\nCheck your mails! ;) (Possibly in SPAM)</string>
+	<string name="lost_mdp_pb">Sending problem! Did you provide a valid address??</string>
+	<string name="lost_mdp_ok">Done! Check your e-mails! :)</string>
+	<string name="patience">Be patient! Everybody has not played this match yet. ;)</string>
 	
 </resources>

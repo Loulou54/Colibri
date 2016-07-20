@@ -126,7 +126,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 		    .build();
 		notification.flags |= Notification.FLAG_AUTO_CANCEL;
 		// Play default notification sound
-		notification.defaults |= Notification.DEFAULT_SOUND;
+		//notification.defaults |= Notification.DEFAULT_SOUND;
 		// Vibrate if vibrate is enabled
 		notification.defaults |= Notification.DEFAULT_VIBRATE;
 		notificationManager.notify((int) (Math.random()*Integer.MAX_VALUE), notification);

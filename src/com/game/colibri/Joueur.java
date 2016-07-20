@@ -4,7 +4,9 @@ import android.content.Context;
 
 public class Joueur {
 	
-	public static int[] img = new int[] {R.drawable.colibri_d1, R.drawable.fleur, R.drawable.fleurm, R.drawable.menhir, R.drawable.menhir_rouge, R.drawable.dynamite_allumee, R.drawable.explo2, R.drawable.rainbow, R.drawable.skull, R.drawable.chat_0, R.drawable.vache_0, R.drawable.doge, R.drawable.doge_lunettes, R.drawable.megusta, R.drawable.ampoule, R.drawable.coupe, android.R.drawable.star_big_on, android.R.drawable.sym_def_app_icon};
+	public static int[] img = new int[] {R.drawable.colibri_d1, R.drawable.fleur, R.drawable.fleurm, R.drawable.menhir, R.drawable.dynamite_allumee, R.drawable.explo2, R.drawable.rainbow, R.drawable.skull, R.drawable.chat_0, R.drawable.vache_0,
+		R.drawable.doge, R.drawable.doge_lunettes, R.drawable.pro_husky, R.drawable.pro_grumpy_cat, R.drawable.pro_hamster, R.drawable.pro_lama, R.drawable.pro_lama2, R.drawable.pro_monkey, R.drawable.pro_ostrich, R.drawable.pro_owl, R.drawable.pro_raccoon, R.drawable.pro_sloth,
+		R.drawable.megusta, R.drawable.pro_cry, R.drawable.pro_haha, R.drawable.pro_happy, R.drawable.pro_how_cute, R.drawable.pro_derpina_brown, R.drawable.pro_derpina_blond, R.drawable.pro_derpina_blond_haha, R.drawable.pro_troll, R.drawable.pro_rage, R.drawable.pro_serious, R.drawable.pro_stop_it, R.drawable.pro_thumbs_up, R.drawable.pro_lol};
 	
 	private String pseudo, pays;
 	private int id, exp, progress, defis, win, loose, avatar, rang;

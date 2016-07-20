@@ -20,6 +20,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:paddingLeft="60dp"
+        android:paddingRight="0dp"
         android:text="@string/pause"
         android:textColor="@color/theme_vert"
         android:textSize="32sp"

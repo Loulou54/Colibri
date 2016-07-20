@@ -11,9 +11,7 @@
         android:layout_height="match_parent"
         android:layout_weight="2"
         android:layout_marginTop="2dp"
-        android:paddingStart="?android:attr/expandableListPreferredItemPaddingLeft"
         android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
-        android:paddingEnd="0dp"
         android:paddingRight="0dp"
         android:gravity="center_vertical"
         android:text="@string/app_name"
@@ -47,7 +45,7 @@
         android:layout_width="25dp"
         android:layout_height="25dp"
         android:focusable="false"
-        android:layout_gravity="end"
+        android:layout_gravity="right"
         android:contentDescription="@string/app_name"
         android:background="@android:drawable/ic_menu_close_clear_cancel"
         android:onClick="supprDefi" />

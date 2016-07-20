@@ -24,11 +24,9 @@
 	<string name="instru_text">\u0009Vous êtes un colibri dans un champ de menhirs en Bretagne et vous devez goûter à chacune des fleurs qui jonchent la prairie.\n\n\u0009Vous ne pouvez voler qu\'en ligne droite et changer de direction seulement lorsque vous faites face à un obstacle (menhir, vache ou bord).</string>
 	<string name="instru_text2">\u0009À vous de découvrir les différents éléments de jeu tout au long de votre progression, comme les fleurs magiques, les dynamites, les vaches, les chats et les arcs-en-ciel ! (À débloquer dans Campagne.)</string>
 	<string name="instru_text3">\u0009Commencez par quelques niveaux Campagne, puis vous pourrez tenter les Défis Multijoueur pour affronter des amis ou d\'autres joueurs du monde entier !\n\nAmusez-vous bien !!</string>
-	<string name="ajout">Nouveau joueur :</string>
 	<string name="accept">OK</string>
 	<string name="annuler">Annuler</string>
 	<string name="name">Nom</string>
-	<string name="fin">Défi fini :)</string>
 	<string name="bravo">Bien joué !</string>
 	<string name="temps">Temps</string>
 	<string name="exp">Expérience</string>
@@ -58,7 +56,6 @@
 	<string name="forfait_msg">Voulez-vous abandonner par forfait ?</string>
 	<string name="c_est_parti">C\'est parti</string>
 	<string name="joueur">Joueur</string>
-	<string name="vous">Vous</string>
 	<string name="the_results">Les Résultats&#8230;</string>
 	<string name="penalite_aide">Pénalité aide</string>
 	<string name="victoire">Victoire !!</string>
@@ -75,7 +72,6 @@
 	<string name="errServ">Oups, erreur côté serveur !</string>
 	<string name="deja_pris">Ce pseudo est déjà pris.\nEssayez un autre !</string>
 	<string name="enregistre">Vous vous êtes inscrits avec succès !</string>
-	<string name="pas_connect_register">Vous devez être connectés à Internet pour vous inscrire.</string>
 	<string name="hors_connexion">Vous êtes actuellement hors connexion.</string>
 	<string name="gcm_register">Enregistrement au service Google Cloud Messaging&#8230;</string>
 	<string name="gcm_success">Fait !</string>
@@ -89,7 +85,6 @@
 	<string name="etat_obsolete">Obsolète</string>
 	<string name="tiret"> - </string>
 	<string name="chercher_adv">Rechercher un joueur&#8230;</string>
-	<string name="ajouter">Ajouter</string>
 	<string name="adversaires">Adversaires :</string>
 	<string name="ajout_part">Ajouter des participants.</string>
 	<string name="nojoueur">Aucun adversaire.</string>
@@ -134,7 +129,7 @@
 	<string name="avatar">Avatar</string>
 	<string name="pays">Pays</string>
 	<string name="global">Global</string>
-	<string name="amis">Amis</string>
+	<string name="amis">Adversaires</string>
 	<string name="connexion_ranking">Vous devez être connectés pour voir les classements !</string>
 	<string name="commencer">Commencer</string>
 	<string name="minutesAgo">Il y a %1$d minute%2$s</string>
@@ -155,5 +150,11 @@
 	<string name="mail">Adresse mail *</string>
 	<string name="mail_exp">\u0009* En cas d\'oubli de mot de passe. Aucune utilisation commerciale.</string>
 	<string name="mail_invalide">Adresse e-mail invalide.</string>
+	<string name="lost_mdp_chk">J\'ai oublié mon mot de passe !</string>
+	<string name="lost_mdp_expl">\u0009(i) Vous allez recevoir un e-mail à l\'adresse spécifiée à la création de votre compte. Vous en suivrez les instructions.</string>
+	<string name="lost_mdp_already_sent">Déjà envoyé il y a moins d\'un jour !\nLisez vos mails ! ;) (Possiblement dans SPAM !)</string>
+	<string name="lost_mdp_pb">Problème d\'envoi ! Aviez-vous renseigné une adresse valide ??</string>
+	<string name="lost_mdp_ok">C\'est fait ! Lisez vos courriels ! :)</string>
+	<string name="patience">Patience ! Tout le monde n\'a pas encore joué ce match. ;)</string>
 	
 </resources>

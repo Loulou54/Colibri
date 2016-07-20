@@ -1,5 +1,6 @@
 package com.game.colibri;
 
+import static com.network.colibri.CommonUtilities.APP_TOKEN;
 import static com.network.colibri.CommonUtilities.SERVER_URL;
 
 import java.util.ArrayList;
@@ -197,6 +198,7 @@ public class NewDefi {
 	private void createDefi() {
 		prgDialog.show();
 		RequestParams params = new RequestParams();
+		params.put("token", APP_TOKEN);
 		params.put("joueur", ""+user);
 		params.put("appareil", ""+appareil);
 		params.put("nom", nomDefi);

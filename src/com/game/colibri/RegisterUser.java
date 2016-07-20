@@ -19,12 +19,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.AnimationUtils;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+import static com.network.colibri.CommonUtilities.APP_TOKEN;
 import static com.network.colibri.CommonUtilities.SERVER_URL;
 
 public class RegisterUser {
@@ -78,6 +80,7 @@ public class RegisterUser {
 				reg.setBackgroundColor(context.getResources().getColor(R.color.theme_gris_alpha));
 				con.setClickable(true);
 				con.setBackgroundColor(context.getResources().getColor(R.color.theme_vert));
+				lay.findViewById(R.id.lostPassword).setVisibility(View.GONE);
 				View layAv = lay.findViewById(R.id.pickAvatar);
 				layAv.setVisibility(View.VISIBLE);
 				layAv.startAnimation(AnimationUtils.loadAnimation(context, R.anim.aleat_opt_anim));
@@ -92,6 +95,13 @@ public class RegisterUser {
 				reg.setClickable(true);
 				reg.setBackgroundColor(context.getResources().getColor(R.color.theme_vert));
 				lay.findViewById(R.id.pickAvatar).setVisibility(View.GONE);
+				lay.findViewById(R.id.lostPassword).setVisibility(View.VISIBLE);
+			}
+		});
+		lay.findViewById(R.id.lost_chkbox).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				lay.findViewById(R.id.lost_exp).setVisibility(((CheckBox) v).isChecked() ? View.VISIBLE : View.GONE);
 			}
 		});
 		if(!register) {
@@ -100,6 +110,7 @@ public class RegisterUser {
 			reg.setClickable(true);
 			reg.setBackgroundColor(context.getResources().getColor(R.color.theme_vert));
 			lay.findViewById(R.id.pickAvatar).setVisibility(View.GONE);
+			lay.findViewById(R.id.lostPassword).setVisibility(View.VISIBLE);
 		} else
 			reg.setClickable(false);
 		final LinearLayout imagePicker = (LinearLayout) lay.findViewById(R.id.imagePicker);
@@ -140,9 +151,12 @@ public class RegisterUser {
 					String name = ((EditText) lay.findViewById(R.id.pseudo)).getText().toString().trim();
 					String mdp = ((EditText) lay.findViewById(R.id.mdp)).getText().toString();
 					String mail = ((EditText) lay.findViewById(R.id.mail)).getText().toString();
+					boolean lostMdp = ((CheckBox) lay.findViewById(R.id.lost_chkbox)).isChecked();
 					if(name.length()<3 || name.length()>14) {
 						Toast.makeText(context, R.string.nom_invalide, Toast.LENGTH_LONG).show();
 						show(name);
+					} else if(!register && lostMdp) {
+						lostMdp(name);
 					} else if(mdp.length()<6) {
 						Toast.makeText(context, R.string.mdp_invalide, Toast.LENGTH_LONG).show();
 						show(name);
@@ -174,6 +188,7 @@ public class RegisterUser {
 	
 	private void registerUser(final String name, String mdp, String mail) {
 		RequestParams params = new RequestParams();
+		params.put("token", APP_TOKEN);
 		params.put("pseudo", name);
 		params.put("password", mdp);
 		params.put("mail", mail);
@@ -220,6 +235,7 @@ public class RegisterUser {
 	
 	private void connectUser(final String name, String mdp) {
 		RequestParams params = new RequestParams();
+		params.put("token", APP_TOKEN);
 		params.put("pseudo", name);
 		params.put("password", mdp);
 		params.put("regId", GCMRegistrar.getRegistrationId(context));
@@ -242,6 +258,41 @@ public class RegisterUser {
 						show(name);
 					}
 				}
+			}
+
+			@Override
+			public void onFailure(int statusCode, Throwable error, String content) {
+				prgDialog.dismiss();
+				if (statusCode == 404) {
+					Toast.makeText(context, R.string.err404, Toast.LENGTH_LONG).show();
+				} else if (statusCode == 500 || statusCode == 503) {
+					Toast.makeText(context, R.string.err500, Toast.LENGTH_LONG).show();
+				} else {
+					Toast.makeText(context, R.string.err, Toast.LENGTH_LONG).show();
+				}
+				show(name);
+			}
+		});
+	}
+	
+	private void lostMdp(final String name) {
+		RequestParams params = new RequestParams();
+		params.put("pseudo", name);
+		prgDialog.show();
+		client.post(SERVER_URL+"/mail_mdp.php", params, new AsyncHttpResponseHandler() {
+			@Override
+			public void onSuccess(String response) {
+				prgDialog.dismiss();
+				if(response.equalsIgnoreCase("not found")) { // Le pseudo n'existe pas
+					Toast.makeText(context, R.string.not_registered, Toast.LENGTH_LONG).show();
+				} else if(response.equalsIgnoreCase("already sent")) { // Un token de moins d'un jour est déjà attribué à cet utilisateur
+					Toast.makeText(context, R.string.lost_mdp_already_sent, Toast.LENGTH_LONG).show();
+				} else if(response.equalsIgnoreCase("OK")) { // Un token de moins d'un jour est déjà attribué à cet utilisateur
+					Toast.makeText(context, R.string.lost_mdp_ok, Toast.LENGTH_LONG).show();
+				} else { // Problème d'envoi
+					Toast.makeText(context, R.string.lost_mdp_pb, Toast.LENGTH_LONG).show();
+				}
+				show(name);
 			}
 
 			@Override

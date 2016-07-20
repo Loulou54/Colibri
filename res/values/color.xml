@@ -1,33 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<color name="red">#ff0808</color>
-	<color name="cyan">#70D1EEEE</color>
 	<color name="cyan_opaque">#20EEEE</color>
 	<color name="orange">#FF8C00</color>
 	<color name="choco">#AA8B4513</color>
-	<color name="rose_doux">#EED2EE</color>
 	<color name="noir">#000000</color>
-	<color name="bleu">#0000FF</color>
-	<color name="saumon">#FF7256</color>
 	<color name="vert_fonce">#ff669900</color>
-	<color name="vert_clair">#ccaacc00</color>
-	<color name="bleu_clair">#bce0ee</color>
 	<color name="bleu_moyen">#29b9e5</color>
-	<color name="gris">#ededed</color>
 	<color name="bleu_nuit">#101040</color>
 	<color name="gris_sombre">#101010</color>
 	<color name="violet">#BF3EFF</color>
 	<color name="start_fond_gradient">#E0E0E0</color>
-	<color name="center_fond_gradient">#CCCCCC</color>
-	<color name="end_fond_gradient">#B0B0B0</color>
-	<color name="fond_classement">#A1C5D1</color>
-	<color name="fond_tabs">#5E585B</color>
-	<color name="tab">#A3A5C4</color>
 	<color name="theme_gris">#4A535A</color>
 	<color name="theme_vert">#4BC0A1</color>
-	<color name="theme_orange">#F19425</color>
 	<color name="theme_beige">#E6E6DC</color>
-	<color name="theme_rouge">#D74621</color>
 	<color name="theme_gris_alpha">#704A535A</color>
 	
 </resources>

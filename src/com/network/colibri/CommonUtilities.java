@@ -6,10 +6,13 @@ import android.content.Intent;
 public final class CommonUtilities {
      
     // give your server registration url here
-    public static final String SERVER_URL = "http://louisworkplace.net/colibri"; 
+    public static final String SERVER_URL = "https://ssl17.ovh.net/~louisworix/colibri"; 
  
     // Google project id
     public static final String SENDER_ID = "533995009920"; 
+    
+    // Communication token
+    public static final String APP_TOKEN = "az-79A_uG7*uYf42"; 
  
     /**
      * Tag used on log messages.

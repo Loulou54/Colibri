@@ -25,9 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingLeft="20dp"
-            android:paddingStart="20dp"
             android:paddingRight="20dp"
-            android:paddingEnd="20dp"
             android:textSize="20sp"
             android:textColor="@color/bleu_nuit"
             android:text="@string/ajout_part" />
@@ -56,9 +54,8 @@
 	            style="?android:attr/progressBarStyleSmall"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
-	            android:layout_gravity="center_vertical|end"
+	            android:layout_gravity="center_vertical|right"
 	            android:layout_marginRight="15dp"
-	            android:layout_marginEnd="15dp"
 	            android:visibility="gone" />
         </FrameLayout>
 
@@ -77,9 +74,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingLeft="20dp"
-        android:paddingStart="20dp"
         android:paddingRight="20dp"
-        android:paddingEnd="20dp"
         android:textSize="20sp"
         android:textColor="@color/bleu_nuit"
         android:text="@string/adversaires" />

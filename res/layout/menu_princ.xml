@@ -149,7 +149,7 @@
     
     <ViewStub
 	    android:id="@+id/instrus"
-	    android:layout="@layout/activity_instru"
+	    android:layout="@layout/instru"
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"
 	    android:layout_marginTop="20dp"
@@ -159,7 +159,7 @@
     
     <ViewStub
 	    android:id="@+id/a_propos"
-	    android:layout="@layout/activity_info"
+	    android:layout="@layout/info"
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"
 	    android:layout_marginTop="20dp"

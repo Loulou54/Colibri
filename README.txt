@@ -3,8 +3,10 @@
 
 Jeu de réflexion sur Android
 
-Projet Développement Telecom Bretagne
+Lancé au cours du Projet Développement à Telecom Bretagne
 Louis DURAND
 Valentin GUYARD
 Laura JACQUEMOD
 Mariam THIAM
+
+Maintenu et mis-à-jour par Louis Durand.

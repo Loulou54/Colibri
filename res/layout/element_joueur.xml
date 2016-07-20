@@ -20,8 +20,7 @@
         android:layout_gravity="center_vertical"
         android:layout_weight="2"
         android:paddingLeft="5dp"
-        android:paddingStart="5dp"
-        android:paddingEnd="5dp"
+        android:paddingRight="0dp"
         android:textSize="18sp"
         android:textColor="@color/theme_gris"
         android:text="@string/joueur" />

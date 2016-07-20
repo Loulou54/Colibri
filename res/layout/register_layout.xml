@@ -55,9 +55,8 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingEnd="10dp"
         android:paddingLeft="10dp"
-        android:paddingStart="10dp"
+        android:paddingRight="0dp"
         android:text="@string/enter_pseudo" />
 
     <EditText
@@ -93,57 +92,80 @@
         android:visibility="gone" />
     
     <LinearLayout
+        android:id="@+id/lostPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone" >
+        
+        <CheckBox
+            android:id="@+id/lost_chkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/lost_mdp_chk" />
+        
+        <TextView
+            android:id="@+id/lost_exp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/lost_mdp_expl"
+            android:visibility="gone" />
+        
+    </LinearLayout>
+    
+    <LinearLayout
         android:id="@+id/pickAvatar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
     
-    <EditText
-        android:id="@+id/mail"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:ems="10"
-        android:hint="@string/mail"
-        android:inputType="textEmailAddress"
-        android:imeOptions="flagNoExtractUi" >
-    </EditText>
-    
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/pick_avatar" />
-
-    <ImageView
-        android:id="@+id/avatarReg"
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:layout_gravity="center"
-        android:contentDescription="@string/pick_avatar"
-        android:src="@drawable/colibri_d1" />
-
-    <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center" >
-
-        <LinearLayout
-            android:id="@+id/imagePicker"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:layout_marginBottom="5dp"
-            android:layout_marginTop="5dp"
-            android:orientation="horizontal"
-            android:visibility="gone" >
-        </LinearLayout>
-    </HorizontalScrollView>
-    
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/mail_exp"
-        android:textStyle="italic" />
-    
+	    <EditText
+	        android:id="@+id/mail"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="center_horizontal"
+	        android:ems="10"
+	        android:hint="@string/mail"
+	        android:inputType="textEmailAddress"
+	        android:imeOptions="flagNoExtractUi" >
+	    </EditText>
+	    
+	    <TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/pick_avatar" />
+	
+	    <ImageView
+	        android:id="@+id/avatarReg"
+	        android:layout_width="wrap_content"
+	        android:layout_height="50dp"
+	        android:layout_gravity="center"
+	        android:contentDescription="@string/pick_avatar"
+	        android:src="@drawable/colibri_d1" />
+	
+	    <HorizontalScrollView
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="center" >
+	
+	        <LinearLayout
+	            android:id="@+id/imagePicker"
+	            android:layout_width="wrap_content"
+	            android:layout_height="40dp"
+	            android:layout_marginBottom="5dp"
+	            android:layout_marginTop="5dp"
+	            android:orientation="horizontal"
+	            android:visibility="gone" >
+	        </LinearLayout>
+	    </HorizontalScrollView>
+	    
+	    <TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/mail_exp"
+	        android:textStyle="italic" />
+	    
     </LinearLayout>
 
 </LinearLayout>

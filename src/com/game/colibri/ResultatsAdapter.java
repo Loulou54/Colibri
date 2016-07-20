@@ -55,20 +55,21 @@ public class ResultatsAdapter extends ArrayAdapter<Participation> {
 		} else {
 			int strRes = (p.t_fini==Participation.FORFAIT) ? R.string.forfait : R.string.not_played;
 			h.temps.setText(getContext().getString(strRes)+" !");
-			h.penalite.setVisibility(View.INVISIBLE);
-			h.exp.setVisibility(View.INVISIBLE);
+			h.penalite.setText("");
+			h.exp.setText("");
 		}
 		if(etape>=4) {
 			if(p.gagne==1)
 				h.nom.setTextColor(getContext().getResources().getColor(R.color.vert_fonce));
 			else if(p.t_fini==Participation.NOT_PLAYED)
-				h.nom.setTextColor(getContext().getResources().getColor(R.color.gris));
+				h.nom.setTextColor(getContext().getResources().getColor(R.color.theme_gris));
 			else
 				h.nom.setTextColor(getContext().getResources().getColor(R.color.red));
 			if(p.gagne!=0) {
 				h.rang.setText(""+p.gagne);
 				h.rang.setVisibility(View.VISIBLE);
-			}
+			} else
+				h.rang.setVisibility(View.INVISIBLE);
 		}
 		return convertView;
 	}

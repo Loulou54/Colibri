@@ -4,6 +4,7 @@ import static com.network.colibri.CommonUtilities.BROADCAST_MESSAGE_ACTION;
 import static com.network.colibri.CommonUtilities.EXTRA_MESSAGE;
 import static com.network.colibri.CommonUtilities.SENDER_ID;
 import static com.network.colibri.CommonUtilities.SERVER_URL;
+import static com.network.colibri.CommonUtilities.APP_TOKEN;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -30,6 +31,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -264,6 +268,7 @@ public class Multijoueur extends Activity {
 		prgDialog.setCancelable(false);
 		prgDialog.show();
 		RequestParams params = new RequestParams();
+		params.put("token", APP_TOKEN);
 		params.put("joueur", ""+menu.pref.getInt("id", 0));
 		params.put("appareil", ""+menu.pref.getInt("appareil", 0));
 		params.put("expToSync", ""+menu.expToSync);
@@ -309,9 +314,8 @@ public class Multijoueur extends Activity {
 		final int groupPosition = (Integer) v.getTag();
 		defi = adversaires.get(groupPosition);
 		switch(defi.getEtat(user.getId())) {
-		case Defi.ATTENTE: // Send POKE
-			// TODO: Poke.
-			poke(defi);
+		case Defi.ATTENTE: // Patience !
+			Toast.makeText(this, R.string.patience, Toast.LENGTH_LONG).show();
 			break;
 		case Defi.RESULTATS: // Afficher les résultats
 			Resultats.callback = new Resultats.callBackInterface() {
@@ -342,39 +346,6 @@ public class Multijoueur extends Activity {
 		}
 	}
 	
-	private void poke(final Defi defi) {
-		/*new AlertDialog.Builder(this)
-			.setIcon(android.R.drawable.ic_dialog_info)
-			.setTitle(R.string.sendPoke)
-			.setMessage(this.getString(R.string.sendPokeConf, defi.nom))
-			.setPositiveButton(R.string.accept, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					RequestParams params = new RequestParams();
-					params.put("joueur", ""+menu.pref.getInt("id", 0));
-					params.put("defi", ""+defi.id);
-					client.post(SERVER_URL+"/disconnect.php", params, new AsyncHttpResponseHandler() {
-						@Override
-						public void onSuccess(String response) {
-							if(response.equalsIgnoreCase("OK")) {
-								Toast.makeText(Multijoueur.this, R.string.pokeSent, Toast.LENGTH_SHORT).show();
-							} else {
-								System.out.println(response);
-							}
-						}
-
-						@Override
-						public void onFailure(int statusCode, Throwable error, String content) {
-							prgDialog.dismiss();
-							Toast.makeText(Multijoueur.this, R.string.sync_fail, Toast.LENGTH_SHORT).show();
-						}
-					});
-				}
-			})
-			.setNegativeButton(R.string.annuler, null)
-			.show();*/
-	}
-	
 	public void syncTotale(View v) {
 		if(!connect.isConnectedToInternet()) {
 			Toast.makeText(this, R.string.hors_connexion, Toast.LENGTH_SHORT).show();
@@ -390,6 +361,7 @@ public class Multijoueur extends Activity {
 		prgDialog.setCancelable(false);
 		prgDialog.show();
 		RequestParams params = new RequestParams();
+		params.put("token", APP_TOKEN);
 		params.put("joueur", ""+menu.pref.getInt("id", 0));
 		params.put("appareil", ""+menu.pref.getInt("appareil", 0));
 		params.put("tasks", base.getTasks());
@@ -436,7 +408,15 @@ public class Multijoueur extends Activity {
 	private void dispUser() {
 		((ImageView) findViewById(R.id.user_avatar)).setImageResource(user.getAvatar());
 		((TextView) findViewById(R.id.user_name)).setText(user.getPseudo());
-		((TextView) findViewById(R.id.user_exp)).setText(getString(R.string.exp)+" :\n\u0009"+String.format("%,d", user.getExp()));
+		String expStr = getString(R.string.exp)+" :\n\u0009"+String.format("%,d", user.getExp());
+		int dbSpan = expStr.length();
+		if(user.getExp()>menu.experience) {
+			expStr += " +"+String.format("%,d", user.getExp() - menu.experience);
+		}
+		SpannableString expTxt = new SpannableString(expStr);
+		expTxt.setSpan(new RelativeSizeSpan(1.2f), dbSpan, expTxt.length(), 0);
+		expTxt.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.violet)), dbSpan, expTxt.length(), 0);
+		((TextView) findViewById(R.id.user_exp)).setText(expTxt);
 		((TextView) findViewById(R.id.user_defis)).setText(getString(R.string.defis_joues)+" : "+user.getDefis());
 		((TextView) findViewById(R.id.user_wins)).setText(getString(R.string.defis_gagnés)+" : "+user.getWin());
 	}
@@ -501,13 +481,14 @@ public class Multijoueur extends Activity {
 					base.getDefis(user.getId(),joueurs,adversaires);
 					adapt = new DefiExpandableAdapter(Multijoueur.this, user.getId(), adversaires);
 					lv.setAdapter(adapt);
-					menu.expToSync = 0;
 					menu.experience = user.getExp();
 					menu.avancement = user.getProgress();
-					menu.saveData();
-					dispUser();
 					if(sync)
 						syncData();
+					else
+						menu.expToSync = 0;
+					dispUser();
+					menu.saveData();
 					return true;
 				} catch (JSONException e) {
 					e.printStackTrace();
@@ -529,6 +510,7 @@ public class Multijoueur extends Activity {
 		loader.showNext();
 		loader.setEnabled(false);
 		RequestParams params = new RequestParams();
+		params.put("token", APP_TOKEN);
 		params.put("joueur", ""+menu.pref.getInt("id", 0));
 		params.put("appareil", ""+menu.pref.getInt("appareil", 0));
 		params.put("tasks", base.getTasks());
@@ -543,7 +525,6 @@ public class Multijoueur extends Activity {
 				adapt.setLaunchEnabled(true);
 				if(insertJSONData(response)) {
 					base.clearTasks();
-					// TODO : acquitement pour que le serveur supprime les *ToSync.
 				}
 			}
 
@@ -584,11 +565,6 @@ public class Multijoueur extends Activity {
 				if(o.has("joueurs")) {
 					base.insertJSONJoueurs((JSONArray) o.get("joueurs"));
 					loadJoueurs();
-					menu.expToSync = 0;
-					menu.experience = user.getExp();
-					menu.avancement = user.getProgress();
-					menu.saveData();
-					dispUser();
 				}
 				if(o.has("defis"))
 					base.insertJSONDefis((JSONArray) o.get("defis"));
@@ -601,6 +577,13 @@ public class Multijoueur extends Activity {
 			}
 		} else
 			res = true;
+		if(res) {
+			dispUser();
+			menu.expToSync = 0;
+			menu.experience = user.getExp();
+			menu.avancement = user.getProgress();
+			menu.saveData();
+		}
 		int pRapide = base.getDefis(user.getId(),joueurs,adversaires);
 		adapt.notifyDataSetChanged();
 		if(pRapide!=-1) {
