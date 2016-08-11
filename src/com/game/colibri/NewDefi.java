@@ -1,9 +1,10 @@
 package com.game.colibri;
 
-import static com.network.colibri.CommonUtilities.APP_TOKEN;
 import static com.network.colibri.CommonUtilities.SERVER_URL;
 
 import java.util.ArrayList;
+
+import org.json.JSONArray;
 
 import com.game.colibri.DropDownAdapter.NameAndId;
 import com.google.gson.Gson;
@@ -39,14 +40,14 @@ public class NewDefi {
 	private Context context;
 	private callBackInterface callback;
 	private String nomDefi;
-	private int user, appareil, t_max;
+	private int user, t_max;
 	private DropDownAdapter dropDownAdapter;
 	private JoueursAdapter jAdapter;
 	private AsyncHttpClient client;
 	private ProgressDialog prgDialog;
 	
 	@SuppressLint("InlinedApi")
-	public NewDefi(Context context, AsyncHttpClient client, int user, int app, callBackInterface callback) {
+	public NewDefi(Context context, AsyncHttpClient client, int user, callBackInterface callback) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			this.context = new ContextThemeWrapper(context, android.R.style.Theme_Holo_Light_Dialog);
 		} else {
@@ -56,7 +57,6 @@ public class NewDefi {
 		this.client = client;
 		this.callback= callback;
 		this.user = user;
-		this.appareil = app;
 		ArrayList<Joueur> joueurs = new ArrayList<Joueur>();
 		jAdapter = new JoueursAdapter(context, R.layout.element_joueur, joueurs);
 		dropDownAdapter = new DropDownAdapter(context, R.layout.simple_list_element, user, joueurs);
@@ -153,21 +153,22 @@ public class NewDefi {
 	    inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
 	}
 	
-	private String getStringListOfJoueurs() {
-		StringBuilder joueurs = new StringBuilder("\""+user+"\",");
+	private JSONArray getJSONListOfJoueurs() {
+		JSONArray joueurs = new JSONArray();
+		joueurs.put(user);
 		int fin = jAdapter.getCount();
 		for(int i=0; i<fin; i++) {
-			joueurs.append("\""+jAdapter.getItem(i).getId()+"\",");
+			joueurs.put(jAdapter.getItem(i).getId());
 		}
-		joueurs.deleteCharAt(joueurs.length()-1);
-		return joueurs.toString();
+		return joueurs;
 	}
 	
 	private void addJoueur(NameAndId j) {
 		prgDialog.show();
 		RequestParams params = new RequestParams();
+		params.setHttpEntityIsRepeatable(true);
 		if(j==null) // Mode auto. On spécifie la liste des joueurs déjà pris.
-			params.put("auto", "["+getStringListOfJoueurs()+"]");
+			params.put("auto", getJSONListOfJoueurs().toString());
 		else
 			params.put("joueur", ""+j.id);
 		client.post(SERVER_URL+"/get_joueur.php", params, new AsyncHttpResponseHandler() {
@@ -196,8 +197,10 @@ public class NewDefi {
 	}
 	
 	private void createDefi() {
-		prgDialog.show();
+		callback.create(nomDefi, getJSONListOfJoueurs(), t_max);
+		/*prgDialog.show();
 		RequestParams params = new RequestParams();
+		params.setHttpEntityIsRepeatable(true);
 		params.put("token", APP_TOKEN);
 		params.put("joueur", ""+user);
 		params.put("appareil", ""+appareil);
@@ -216,11 +219,11 @@ public class NewDefi {
 				prgDialog.dismiss();
 				Toast.makeText(context, R.string.err, Toast.LENGTH_LONG).show();
 			}
-		});
+		});*/
 	}
 	
 	public interface callBackInterface {
-		void create(String jsonData);
+		void create(String nomDefi, JSONArray participants, int t_max);
 	}
 	
 	/**

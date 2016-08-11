@@ -3,6 +3,10 @@ package com.game.colibri;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.util.SparseArray;
 
 import com.google.gson.Gson;
@@ -11,8 +15,7 @@ import com.network.colibri.DBController;
 
 public class Defi {
 	
-	public static final byte ATTENTE=0, RESULTATS=1, RELEVER=2, LANCER=3, OBSOLETE=4; // États possible du défi contre "adversaire".
-	public static DBController base;
+	public static final byte ATTENTE=0, RESULTATS=1, RELEVER=2, LANCER=3, OBSOLETE=4; // États possibles du défi.
 	
 	public int id;
 	public String nom;
@@ -24,6 +27,21 @@ public class Defi {
 	public long limite;
 	public int type;
 	public int resVus;
+	
+	public static Defi DefiFromJSON(String jsonDefi) throws JSONException {
+		if(jsonDefi==null)
+			return null;
+		Gson g = new Gson();
+		Defi d = g.fromJson(jsonDefi, Defi.class);
+		JSONObject jso = (new JSONObject(jsonDefi)).getJSONObject("participants"); // Gson ne parvient pas à reconstruire les participations de SparseArray donc on le fait nous même.
+		JSONArray pArray = jso.getJSONArray("mValues"); // Participations
+		JSONArray kArray = jso.getJSONArray("mKeys"); // Clés (id joueurs)
+		int nP = jso.getInt("mSize"); // Taille de la SparseArray
+		for(int i=0; i<nP; i++) {
+			d.participants.put(kArray.getInt(i), g.fromJson(pArray.getString(i), Participation.class));
+		}
+		return d;
+	}
 	
 	public Defi(int id, String nom, SparseArray<Participation> p, int nMatch, String nivCours, String nivFini, int t_m, int lim, int type, int resVus) {
 		this.id = id;
@@ -47,11 +65,15 @@ public class Defi {
 		this.resVus = resVus;
 	}
 	
+	public String toJSON() {
+		return (new Gson()).toJson(this, Defi.class);
+	}
+	
 	/**
 	 * Appelé en fin de match pour incrémenter les différents scores, etc
 	 * @param user
 	 */
-	public boolean finMatch(int user, int temps, int penalite) {
+	public boolean finMatch(DBController base, int user, int temps, int penalite) {
 		participants.get(user).solved(temps,penalite);
 		Participation[] classement = new Participation[participants.size()];
 		for(int i=0; i<classement.length; i++) {
@@ -80,8 +102,9 @@ public class Defi {
 			nMatch++;
 			matchFini = match;
 			match = null;
-			base.updateDefiTout(this, user, nMatch-1);
-		} else {
+			if(base!=null)
+				base.updateDefiTout(this, user, nMatch-1);
+		} else if(base!=null) {
 			base.updateParticipation(participants.get(user), id, nMatch);
 		}
 		return result;
@@ -125,13 +148,15 @@ public class Defi {
 		public int mode;
 		public long seed;
 		public int[] param;
+		public int avancement;
 		public int progressMin;
 		public int exp;
 		
-		public Match(int m, long s, int[] p, int pm, int e) {
+		public Match(int m, long s, int[] p, int a, int pm, int e) {
 			mode=m;
 			seed=s;
 			param=p;
+			avancement=a;
 			progressMin=pm;
 			exp=e;
 		}

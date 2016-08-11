@@ -93,7 +93,7 @@ public class ParamAleat {
 	}
 	
 	@SuppressLint("InflateParams")
-	public void show(final SharedPreferences.Editor editor) {
+	public void show() {
 		tp = new TempParam();
 		final ScrollView content = (ScrollView) LayoutInflater.from(context).inflate(R.layout.param_aleat, null);
 		final LinearLayout lay = (LinearLayout) content.findViewById(R.id.param_lay);
@@ -110,12 +110,12 @@ public class ParamAleat {
 			public void onClick(DialogInterface d,int i) {
 				if(i==DialogInterface.BUTTON_POSITIVE) {
 					tp.commit();
-					saveParams(editor);
+					saveParams(MyApp.getApp().editor);
 					callback.launchFunction(Niveau.PERSO);
 				} else if(i==DialogInterface.BUTTON_NEUTRAL) {
 					param = paramDefaut.clone();
-					saveParams(editor);
-					ParamAleat.this.show(editor);
+					saveParams(MyApp.getApp().editor);
+					ParamAleat.this.show();
 				}
 			}
 		};

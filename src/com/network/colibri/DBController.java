@@ -21,10 +21,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.SparseArray;
 
 public class DBController  extends SQLiteOpenHelper {
-		
+	
 	public DBController(Context applicationcontext) {
-        super(applicationcontext, "Colibri.db", null, 9);
-        Defi.base = this;
+        super(applicationcontext, "Colibri.db", null, 10);
     }
 	
 	//Creates Tables
@@ -74,7 +73,7 @@ public class DBController  extends SQLiteOpenHelper {
 				+ ")";
         database.execSQL(query);
         query = "CREATE TABLE IF NOT EXISTS tasks ("
-				+ " id INTEGER PRIMARY KEY,"
+				+ " id INTEGER PRIMARY KEY AUTOINCREMENT,"
 				+ " task text NOT NULL"
 				+ ")";
         database.execSQL(query);
@@ -188,12 +187,19 @@ public class DBController  extends SQLiteOpenHelper {
 	 * @return
 	 */
 	public String getTasks() {
-		ArrayList<String> tasks = new ArrayList<String>();
+		JSONArray tasks = new JSONArray();
+		JSONObject o;
 	    SQLiteDatabase database = this.getWritableDatabase();
-	    Cursor cursor = database.rawQuery("SELECT task FROM `tasks` ORDER BY id", null);
-	    if (cursor.moveToFirst()) {
+	    Cursor cursor = database.rawQuery("SELECT task, id FROM `tasks` ORDER BY id", null);
+	    if(cursor.moveToFirst()) {
 	        do {
-				tasks.add(cursor.getString(0));
+	        	try {
+		        	o = new JSONObject(cursor.getString(0));
+		        	o.put("t_id", cursor.getInt(1));
+					tasks.put(o);
+	        	} catch (JSONException e) {
+					e.printStackTrace();
+				}
 	        } while(cursor.moveToNext());
 	    }
 	    database.close();
@@ -246,7 +252,7 @@ public class DBController  extends SQLiteOpenHelper {
 	        do {
 	        	String selectQuery2 = "SELECT joueur,win,t_cours,penalite_cours,t_fini,penalite_fini,exp,gagne FROM `participations` WHERE defi="+cursor.getInt(0);
 	        	Cursor cursor2 = database.rawQuery(selectQuery2, null);
-	        	SparseArray<Participation> part = new SparseArray<Participation>();
+	        	SparseArray<Participation> part = new SparseArray<Participation>(cursor2.getCount());
 	        	if(cursor2.moveToFirst()) {
 		        	do {
 		        		Participation p = new Participation(joueurs.get(cursor2.getInt(0)),cursor2.getInt(1),cursor2.getInt(2),cursor2.getInt(3),cursor2.getInt(4),cursor2.getInt(5),cursor2.getInt(6),cursor2.getInt(7));
@@ -461,23 +467,53 @@ public class DBController  extends SQLiteOpenHelper {
 	}
 	
 	/**
-	 * Supprime tout et demande le renvoi de toutes les données.
+	 * Crée une tâche serveur pour un nouveau défi.
+	 * @param nomDefi le nom du défi
+	 * @param participants la liste des participants
+	 * @param t_max le temps de vie de chaque match (int en String)
+	 */
+	public void newDefi(String nomDefi, JSONArray participants, int t_max) {
+		SQLiteDatabase database = this.getWritableDatabase();
+		ContentValues values = new ContentValues();
+		JSONObject o = new JSONObject();
+		try {
+			o.put("task", "newDefi");
+			o.put("nom", nomDefi);
+			o.put("participants", participants);
+			o.put("t_max", t_max);
+			values.put("task", o.toString());
+			database.insert("tasks", null, values);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		database.close();
+	}
+	
+	/**
+	 * Crée une tâche serveur pour une nouvelle partie rapide.
+	 */
+	public void partieRapide() {
+		SQLiteDatabase database = this.getWritableDatabase();
+		ContentValues values = new ContentValues();
+		JSONObject o = new JSONObject();
+		try {
+			o.put("task", "partieRapide");
+			values.put("task", o.toString());
+			database.insert("tasks", null, values);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		database.close();
+	}
+	
+	/**
+	 * Supprime tout avant une synchro totale.
 	 */
 	public void taskSyncTotale(int user) {
 		SQLiteDatabase database = this.getWritableDatabase();
 		database.delete("participations", null, null);
 		database.delete("defis", null, null);
 		database.delete("joueurs", "id<>"+user, null);
-		ContentValues values = new ContentValues();
-		values = new ContentValues();
-		JSONObject o = new JSONObject();
-		try {
-			o.put("task","syncTotale");
-			values.put("task", o.toString());
-			database.insert("tasks", null, values);
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
 		database.close();
 	}
 
@@ -509,7 +545,7 @@ public class DBController  extends SQLiteOpenHelper {
 				} else if(task.equalsIgnoreCase("triche")) {
 					liste+=context.getResources().getString(R.string.triche, d.getString("nomDefi"))+"\n";
 				} else if(task.equalsIgnoreCase("message")) {
-					liste+=context.getResources().getString(R.string.messageServeur, d.getString("message"))+"\n";
+					liste+=" "+d.getString("message")+"\n";
 				}
 			} catch (JSONException e) {
 				e.printStackTrace();

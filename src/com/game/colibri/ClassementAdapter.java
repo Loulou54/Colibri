@@ -31,8 +31,6 @@ import android.widget.Toast;
 
 public class ClassementAdapter extends ArrayAdapter<Joueur> {
 	
-	public static int userId;
-	
 	private Classements classements;
 	private AsyncHttpClient client;
 	private int type;
@@ -44,6 +42,7 @@ public class ClassementAdapter extends ArrayAdapter<Joueur> {
 	public ClassementAdapter(Classements c, int t, boolean f, String s) {
 		super(c, R.layout.element_classement, new ArrayList<Joueur>());
 		client = new AsyncHttpClient();
+		client.setMaxRetriesAndTimeout(5, 500);
 		classements = c;
 		type = t;
 		font = Typeface.createFromAsset(c.getAssets(),"fonts/Passing Notes.ttf");
@@ -116,7 +115,8 @@ public class ClassementAdapter extends ArrayAdapter<Joueur> {
 		if(isLoading || endOfList)
 			return null;
 		RequestParams params = new RequestParams();
-		params.put("joueur", userId==0 ? "" : ""+userId);
+		params.setHttpEntityIsRepeatable(true);
+		params.put("joueur", MyApp.id==0 ? "" : ""+MyApp.id);
 		params.put("type", ""+type);
 		if(filterFriends)
 			params.put("amis", "OUI");

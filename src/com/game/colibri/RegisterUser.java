@@ -188,6 +188,7 @@ public class RegisterUser {
 	
 	private void registerUser(final String name, String mdp, String mail) {
 		RequestParams params = new RequestParams();
+		params.setHttpEntityIsRepeatable(true);
 		params.put("token", APP_TOKEN);
 		params.put("pseudo", name);
 		params.put("password", mdp);
@@ -235,6 +236,7 @@ public class RegisterUser {
 	
 	private void connectUser(final String name, String mdp) {
 		RequestParams params = new RequestParams();
+		params.setHttpEntityIsRepeatable(true);
 		params.put("token", APP_TOKEN);
 		params.put("pseudo", name);
 		params.put("password", mdp);
@@ -277,6 +279,7 @@ public class RegisterUser {
 	
 	private void lostMdp(final String name) {
 		RequestParams params = new RequestParams();
+		params.setHttpEntityIsRepeatable(true);
 		params.put("pseudo", name);
 		prgDialog.show();
 		client.post(SERVER_URL+"/mail_mdp.php", params, new AsyncHttpResponseHandler() {

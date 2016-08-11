@@ -18,10 +18,20 @@ import android.view.animation.Animation.AnimationListener;
  * Classe gérant les déplacements des éléments (colibri, vaches, ...) selon les régles
  * et le rafraîchissement de l'écran.
  */
-@SuppressLint("RtlHardcoded")
+
 public class MoteurJeu {
 	
 	private static final boolean DEBUG = false;
+	private static final int LIG=12, COL=20; // Dimensions de la grille
+	private static int SEUIL=15; // seuil de vitesse de glissement du doigt sur l'écran.
+	public static int PERIODE=1000/25; // pour 25 frames par secondes
+	public static final int MENHIR=1;
+	public static final int FLEUR=2;
+	public static final int FLEURM=3;
+	public static final int DYNA=4;
+	public static final int MENHIR_ROUGE=5; // Menhir sur lequel on déposerait une dynamite.
+	public static final char VIDE=0;
+	public static final int UP=1,RIGHT=2,LEFT=3,DOWN=4;
 	
 	public int frame, total_frames;
 	private Carte carte;
@@ -35,17 +45,6 @@ public class MoteurJeu {
 	// private LinkedList <int[]> mouvements; // Les mouvements effectués
 	private int[] lastMove=new int[] {0,0};
 	private int[][] trace_diff; // Contient le différentiel de position lors des ACTION_MOVE.
-	private static int SEUIL=15; // seuil de vitesse de glissement du doigt sur l'écran.
-	public static int PERIODE=1000/25; // pour 25 frames par secondes
-	public static final int MENHIR=1;
-	public static final int FLEUR=2;
-	public static final int FLEURM=3;
-	public static final int DYNA=4;
-	public static final int MENHIR_ROUGE=5; // Menhir sur lequel on déposerait une dynamite.
-	public static final char VIDE=0;
-	public static final int UP=1,RIGHT=2,LEFT=3,DOWN=4;
-	
-	private static final int LIG=12, COL=20; // Dimensions de la grille
 	
 	/**
 	 * Handler de rafraîchissement

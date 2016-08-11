@@ -6,6 +6,7 @@ import static com.network.colibri.CommonUtilities.SENDER_ID;
 import static com.network.colibri.CommonUtilities.SERVER_URL;
 import static com.network.colibri.CommonUtilities.APP_TOKEN;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -47,7 +48,6 @@ import android.widget.ViewSwitcher;
 
 public class Multijoueur extends Activity {
 	
-	public static MenuPrinc menu;
 	public static boolean active = false;
 	
 	private ExpandableListView lv;
@@ -70,6 +70,7 @@ public class Multijoueur extends Activity {
 		active = true;
 		connect = new ConnectionDetector(this);
 		client = new AsyncHttpClient();
+		client.setMaxRetriesAndTimeout(5, 500);
 		base = new DBController(this);
 		joueurs = new SparseArray<Joueur>();
 		adversaires = new ArrayList<Defi>();
@@ -100,6 +101,18 @@ public class Multijoueur extends Activity {
 	}
 	
 	@Override
+	protected void onStart() {
+		MyApp.resumeActivity();
+		super.onStart();
+	}
+	
+	@Override
+	protected void onStop() {
+		MyApp.stopActivity();
+		super.onStop();
+	}
+	
+	@Override
     protected void onDestroy() {
 		active = false;
 		try {
@@ -115,12 +128,12 @@ public class Multijoueur extends Activity {
 	 * Crée toutes les instances de Joueur pour l'utilisateur du jeu et pour tous ses adversaires en liste.
 	 */
 	private void loadData() {
-		int userId = menu.pref.getInt("id",0);
-		if(menu.pref.contains("defi_fuit")) { // L'application a été quittée de force pendant un défi.
-			int defiId = menu.pref.getInt("defi_fuit", 0);
+		int userId = MyApp.id;
+		if(MyApp.getApp().pref.contains("defi_fuit")) { // L'application a été quittée de force pendant un défi.
+			int defiId = MyApp.getApp().pref.getInt("defi_fuit", 0);
 			base.forfaitDefi(defiId, userId);
-			menu.editor.remove("defi_fuit");
-			menu.editor.commit();
+			MyApp.getApp().editor.remove("defi_fuit");
+			MyApp.getApp().editor.commit();
 			AlertDialog.Builder box = new AlertDialog.Builder(this);
 			box.setTitle(R.string.forfait);
 			box.setMessage(R.string.force_quit_msg);
@@ -157,7 +170,7 @@ public class Multijoueur extends Activity {
 	}
 	
 	private void loadJoueurs() {
-		int userId = menu.pref.getInt("id",0);
+		int userId = MyApp.id;
 		base.getJoueurs(joueurs);
 		System.out.println("Nombre de Joueurs : "+joueurs.size());
 		for(int i=0, length=joueurs.size(); i<length; i++) {
@@ -170,8 +183,8 @@ public class Multijoueur extends Activity {
 				Toast.makeText(this, R.string.hors_connexion, Toast.LENGTH_SHORT).show();
 				finish();
 			} else {
-				user = new Joueur(userId, menu.pref.getString("pseudo",null), "", 0, 0, 0, 0, 0, 0, 0);
-				base.taskSyncTotale(userId);
+				user = new Joueur(userId, MyApp.pseudo, "", 0, 0, 0, 0, 0, 0, 0);
+				MyApp.last_update = 0;
 			}
 		}
 	}
@@ -198,7 +211,7 @@ public class Multijoueur extends Activity {
 				newMatch(mode);
 			}
 		}, this, defi.getProgressMin());
-		pa.show(menu.editor); // Si appui sur "OK", lance un niveau aléatoire en mode PERSO.
+		pa.show(); // Si appui sur "OK", lance un niveau aléatoire en mode PERSO.
 	}
 	
 	public void facile(View v) {
@@ -219,14 +232,16 @@ public class Multijoueur extends Activity {
 	 */
 	public void newMatch(int mode) {
 		boxNiv.dismiss();
-		Jeu.multi=this;
+		Jeu.multijoueur = new WeakReference<Multijoueur>(this);
 		long seed = (new Random()).nextLong();
-		Jeu.startMsg = getString(R.string.c_est_parti)+" "+user.getPseudo()+" !";
-		Jeu.opt.putInt("mode", mode);
-		Jeu.opt.putLong("seed", seed);
-		Jeu.opt.putIntArray("param", ParamAleat.param);
-		Jeu.opt.putInt("progressMin", defi.getProgressMin());
-		startActivity(new Intent(this, Jeu.class));
+		Intent intent = new Intent(this, Jeu.class);
+		intent.putExtra("startMsg", getString(R.string.c_est_parti)+" "+user.getPseudo()+" !")
+			.putExtra("mode", mode)
+			.putExtra("seed", seed)
+			.putExtra("param", ParamAleat.param)
+			.putExtra("avancement", defi.getProgressMin())
+			.putExtra("defi", defi.toJSON());
+		startActivity(intent);
 	}
 	
 	/**
@@ -234,13 +249,15 @@ public class Multijoueur extends Activity {
 	 * 
 	 */
 	public void releverMatch() {
-		Jeu.multi=this;
-		Jeu.startMsg = getString(R.string.c_est_parti)+" "+user.getPseudo()+" !";
-		Jeu.opt.putInt("mode", defi.match.mode);
-		Jeu.opt.putLong("seed", defi.match.seed);
-		Jeu.opt.putIntArray("param", defi.match.param);
-		Jeu.opt.putInt("progressMin", defi.match.progressMin);
-		startActivity(new Intent(this, Jeu.class));
+		Jeu.multijoueur = new WeakReference<Multijoueur>(this);
+		Intent intent = new Intent(this, Jeu.class);
+		intent.putExtra("startMsg", getString(R.string.c_est_parti)+" "+user.getPseudo()+" !")
+			.putExtra("mode", defi.match.mode)
+			.putExtra("seed", defi.match.seed)
+			.putExtra("param", defi.match.param)
+			.putExtra("avancement", defi.match.avancement)
+			.putExtra("defi", defi.toJSON());
+		startActivity(intent);
 	}
 	
 	public void nouveauDefi(View v) {
@@ -248,12 +265,15 @@ public class Multijoueur extends Activity {
 			Toast.makeText(this, R.string.hors_connexion, Toast.LENGTH_SHORT).show();
 			return;
 		}
-		if(menu.expToSync!=0)
+		if(base.getTasks().contains("\"task\":\"newDefi\"")) {
 			syncData();
-		(new NewDefi(this, client, user.getId(), menu.pref.getInt("appareil", 0), new NewDefi.callBackInterface() {
+			return;
+		}
+		(new NewDefi(this, client, user.getId(), new NewDefi.callBackInterface() {
 			@Override
-			public void create(String jsonData) {
-				insertJSONData(jsonData);
+			public void create(String nomDefi, JSONArray participants, int t_max) {
+				base.newDefi(nomDefi, participants, t_max);
+				syncData();
 			}
 		})).show();
 	}
@@ -263,15 +283,20 @@ public class Multijoueur extends Activity {
 			Toast.makeText(this, R.string.hors_connexion, Toast.LENGTH_SHORT).show();
 			return;
 		}
+		if(!base.getTasks().contains("\"task\":\"partieRapide\""))
+			base.partieRapide();
+		syncData();
+		/*
 		final ProgressDialog prgDialog = new ProgressDialog(this);
 		prgDialog.setMessage(getString(R.string.progress));
 		prgDialog.setCancelable(false);
 		prgDialog.show();
 		RequestParams params = new RequestParams();
+		params.setHttpEntityIsRepeatable(true);
 		params.put("token", APP_TOKEN);
-		params.put("joueur", ""+menu.pref.getInt("id", 0));
-		params.put("appareil", ""+menu.pref.getInt("appareil", 0));
-		params.put("expToSync", ""+menu.expToSync);
+		params.put("joueur", ""+MyApp.id);
+		params.put("appareil", ""+MyApp.appareil);
+		params.put("expToSync", ""+MyApp.expToSync);
 		client.post(SERVER_URL+"/partie_rapide.php", params, new AsyncHttpResponseHandler() {
 			@Override
 			public void onSuccess(String response) {
@@ -290,7 +315,7 @@ public class Multijoueur extends Activity {
 					Toast.makeText(Multijoueur.this, R.string.err, Toast.LENGTH_LONG).show();
 				}
 			}
-		});
+		});*/
 	}
 	
 	public void supprDefi(View v) {
@@ -318,22 +343,17 @@ public class Multijoueur extends Activity {
 			Toast.makeText(this, R.string.patience, Toast.LENGTH_LONG).show();
 			break;
 		case Defi.RESULTATS: // Afficher les résultats
-			Resultats.callback = new Resultats.callBackInterface() {
-				@Override
-				public void suite() {
-					if(defi.type>0) { // Partie rapide
-						base.removeDefi(adversaires.remove(groupPosition), user.getId());
-					} else {
-						defi.resVus = defi.nMatch;
-						base.setResultatsVus(defi.id,defi.nMatch);
-						adapt.notifyDataSetChanged();
-					}
-					syncData();
-				}
-			};
-			Resultats.multi = this;
-			Resultats.DISPLAY_RES = true;
-			startActivity(new Intent(this, Resultats.class));
+			Intent intent = new Intent(this, Resultats.class);
+			intent.putExtra("defi", defi.toJSON());
+			if(defi.type>0) { // Partie rapide
+				base.removeDefi(adversaires.remove(groupPosition), user.getId());
+			} else {
+				defi.resVus = defi.nMatch;
+				base.setResultatsVus(defi.id,defi.nMatch);
+			}
+			adapt.notifyDataSetChanged();
+			//syncData();
+			startActivity(intent);
 			break;
 		case Defi.RELEVER: // Lancer le jeu avec Seed donnée
 			releverMatch();
@@ -346,12 +366,19 @@ public class Multijoueur extends Activity {
 		}
 	}
 	
+	/**
+	 * Supprime le defi courant de la liste.
+	 */
+	public void removeDefi() {
+		adversaires.remove(defi);
+	}
+	
 	public void syncTotale(View v) {
 		if(!connect.isConnectedToInternet()) {
 			Toast.makeText(this, R.string.hors_connexion, Toast.LENGTH_SHORT).show();
 			return;
 		}
-		base.taskSyncTotale(user.getId());
+		MyApp.last_update = 0;
 		syncData();
 	}
 	
@@ -361,21 +388,23 @@ public class Multijoueur extends Activity {
 		prgDialog.setCancelable(false);
 		prgDialog.show();
 		RequestParams params = new RequestParams();
+		params.setHttpEntityIsRepeatable(true);
 		params.put("token", APP_TOKEN);
-		params.put("joueur", ""+menu.pref.getInt("id", 0));
-		params.put("appareil", ""+menu.pref.getInt("appareil", 0));
+		params.put("joueur", ""+MyApp.id);
+		params.put("appareil", ""+MyApp.appareil);
 		params.put("tasks", base.getTasks());
 		System.out.println(base.getTasks());
-		params.put("expToSync", ""+menu.expToSync);
-		params.put("progress", ""+menu.avancement);
+		params.put("expToSync", ""+MyApp.expToSync);
+		params.put("progress", ""+MyApp.avancement);
 		client.post(SERVER_URL+"/disconnect.php", params, new AsyncHttpResponseHandler() {
 			@Override
 			public void onSuccess(String response) {
 				prgDialog.dismiss();
 				if(response.equalsIgnoreCase("OK")) {
 					base.clearDB();
-					menu.editor.remove("id");
-					menu.editor.commit();
+					MyApp.id = 0;
+					MyApp.getApp().editor.remove("id");
+					MyApp.getApp().editor.commit();
 					registerUser();
 				} else {
 					System.out.println(response);
@@ -410,8 +439,8 @@ public class Multijoueur extends Activity {
 		((TextView) findViewById(R.id.user_name)).setText(user.getPseudo());
 		String expStr = getString(R.string.exp)+" :\n\u0009"+String.format("%,d", user.getExp());
 		int dbSpan = expStr.length();
-		if(user.getExp()>menu.experience) {
-			expStr += " +"+String.format("%,d", user.getExp() - menu.experience);
+		if(user.getExp()>MyApp.experience) {
+			expStr += " +"+String.format("%,d", user.getExp() - MyApp.experience);
 		}
 		SpannableString expTxt = new SpannableString(expStr);
 		expTxt.setSpan(new RelativeSizeSpan(1.2f), dbSpan, expTxt.length(), 0);
@@ -462,33 +491,31 @@ public class Multijoueur extends Activity {
 		(new RegisterUser(this, client, new RegisterUser.callBackInterface() {
 			@Override
 			public int getExp() {
-				return menu.expToSync;
+				return MyApp.expToSync;
 			}
 			@Override
 			public int getProgress() {
-				return menu.expToSync==menu.experience ? menu.avancement : 1;
+				return MyApp.expToSync==MyApp.experience ? MyApp.avancement : 1;
 			}
 			@Override
 			public boolean registered(String JSONresponse, String name, boolean sync) {
 				try {
 					JSONArray j = new JSONArray(JSONresponse);
 					base.insertJSONJoueurs(j);
-					menu.editor.putString("pseudo", name);
-					menu.editor.putInt("id", j.getJSONObject(0).getInt("id"));
-					menu.editor.putInt("appareil", j.getJSONObject(0).getInt("appareil"));
-					menu.editor.commit();
+					MyApp.getApp().connectUser(j.getJSONObject(0).getInt("id"), name, j.getJSONObject(0).getInt("appareil"));
 					loadJoueurs();
 					base.getDefis(user.getId(),joueurs,adversaires);
 					adapt = new DefiExpandableAdapter(Multijoueur.this, user.getId(), adversaires);
 					lv.setAdapter(adapt);
-					menu.experience = user.getExp();
-					menu.avancement = user.getProgress();
+					MyApp.experience = user.getExp();
+					MyApp.avancement = user.getProgress();
+					MyApp.last_update = 0;
 					if(sync)
 						syncData();
 					else
-						menu.expToSync = 0;
+						MyApp.expToSync = 0;
 					dispUser();
-					menu.saveData();
+					MyApp.getApp().saveData();
 					return true;
 				} catch (JSONException e) {
 					e.printStackTrace();
@@ -510,13 +537,15 @@ public class Multijoueur extends Activity {
 		loader.showNext();
 		loader.setEnabled(false);
 		RequestParams params = new RequestParams();
+		params.setHttpEntityIsRepeatable(true);
 		params.put("token", APP_TOKEN);
-		params.put("joueur", ""+menu.pref.getInt("id", 0));
-		params.put("appareil", ""+menu.pref.getInt("appareil", 0));
+		params.put("joueur", ""+MyApp.id);
+		params.put("appareil", ""+MyApp.appareil);
 		params.put("tasks", base.getTasks());
 		System.out.println(base.getTasks());
-		params.put("expToSync", ""+menu.expToSync);
-		params.put("progress", ""+menu.avancement);
+		params.put("last_update", ""+MyApp.last_update);
+		params.put("expToSync", ""+MyApp.expToSync);
+		params.put("progress", ""+MyApp.avancement);
 		client.post(SERVER_URL+"/sync_data.php", params, new AsyncHttpResponseHandler() {
 			@Override
 			public void onSuccess(String response) {
@@ -557,32 +586,38 @@ public class Multijoueur extends Activity {
 	private boolean insertJSONData(String def) {
 		boolean res;
 		System.out.println(def);
-		if(def.length()>=4) { // Dans le cas où def vaut []
-			try {
-				JSONObject o = new JSONObject(def);
-				if(o.has("tasks"))
-					base.execJSONTasks(this, (JSONArray) o.get("tasks"), user.getId());
-				if(o.has("joueurs")) {
-					base.insertJSONJoueurs((JSONArray) o.get("joueurs"));
-					loadJoueurs();
-				}
-				if(o.has("defis"))
-					base.insertJSONDefis((JSONArray) o.get("defis"));
-				if(o.has("participations"))
-					base.insertJSONParticipations((JSONArray) o.get("participations"));
-				res = true;
-			} catch (JSONException e) {
-				e.printStackTrace();
-				res = false;
+		long last_up = 0;
+		try {
+			JSONObject o = new JSONObject(def);
+			last_up = o.getLong("last_update");
+			if(MyApp.last_update==0) {
+				base.taskSyncTotale(user.getId());
 			}
-		} else
+			if(o.has("tasks"))
+				base.execJSONTasks(this, (JSONArray) o.get("tasks"), user.getId());
+			if(o.has("joueurs")) {
+				base.insertJSONJoueurs((JSONArray) o.get("joueurs"));
+				loadJoueurs();
+			}
+			if(o.has("defis"))
+				base.insertJSONDefis((JSONArray) o.get("defis"));
+			if(o.has("participations"))
+				base.insertJSONParticipations((JSONArray) o.get("participations"));
 			res = true;
+		} catch (JSONException e) {
+			e.printStackTrace();
+			res = false;
+			if(def.equalsIgnoreCase("upgrade"))
+				Toast.makeText(Multijoueur.this, R.string.maj_req, Toast.LENGTH_LONG).show();
+		}
 		if(res) {
 			dispUser();
-			menu.expToSync = 0;
-			menu.experience = user.getExp();
-			menu.avancement = user.getProgress();
-			menu.saveData();
+			MyApp.expToSync = 0;
+			MyApp.experience = user.getExp();
+			MyApp.avancement = user.getProgress();
+			MyApp.last_update = last_up;
+			MyApp.getApp().editor.putInt("nNewM", 0).putInt("nRes", 0);
+			MyApp.getApp().saveData();
 		}
 		int pRapide = base.getDefis(user.getId(),joueurs,adversaires);
 		adapt.notifyDataSetChanged();

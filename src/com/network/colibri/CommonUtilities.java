@@ -12,7 +12,7 @@ public final class CommonUtilities {
     public static final String SENDER_ID = "533995009920"; 
     
     // Communication token
-    public static final String APP_TOKEN = "az-79A_uG7*uYf42"; 
+    public static final String APP_TOKEN = "az-79A_uG7*uYf42v2"; 
  
     /**
      * Tag used on log messages.

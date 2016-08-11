@@ -2,6 +2,8 @@ package com.game.colibri;
 
 import java.util.Comparator;
 
+import org.json.JSONException;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
@@ -18,30 +20,38 @@ import android.widget.Toast;
 
 public class Resultats extends Activity {
 	
-	public static boolean DISPLAY_RES = false; // Détermine s'il faut afficher les résultats ou juste le feu d'artifices
-	public static callBackInterface callback;
-	public static Multijoueur multi;
 	public static int PERIODE = 1000/20;
 	
 	private RefreshHandler handler;
 	private ResultatsAdapter adapt;
 	private Niveau niv;
+	private boolean display_res;
+	private boolean has_won;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if(!DISPLAY_RES) { // Fin de campagne !
+		display_res = (getIntent().getExtras()!=null);
+		if(!display_res) { // Fin de campagne !
 			setContentView(R.layout.fin_campagne);
 			((Artifices) findViewById(R.id.artifices_doge)).doge = true;
 			return;
 		}
 		setContentView(R.layout.activity_resultats);
+		Defi defi;
+		try {
+			defi = Defi.DefiFromJSON(getIntent().getExtras().getString("defi"));
+		} catch (JSONException e) {
+			e.printStackTrace();
+			finish();
+			return;
+		}
 		ResultatsAdapter.prog=0;
 		ResultatsAdapter.etape=0;
 		handler = new RefreshHandler();
-		Participation[] parts = new Participation[multi.defi.participants.size()];
+		Participation[] parts = new Participation[defi.participants.size()];
 		for(int i=0; i<parts.length; i++) {
-			parts[i] = multi.defi.participants.valueAt(i);
+			parts[i] = defi.participants.valueAt(i);
 		}
 		adapt = new ResultatsAdapter(this, parts);
 		ListView lv = (ListView) findViewById(R.id.listRes);
@@ -53,9 +63,22 @@ public class Resultats extends Activity {
 				(new DispJoueur(Resultats.this, j)).show();
 			}
 		});
-		((TextView) findViewById(R.id.nomDefiRes)).setText(multi.defi.nom);
+		((TextView) findViewById(R.id.nomDefiRes)).setText(defi.nom);
 		handler.sendMessageDelayed(handler.obtainMessage(0), 1200); // Commence les animations après 1200ms
-		niv = new Niveau(multi.defi.matchFini.mode, multi.defi.matchFini.seed, multi.defi.matchFini.param, multi.defi.matchFini.progressMin);
+		niv = new Niveau(defi.matchFini.mode, defi.matchFini.seed, defi.matchFini.param, defi.matchFini.avancement);
+		has_won = (defi.participants.get(MyApp.id).gagne==1);
+	}
+	
+	@Override
+	protected void onStart() {
+		MyApp.resumeActivity();
+		super.onStart();
+	}
+	
+	@Override
+	protected void onStop() {
+		MyApp.stopActivity();
+		super.onStop();
 	}
 	
 	public interface callBackInterface {
@@ -65,7 +88,7 @@ public class Resultats extends Activity {
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		if(hasFocus) {
-			if(!DISPLAY_RES) {
+			if(!display_res) {
 				((TextView) findViewById(R.id.the_end)).startAnimation(AnimationUtils.loadAnimation(this, R.anim.artifice_anim_spin));
 				Toast toast = Toast.makeText(this, R.string.toast_fin, Toast.LENGTH_SHORT);
 		    	TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
@@ -105,7 +128,7 @@ public class Resultats extends Activity {
 			} else {
 				ResultatsAdapter.etape = msg.what;
 				if(msg.what==4) {
-					if(multi.defi.participants.get(multi.user.getId()).gagne==1)
+					if(has_won)
 						((Artifices) findViewById(R.id.artifices)).setVisibility(View.VISIBLE);
 				}
 				if(msg.what==5) {
@@ -130,12 +153,10 @@ public class Resultats extends Activity {
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if(keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE) {
-			if(DISPLAY_RES && findViewById(R.id.apercuResMaxi).getVisibility()==View.VISIBLE) {
+			if(display_res && findViewById(R.id.apercuResMaxi).getVisibility()==View.VISIBLE) {
 				findViewById(R.id.apercuResMaxi).setVisibility(View.GONE);
 			} else {
 				finish();
-				callback.suite();
-				DISPLAY_RES = false;
 			}
 			return true;
 		}

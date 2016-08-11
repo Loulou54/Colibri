@@ -8,6 +8,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -85,25 +86,46 @@ public class GCMIntentService extends GCMBaseIntentService {
      */
 	private static void generateNotification(Context context, String message) {
 		int icon = R.drawable.ic_launcher;
+		int id = 3 + (int) (Math.random()*(Integer.MAX_VALUE-3));
 		long when = System.currentTimeMillis();
 		String title = context.getString(R.string.app_name), msg=message;
+		SharedPreferences pref = MyApp.getApp().pref;
+		SharedPreferences.Editor editor = MyApp.getApp().editor;
+		int nNewM = pref.getInt("nNewM", 0), nRes = pref.getInt("nRes", 0);
 		try {
 			JSONObject o = new JSONObject(message);
 			String typ = o.getString("type");
 			if(typ.equals("newMatch")) {
-				title = o.getString("nomDefi");
-				msg = context.getString(R.string.notif_newdefi, o.getString("initPlayer"));
+				id = 1;
+				nNewM++;
+				if(nNewM>1) {
+					title = context.getString(R.string.nouveau_defi);
+					msg = context.getString(R.string.notif_n_newmatch, nNewM);
+				} else {
+					title = o.getString("nomDefi");
+					msg = context.getString(R.string.notif_newdefi, o.getString("initPlayer"));
+				}
 			} else if(typ.equals("results")) {
-				title = o.getString("nomDefi");
-				if(o.has("initPlayer"))
-					msg = context.getString(R.string.notif_results, o.getString("initPlayer"));
-				else
-					msg = context.getString(R.string.notif_results_exp);
+				id = 2;
+				nRes++;
+				if(nRes>1) {
+					title = context.getString(R.string.etat_resultats);
+					msg = context.getString(R.string.notif_n_results, nRes);
+				} else {
+					title = o.getString("nomDefi");
+					if(o.has("initPlayer"))
+						msg = context.getString(R.string.notif_results, o.getString("initPlayer"));
+					else
+						msg = context.getString(R.string.notif_results_exp);
+				}
 			} else if(typ.equals("message")) {
 				if(o.has("title"))
 					title = o.getString("title");
 				msg = o.getString("message");
 			}
+			editor.putInt("nNewM", nNewM)
+				.putInt("nRes", nRes)
+				.commit();
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -129,7 +151,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 		//notification.defaults |= Notification.DEFAULT_SOUND;
 		// Vibrate if vibrate is enabled
 		notification.defaults |= Notification.DEFAULT_VIBRATE;
-		notificationManager.notify((int) (Math.random()*Integer.MAX_VALUE), notification);
+		notificationManager.notify(id, notification);
 	}
 
 }

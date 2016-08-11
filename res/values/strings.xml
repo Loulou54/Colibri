@@ -103,7 +103,6 @@
 	<string name="newNivDejaCree">Another participant in the challenge %1$s has already submitted a new level. Yours has been therefore discarded.</string>
 	<string name="partObsolete">Your last participation to the challenge %1$s has been submitted after the deadline!</string>
 	<string name="triche">CHEATER spotted! Seems like you used two devices to solve one level of the challenge "%1$s"&#8230; You get a 10000 exp penalty! Don\'t do that again ;)</string>
-	<string name="messageServeur">Message from the creator!\n %1$s</string>
 	<string name="connexion_register">You must be connected to register for multiplayer mode!</string>
 	<string name="nodefis">No challenge yet!\n\nCreate a new challenge with\nthe button on the left.</string>
 	<string name="notif_newdefi">%1$s launched a new challenge!</string>
@@ -158,5 +157,8 @@
 	<string name="lost_mdp_pb">Sending problem! Did you provide a valid address??</string>
 	<string name="lost_mdp_ok">Done! Check your e-mails! :)</string>
 	<string name="patience">Be patient! Everybody has not played this match yet. ;)</string>
+	<string name="notif_n_newmatch">You have %1$d new challenges to solve!</string>
+	<string name="notif_n_results">The results of %1$d challenges are available!</string>
+	<string name="maj_req">You have to update Colibri to the latest version!</string>
 	
 </resources>

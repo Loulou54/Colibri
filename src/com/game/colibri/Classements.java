@@ -78,6 +78,18 @@ public class Classements extends Activity {
 		dispClassement(0);
 	}
 	
+	@Override
+	protected void onStart() {
+		MyApp.resumeActivity();
+		super.onStart();
+	}
+	
+	@Override
+	protected void onStop() {
+		MyApp.stopActivity();
+		super.onStop();
+	}
+	
 	private void refresh() {
 		if(rh!=null)
         	rh.cancel(true);

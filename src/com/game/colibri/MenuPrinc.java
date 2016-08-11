@@ -2,10 +2,7 @@ package com.game.colibri;
 
 import java.io.IOException;
 
-import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -28,8 +25,6 @@ import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Typeface;
 
 /**
@@ -37,17 +32,10 @@ import android.graphics.Typeface;
  */
 public class MenuPrinc extends Activity {
 	
-	public static MediaPlayer intro=null,boucle=null;
-	
 	public int ww,wh;
-	public int avancement; // Progression du joueur dans les niveaux campagne.
 	private int n_niv; // Niveau sélectionné dans Campagne
-	public int experience, expToSync; // L'expérience du joueur et l'expérience encore non synchronisée avec le serveur.
-	public int versionCode; // Le code de version de la dernière version de Colibri exécutée.
 	private boolean brandNew=true;
 	public int screen=0; // Définit quel écran est affiché : 0:menu, 1:choix niveaux, 2:infos, 3:instructions. Remplace l'utilisation de ViewFlipper qui pouvait causer des outOfMemoryError.
-	public SharedPreferences pref;
-	public SharedPreferences.Editor editor;
 	private RelativeLayout root;
 	private ViewFlipper MenuSel;
 	private Carte carte; // L'instance de carte permettant de faire un apercu dans le menu de sélection de niveaux.
@@ -65,30 +53,8 @@ public class MenuPrinc extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_menu_princ);
 		root=(RelativeLayout) findViewById(R.id.root);
-		pref = PreferenceManager.getDefaultSharedPreferences(this);
-		editor = pref.edit();
-		Jeu.opt = new Bundle(); // On va contourner le fait que startActivity(Intent i, Bundle b) ne soit pas supporté sur API < 16, en utilisant un Bundle de classe.
-		Jeu.menu=this;
-		Multijoueur.menu=this;
-		loadData();
+		n_niv = MyApp.avancement;
 		//displayMenu();
-		if(intro==null && boucle==null) {
-			intro = MediaPlayer.create(this, R.raw.intro);
-			intro.setLooping(false);
-			boucle = MediaPlayer.create(this, R.raw.boucle);
-			boucle.setLooping(true);
-			intro.start();
-			intro.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-				@Override
-				public void onCompletion(MediaPlayer mp) {
-					intro.release();
-				    intro = null;
-					boucle.start();
-				}
-			});
-			if(!pref.getBoolean("musique", true))
-				stopMusic();
-		}
 		// Lancé depuis une notification ?
 		if(getIntent().getExtras()!=null && getIntent().getExtras().getString("com.game.colibri.notification")!=null) {
 			((NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE)).cancelAll();
@@ -97,11 +63,34 @@ public class MenuPrinc extends Activity {
 	}
 	
 	@Override
+	protected void onStart() {
+		MyApp.resumeActivity();
+		super.onStart();
+	}
+	
+	@Override
+	protected void onStop() {
+		MyApp.stopActivity();
+		super.onStop();
+	}
+	
+	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if(requestCode==1 && screen==0) { // On met à jour le niveau d'expérience.
 			TextView exp = (TextView) findViewById(R.id.exp_menu);
-			exp.setText(getString(R.string.exp)+" : "+String.format("%,d", experience));
-			exp.startAnimation(AnimationUtils.loadAnimation(MenuPrinc.this, R.anim.aleat_opt_anim));
+			if(exp!=null) { // En retour de notification, l'affichage de MenuPrinc n'a pas été effectué
+				exp.setText(getString(R.string.exp)+" : "+String.format("%,d", MyApp.experience));
+				exp.startAnimation(AnimationUtils.loadAnimation(MenuPrinc.this, R.anim.aleat_opt_anim));
+				findViewById(R.id.coupe).setVisibility(MyApp.avancement>Jeu.NIV_MAX ? View.VISIBLE : View.GONE);
+			}
+		} else if(requestCode==3) { // Retour des artifices
+			Toast toast = Toast.makeText(MenuPrinc.this, R.string.toast_fin2, Toast.LENGTH_LONG);
+	    	TextView tv = (TextView) toast.getView().findViewById(android.R.id.message);
+	    	if( tv != null) tv.setGravity(Gravity.CENTER);
+	    	toast.show();
+		}
+		if(resultCode==2) { // Lancement artifices !
+			finCampagne(null);
 		}
 		super.onActivityResult(requestCode, resultCode, data);
 	}
@@ -144,15 +133,15 @@ public class MenuPrinc extends Activity {
 			}
 		});
 		placeButton();
-		if(avancement==1) {
+		if(MyApp.avancement==1) {
 			((TextView) findViewById(R.id.bout1)).setText(R.string.commencer);
-		} else if(avancement==Jeu.NIV_MAX+1) {
+		} else if(MyApp.avancement==Jeu.NIV_MAX+1) {
 			findViewById(R.id.coupe).setVisibility(View.VISIBLE);
 		}
-		if(!pref.getBoolean("musique", true))
+		if(!MyApp.getApp().pref.getBoolean("musique", true))
 			((ImageButton) findViewById(R.id.bout_musique)).setImageResource(R.drawable.nosound);
 		TextView exp = (TextView) findViewById(R.id.exp_menu);
-		exp.setText(getString(R.string.exp)+" : "+String.format("%,d", experience));
+		exp.setText(getString(R.string.exp)+" : "+String.format("%,d", MyApp.experience));
 		exp.setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Passing Notes.ttf"));
 		TextView title = (TextView) findViewById(R.id.main_title);
 		title.setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Sketch_Block.ttf"));
@@ -250,14 +239,7 @@ public class MenuPrinc extends Activity {
 				quitInfos(null);
 			}
 			else if(opt_aleat.getVisibility()==View.INVISIBLE) {
-				if (intro!=null) {
-				    intro.release();
-				    intro = null;
-				}
-				if (boucle!=null) {
-				    boucle.release();
-				    boucle = null;
-				}
+				MyApp.getApp().releaseMusic();
 				this.finish(); // On quitte le jeu !
 			} else {
 				// Animation pour rétablir le menu.
@@ -351,55 +333,11 @@ public class MenuPrinc extends Activity {
 	}
 	
 	/**
-	 * On récupère les préférences et l'avancement de l'utilisateur.
-	 */
-	private void loadData() {
-		avancement=pref.getInt("niveau", 1);
-		experience=pref.getInt("exp", 0);
-		expToSync=pref.getInt("expToSync", experience);
-		n_niv=avancement;
-		ParamAleat.loadParams(pref);
-		Log.i("Avancement :","Niv "+avancement);
-		Log.i("Experience :","Score :"+experience);
-		versionCode=pref.getInt("versionCode", 0);
-		int versionActuelle=0;
-		try {
-			versionActuelle = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
-		} catch (NameNotFoundException e) {
-			e.printStackTrace();
-		}
-		if(versionActuelle!=versionCode) {
-			editor.putString("adversaires", null);
-			editor.putInt("versionCode", versionActuelle);
-			editor.commit();
-		}
-	}
-	
-	/**
-	 * On sauve les préférences et l'avancement de l'utilisateur.
-	 */
-	public void saveData() {
-		editor.putInt("niveau", avancement);
-		editor.putInt("exp", experience);
-		editor.putInt("expToSync", expToSync);
-		editor.commit();
-	}
-	
-	/**
 	 * Lance l'activité Resultats pour le feu d'artifice de fin de campagne ! :3
 	 * @param v
 	 */
 	public void finCampagne(View v) {
-		Resultats.callback = new Resultats.callBackInterface() {
-			@Override
-			public void suite() {
-				Toast toast = Toast.makeText(MenuPrinc.this, R.string.toast_fin2, Toast.LENGTH_LONG);
-		    	TextView tv = (TextView) toast.getView().findViewById(android.R.id.message);
-		    	if( tv != null) tv.setGravity(Gravity.CENTER);
-		    	toast.show();
-			}
-		};
-		startActivity(new Intent(this, Resultats.class));
+		startActivityForResult(new Intent(this, Resultats.class), 3);
 	}
 	
 	/**
@@ -408,11 +346,12 @@ public class MenuPrinc extends Activity {
 	 */
 	public void continuer(View v) {
 		opt_infos.setVisibility(View.INVISIBLE);
-		if(avancement==1)
+		if(MyApp.avancement==1)
 			((TextView) findViewById(R.id.bout1)).setText(R.id.continuer);
-		Jeu.opt.putInt("mode", Niveau.CAMPAGNE);
-		Jeu.opt.putInt("n_niv", Math.min(avancement,Jeu.NIV_MAX));
-		startActivityForResult(new Intent(this, Jeu.class), 1);
+		Intent intent = new Intent(this, Jeu.class);
+		intent.putExtra("mode", Niveau.CAMPAGNE);
+		intent.putExtra("n_niv", Math.min(MyApp.avancement,Jeu.NIV_MAX));
+		startActivityForResult(intent, 1);
 	}
 	
 	public void campagne(View v) {
@@ -436,7 +375,7 @@ public class MenuPrinc extends Activity {
 			lay_sel.removeAllViews();
 			for(int i=0; i<points.length; i++) {
 				img = new Button(this);
-				if(ecran*points.length+i+1 >= avancement)
+				if(ecran*points.length+i+1 >= MyApp.avancement)
 					img.setBackgroundResource(R.drawable.fleur);
 				else if(Math.random()<0.5)
 					img.setBackgroundResource(R.drawable.emplacement1);
@@ -453,10 +392,10 @@ public class MenuPrinc extends Activity {
 			    img.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						if(v.getId()<=avancement) setApercu(v.getId());
+						if(v.getId()<=MyApp.avancement) setApercu(v.getId());
 					}
 			    });
-			    if(ecran*points.length+i+1 <= avancement) {
+			    if(ecran*points.length+i+1 <= MyApp.avancement) {
 					Animation a = AnimationUtils.loadAnimation(this, R.anim.dilat_anim);
 					a.setStartOffset(i*10);
 					img.startAnimation(a);
@@ -550,9 +489,10 @@ public class MenuPrinc extends Activity {
 	}
 	
 	public void launchNiv(View v) {
-		Jeu.opt.putInt("mode", Niveau.CAMPAGNE);
-		Jeu.opt.putInt("n_niv", n_niv);
-		startActivity(new Intent(this, Jeu.class));
+		Intent intent = new Intent(this, Jeu.class);
+		intent.putExtra("mode", Niveau.CAMPAGNE);
+		intent.putExtra("n_niv", n_niv);
+		startActivityForResult(intent, 2);
 	}
 	
 	public void paramAleat(View v) {
@@ -561,8 +501,8 @@ public class MenuPrinc extends Activity {
 			public void launchFunction(int mode) {
 				launchAleat(mode);
 			}
-		}, this, avancement);
-		pa.show(editor); // Si appui sur "OK", lance un niveau aléatoire en mode PERSO.
+		}, this, MyApp.avancement);
+		pa.show(); // Si appui sur "OK", lance un niveau aléatoire en mode PERSO.
 	}
 	
 	public void facile(View v) {
@@ -578,8 +518,9 @@ public class MenuPrinc extends Activity {
 	}
 	
 	public void launchAleat(int mode) {
-		Jeu.opt.putInt("mode", mode);
-		startActivityForResult(new Intent(this, Jeu.class), 1);
+		Intent intent = new Intent(this, Jeu.class);
+		intent.putExtra("mode", mode);
+		startActivityForResult(intent, 1);
 	}
 	
 	public void multijoueur(View v) {
@@ -590,8 +531,7 @@ public class MenuPrinc extends Activity {
 	
 	public void classements(View v) {
 		opt_infos.setVisibility(View.INVISIBLE);
-		ClassementAdapter.userId = pref.getInt("id",0);
-		startActivityForResult(new Intent(this, Classements.class), 1);
+		startActivity(new Intent(this, Classements.class));
 	}
 	
 	public void reglages(View v) {
@@ -627,29 +567,16 @@ public class MenuPrinc extends Activity {
 	public void musique(View v) {
 		ImageButton iv = (ImageButton) v;
 		opt_infos.setVisibility(View.INVISIBLE);
-		if(!pref.getBoolean("musique", true)) {
-			startMusic();
+		if(!MyApp.getApp().pref.getBoolean("musique", true)) {
+			MyApp.getApp().startMusic();
 			iv.setImageResource(R.drawable.sound);
-			editor.putBoolean("musique", true);
+			MyApp.getApp().editor.putBoolean("musique", true);
 		} else {
-			stopMusic();
+			MyApp.getApp().stopMusic();
 			iv.setImageResource(R.drawable.nosound);
-			editor.putBoolean("musique", false);
+			MyApp.getApp().editor.putBoolean("musique", false);
 		}
-		editor.commit();
+		MyApp.getApp().editor.commit();
 	}
 	
-	public static void startMusic() {
-		if(intro==null)
-			boucle.start();
-		else
-			intro.start();
-	}
-	
-	public static void stopMusic() {
-		if(intro==null)
-			boucle.pause();
-		else
-			intro.pause();
-	}
 }

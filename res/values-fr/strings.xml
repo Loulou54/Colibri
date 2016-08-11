@@ -103,7 +103,6 @@
 	<string name="newNivDejaCree">Un autre participant au défi %1$s a déjà soumi un nouveau niveau. Le vôtre a donc été abandonné.</string>
 	<string name="partObsolete">Votre dernière participation au défi %1$s a été soumise après la limite temporelle !</string>
 	<string name="triche">TRICHEUR repéré ! Il semblerait que vous avez utilisé deux appareils pour résoudre un niveau du défi "%1$s"&#8230; Vous obtenez une pénalité d\'expérience de 10000 ! Ne recommencez pas ;)</string>
-	<string name="messageServeur">Message du créateur !\n %1$s</string>
 	<string name="connexion_register">Vous devez être connecté pour vous inscrire au mode multijoueur !</string>
 	<string name="nodefis">Aucun défi !\n\nCréez un nouveau défi à l\'aide\ndu bouton à gauche.</string>
 	<string name="notif_newdefi">%1$s a lancé un nouveau défi !</string>
@@ -156,5 +155,8 @@
 	<string name="lost_mdp_pb">Problème d\'envoi ! Aviez-vous renseigné une adresse valide ??</string>
 	<string name="lost_mdp_ok">C\'est fait ! Lisez vos courriels ! :)</string>
 	<string name="patience">Patience ! Tout le monde n\'a pas encore joué ce match. ;)</string>
+	<string name="notif_n_newmatch">Vous avez %1$d nouveaux défis à relever !</string>
+	<string name="notif_n_results">Les résultats de %1$d défis sont disponibles !</string>
+	<string name="maj_req">Vous devez mettre à jour Colibri à la dernière version !</string>
 	
 </resources>

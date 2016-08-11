@@ -1446,6 +1446,7 @@ public class Niveau {
 		System.out.println("SEED : "+seed);
 		random.setSeed(seed);
 		int nbVaches, nbDyna, nCats, nbArcs;
+		progressMin = 0;
 		nbVaches = random.nextInt(1+nVaches);
 		nbDyna = random.nextInt(1+nDyna);
 		nCats = random.nextInt(1+nChats);
@@ -1478,7 +1479,7 @@ public class Niveau {
 		if(!geneChemin(longueur,db_l,db_c,nbVaches,nbDyna,nCats,nbArcs,numArcs) || casesParcourues()<15) { // on génère la carte pour une solution en "longueur" coups !
 			// Si la génération s'est retrouvée dans une impasse ou si le niveau généré est trop simple (coincé dans un secteur)
 			init();
-			geneNivRand(lon,var,base,seed-42);
+			geneNivRand(lon,var,base,random.nextLong());
 		}
 		experience = solution.length*(10+solution.length/4)+vaches.size()*20+nbDyna*15+chats.size()*40+nbArcs*30;
 	}

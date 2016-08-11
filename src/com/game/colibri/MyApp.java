@@ -1,0 +1,141 @@
+package com.game.colibri;
+
+import android.app.Application;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.media.MediaPlayer;
+import android.preference.PreferenceManager;
+import android.util.Log;
+
+public class MyApp extends Application {
+	
+	private static MyApp singleton;
+	
+	public static int id;
+	public static String pseudo;
+	public static int appareil;
+	public static Joueur user;
+	public static int avancement; // Progression du joueur dans les niveaux campagne.
+	public static int experience, expToSync; // L'expérience du joueur et l'expérience encore non synchronisée avec le serveur.
+	public static int versionCode; // Le code de version de la dernière version de Colibri exécutée.
+	public static long last_update; // Timestamp donné par le serveur de la dernière mise-à-jour.
+	private static int nActiveActivities = 0; // Pour déterminer si l'on doit mettre en pause la musique ou non lorsqu'une activité passe en fond.
+	
+	public SharedPreferences pref;
+	public SharedPreferences.Editor editor;
+	public MediaPlayer intro=null,boucle=null;
+	
+	public static MyApp getApp(){
+		return singleton;
+	}
+	
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		singleton = this;
+		pref = PreferenceManager.getDefaultSharedPreferences(this);
+		editor = pref.edit();
+		loadData();
+	}
+	
+	/**
+	 * On récupère les préférences et l'avancement de l'utilisateur.
+	 */
+	private void loadData() {
+		id = pref.getInt("id", 0);
+		pseudo = pref.getString("pseudo", null);
+		appareil = pref.getInt("appareil", 0);
+		avancement = pref.getInt("niveau", 1);
+		experience = pref.getInt("exp", 0);
+		expToSync = pref.getInt("expToSync", experience);
+		versionCode = pref.getInt("versionCode", 0);
+		last_update = pref.getLong("last_update", 0);
+		ParamAleat.loadParams(pref);
+		Log.i("Avancement :","Niv "+avancement);
+		Log.i("Experience :","Score :"+experience);
+		int versionActuelle=0;
+		try {
+			versionActuelle = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+		} catch (NameNotFoundException e) {
+			e.printStackTrace();
+		}
+		if(versionActuelle!=versionCode) {
+			editor.putString("adversaires", null)
+				.putInt("versionCode", versionActuelle)
+				.commit();
+		}
+	}
+	
+	public void connectUser(int i, String n, int a) {
+		id = i;
+		pseudo = n;
+		appareil= a;
+		editor.putString("pseudo", n)
+			.putInt("id", i)
+			.putInt("appareil", a)
+			.commit();
+	}
+	
+	/**
+	 * On sauve les préférences et l'avancement de l'utilisateur.
+	 */
+	public void saveData() {
+		editor.putInt("niveau", avancement)
+			.putInt("exp", experience)
+			.putInt("expToSync", expToSync)
+			.putLong("last_update", last_update)
+			.commit();
+	}
+	
+	public static void resumeActivity() {
+		if(nActiveActivities==0 && singleton!=null && singleton.pref.getBoolean("musique", true))
+			singleton.startMusic();
+		nActiveActivities++;
+	}
+	
+	public static void stopActivity() {
+		nActiveActivities--;
+		if(nActiveActivities==0 && singleton!=null)
+			singleton.stopMusic();
+	}
+	
+	public void startMusic() {
+		if(intro==null && boucle==null) {
+			intro = MediaPlayer.create(this, R.raw.intro);
+			intro.setLooping(false);
+			boucle = MediaPlayer.create(this, R.raw.boucle);
+			boucle.setLooping(true);
+			intro.start();
+			intro.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+				@Override
+				public void onCompletion(MediaPlayer mp) {
+					intro.release();
+				    intro = null;
+					boucle.start();
+				}
+			});
+		} else if(intro==null)
+			boucle.start();
+		else
+			intro.start();
+	}
+	
+	public void stopMusic() {
+		if(intro==null && boucle!=null)
+			boucle.pause();
+		else if(intro!=null)
+			intro.pause();
+	}
+	
+	public void releaseMusic() {
+		if (intro!=null) {
+		    intro.release();
+		    intro = null;
+		}
+		if (boucle!=null) {
+		    boucle.release();
+		    boucle = null;
+		}
+	}
+	
+}

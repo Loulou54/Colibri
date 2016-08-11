@@ -1,8 +1,13 @@
 package com.game.colibri;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.Locale;
 import java.util.Random;
+
+import org.json.JSONException;
+
+import com.network.colibri.DBController;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -35,12 +40,8 @@ import android.widget.Toast;
  */
 public class Jeu extends Activity {
 	
-	
-	public static Bundle opt;
-	public static MenuPrinc menu;
-	public static Multijoueur multi = null;
 	public static final int NIV_MAX=36;
-	public static String startMsg = null; // Message avant le lancement du jeu
+	public static WeakReference<Multijoueur> multijoueur;
 	
 	public Niveau niv;
 	public Carte carte;
@@ -50,8 +51,10 @@ public class Jeu extends Activity {
 	public View perdu; 
 	public View gagne; 
 	public Button bout_dyna;
-	private boolean brandNew=true, solUsed=false, solvedBySol=false, solved=false, music=false, popup=false, finipartous=false;
+	private boolean multi, brandNew=true, solUsed=false, solvedBySol=false, solved=false, finipartous=false;
 	public int n_niv;
+	private Bundle opt, savedInstanceState;
+	private Defi defi=null;
 	
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -59,7 +62,17 @@ public class Jeu extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if(multi!=null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) { // Interdire Screenshots
+		opt = getIntent().getExtras();
+		multi = opt.containsKey("defi"); // Détermine si l'on est en mode multi
+		if(multi) {
+			try {
+				defi = Defi.DefiFromJSON(opt.getString("defi"));
+			} catch(JSONException e) {
+				e.printStackTrace();
+				finish();
+			}
+		}
+		if(multi && Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) { // Interdire Screenshots
 			getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
 		}
 		setContentView(R.layout.activity_jeu);
@@ -119,14 +132,34 @@ public class Jeu extends Activity {
 			}
 		});
 		play = new MoteurJeu(this,carte);
-		if(MenuPrinc.intro!=null)
-			music=MenuPrinc.intro.isPlaying();
-		else
-			music=MenuPrinc.boucle.isPlaying();
-		if(multi!=null) { // On sauvegarde le fait que ce défi a été entammé.
-			menu.editor.putInt("defi_fuit", multi.defi.id);
-			menu.editor.commit();
+		this.savedInstanceState = savedInstanceState;
+		if(multi) { // On sauvegarde le fait que ce défi a été entammé.
+			MyApp.getApp().editor.putInt("defi_fuit", defi.id);
+			MyApp.getApp().editor.commit();
 		}
+	}
+	
+	@Override
+	protected void onStart() {
+		MyApp.resumeActivity();
+		super.onStart();
+	}
+	
+	@Override
+	protected void onStop() {
+		MyApp.stopActivity();
+		super.onStop();
+	}
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putBoolean("solUsed", solUsed);
+		outState.putBoolean("solvedBySol", solvedBySol);
+		outState.putBoolean("solved", solved);
+		outState.putBoolean("finipartous", finipartous);
+		outState.putInt("total_frames", play.total_frames+play.frame);
+		outState.putLong("seed", niv.seed);
+		super.onSaveInstanceState(outState);
 	}
 	
 	/* (non-Javadoc)
@@ -136,20 +169,18 @@ public class Jeu extends Activity {
 	public void onWindowFocusChanged(boolean hasFocus) {
 		if (brandNew) { // événement appelé lorsque le RelativeLayout "lay" est prêt ! C'est ici que l'on peut charger le niveau et ajouter les View "Animal".
 			launch_niv(false);
-			brandNew=false;
-		} else {
-			if(!hasFocus) {
-				if(play.isRunning) {
-					play.pause();
-					pause.setVisibility(View.VISIBLE);
-				}
-				if(music && !popup)
-					MenuPrinc.stopMusic();
-				popup=false;
-			} else {
-				if(music)
-					MenuPrinc.startMusic();
+			if(savedInstanceState!=null) { // Si Jeu a été détruite mais restaurée
+				solUsed = savedInstanceState.getBoolean("solUsed", false);
+				solvedBySol = savedInstanceState.getBoolean("solvedBySol", false);
+				solved = savedInstanceState.getBoolean("solved", false);
+				finipartous = savedInstanceState.getBoolean("finipartous", false);
+				play.total_frames = savedInstanceState.getInt("total_frames", 0);
+				savedInstanceState = null;
 			}
+			brandNew=false;
+		} else if(!hasFocus && play.isRunning) {
+			play.pause();
+			pause.setVisibility(View.VISIBLE);
 		}
 	}
 	
@@ -249,14 +280,17 @@ public class Jeu extends Activity {
 		menuLateral(0,null);
 		LinearLayout res = (LinearLayout) findViewById(R.id.gagne_resultats);
 		TextView phrase = (TextView) findViewById(R.id.gagne_resultats_phrase);
-		if (multi != null) { // Mode multijoueur
+		if (multi) { // Mode multijoueur
 			if(!solved) {
-				menu.editor.remove("defi_fuit");
-				menu.editor.commit();
-				finipartous = multi.defi.finMatch(multi.user.getId(), temps_total_ms, (solUsed) ? niv.solution.length*500 : 0);
-				multi.syncData();
+				MyApp.getApp().editor.remove("defi_fuit");
+				MyApp.getApp().editor.commit();
+				finipartous = defi.finMatch(new DBController(this), MyApp.id, temps_total_ms, (solUsed) ? niv.solution.length*500 : 0);
+				if(multijoueur!=null) {
+					finipartous = multijoueur.get().defi.finMatch(null, MyApp.id, temps_total_ms, (solUsed) ? niv.solution.length*500 : 0);
+					multijoueur.get().syncData();
+				}
 			} else {
-				Participation p = multi.defi.participants.get(multi.user.getId());
+				Participation p = defi.participants.get(MyApp.id);
 				temps_total_ms = finipartous ? p.t_fini : p.t_cours;
 				solUsed = (finipartous ? p.penalite_fini : p.penalite_cours)!=0;
 			}
@@ -283,15 +317,15 @@ public class Jeu extends Activity {
 				if(opt.getInt("mode",0)>0) {
 					exp=(solUsed) ? play.niv.experience/2 : play.niv.experience;
 				} else {
-					if(n_niv==menu.avancement) {
-						menu.avancement++;
+					if(n_niv==MyApp.avancement) {
+						MyApp.avancement++;
 						exp=n_niv*(50+n_niv/4);
 					} else
 						exp=(solUsed) ? n_niv*(10+n_niv/8)/2 : n_niv*(10+n_niv/8);
 				}
-				menu.experience+=exp;
-				menu.expToSync+=exp;
-				menu.saveData(); // On sauvegarde la progression.
+				MyApp.experience+=exp;
+				MyApp.expToSync+=exp;
+				MyApp.getApp().saveData(); // On sauvegarde la progression.
 			}
 			((TextView) res.getChildAt(0)).setText(getString(R.string.temps)+" :\n"+getString(R.string.exp)+" :\n"+getString(R.string.aide)+" :");
 			String s = getFormattedTime(temps_total_ms)+"\n + "+exp+"\n "+(solUsed ? getString(R.string.oui) : getString(R.string.non));
@@ -348,7 +382,8 @@ public class Jeu extends Activity {
 	 */
 	private void menuLateral(int disp, MotionEvent ev) {
 		if(disp==1 && menu_lateral.getVisibility()!=View.VISIBLE) { // Afficher
-			int cote = (int) Math.signum(2*ev.getX()-menu.ww);
+			int ww = findViewById(R.id.lay).getWidth();
+			int cote = (int) Math.signum(2*ev.getX()-ww);
 			RelativeLayout.LayoutParams p = (RelativeLayout.LayoutParams) menu_lateral.getLayoutParams();
 			p.addRule(10-cote, 0); // pour annuler l'autre contrainte
 			p.addRule(10+cote); // car RelativeLayout.ALIGN_PARENT_LEFT = 9 & RelativeLayout.ALIGN_PARENT_RIGHT = 11
@@ -377,15 +412,20 @@ public class Jeu extends Activity {
 			solved = false;
 			solUsed = false;
 			if(opt.getInt("mode", 0)>0) {
-				if(multi!=null) { // Mode multijoueur
-					niv = new Niveau(opt.getInt("mode"), opt.getLong("seed"), opt.getIntArray("param"), opt.getInt("progressMin"));
-					if(multi.defi.match==null) {
-						multi.defi.match = new Defi.Match(opt.getInt("mode"), opt.getLong("seed"), opt.getIntArray("param"), niv.progressMin, niv.experience);
-						multi.defi.limite = System.currentTimeMillis()/1000 + multi.defi.t_max;
-						multi.base.updateDefi(multi.defi);
+				if(multi) { // Mode multijoueur
+					niv = new Niveau(opt.getInt("mode"), opt.getLong("seed"), opt.getIntArray("param"), opt.getInt("avancement"));
+					if(defi.match==null) {
+						defi.match = new Defi.Match(opt.getInt("mode"), opt.getLong("seed"), opt.getIntArray("param"), opt.getInt("avancement"), niv.progressMin, niv.experience);
+						defi.limite = System.currentTimeMillis()/1000 + defi.t_max;
+						if(multijoueur!=null) {
+							multijoueur.get().defi.match = defi.match;
+							multijoueur.get().defi.limite = defi.limite;
+							multijoueur.get().adapt.notifyDataSetChanged();
+						}
+						(new DBController(this)).updateDefi(defi);
 					}
 				} else // Mode Carte Aléatoire
-					niv = new Niveau(opt.getInt("mode"), (new Random()).nextLong(), ParamAleat.param, menu.avancement);
+					niv = new Niveau(opt.getInt("mode"), savedInstanceState==null ? (new Random()).nextLong() : savedInstanceState.getLong("seed"), ParamAleat.param, MyApp.avancement);
 			} else {
 				try { // On ouvre le Niveau index_niv.
 					niv = new Niveau(this.getAssets().open("niveaux/niveau"+n_niv+".txt"));
@@ -398,9 +438,13 @@ public class Jeu extends Activity {
 		setMenuLateral();
 		carte.loadNiveau(niv);
 		play.init(replay);
-		if(startMsg!=null) { // Affichage d'un message avant le démarrage du jeu.
-			Toast.makeText(this, startMsg, Toast.LENGTH_SHORT).show();
-			startMsg = null;
+		if(savedInstanceState!=null) {
+			pause.setVisibility(View.VISIBLE);
+			return;
+		}
+		if(opt.containsKey("startMsg")) { // Affichage d'un message avant le démarrage du jeu.
+			Toast.makeText(this, opt.getString("startMsg"), Toast.LENGTH_SHORT).show();
+			opt.remove("startMsg");
 			final Handler handler = new Handler();
 			handler.postDelayed(new Runnable() {
 			  @Override
@@ -435,19 +479,17 @@ public class Jeu extends Activity {
 	}
 	
 	public void quitter(View v) {
-		if(multi!=null && !solved) {
+		if(multi && !solved) {
 			forfaitBox();
 		} else {
-			music=false;
-			multi=null;
-			this.finish();
+			finish();
 		}
 	}
 	
 	public void solution(View v) {
 		if(niv.solution==null) // il n'y a pas de solution
 			return;
-		if(opt.getInt("mode", 0)==Niveau.CAMPAGNE && n_niv==menu.avancement) {
+		if(opt.getInt("mode", 0)==Niveau.CAMPAGNE && n_niv==MyApp.avancement) {
 			Toast.makeText(this, R.string.solution_bloque, Toast.LENGTH_SHORT).show();
 			return;
 		}
@@ -464,25 +506,23 @@ public class Jeu extends Activity {
 			play.pause();
 		if(opt.getInt("mode", 0)==Niveau.CAMPAGNE) {
 			if(n_niv==NIV_MAX) {
+				setResult(2);
 				quitter(v);
-				if(menu.screen==0)
-					menu.findViewById(R.id.coupe).setVisibility(View.VISIBLE);
-				menu.finCampagne(v);
 				return;
 			}
-			if(n_niv<menu.avancement)
+			if(n_niv<MyApp.avancement)
 				n_niv++;
 			else {
 				Toast.makeText(this, R.string.bloque, Toast.LENGTH_SHORT).show();
 				play.start();
 				return;
 			}
-		} else if(multi!=null) {
+		} else if(multi) {
 			if(!solved) { // j1 ou j2 appui bouton Suivant => Forfait
 				forfaitBox();
 			} else{
 				if(v.getId()==R.id.continuer) { // appui sur continuer
-					if(finipartous && multi.defi.type==0) {
+					if(finipartous && defi.type==0) {
 						finDefi();
 					} else {
 						quitter(null);
@@ -517,25 +557,28 @@ public class Jeu extends Activity {
 		forfait.setMessage(R.string.forfait_msg);
 		forfait.setPositiveButton(R.string.accept, check);
 		forfait.setNegativeButton(R.string.annuler, null);
-		popup = true;
 		forfait.show();
 	}
 	
 	private void finDefi() {
-		Resultats.callback = new Resultats.callBackInterface() {
-			@Override
-			public void suite() {
-				multi.defi.resVus = multi.defi.nMatch;
-				multi.base.setResultatsVus(multi.defi.id,multi.defi.nMatch);
-				multi.adapt.notifyDataSetChanged();
-				multi.syncData();
-				quitter(null);
-				//multi.choixNiveau();
-			}
-		};
-		Resultats.multi = multi;
-		Resultats.DISPLAY_RES = true;
-		popup = true;
-		startActivity(new Intent(this, Resultats.class));
+		Intent intent = new Intent(this, Resultats.class);
+		intent.putExtra("defi", defi.toJSON());
+		DBController base = new DBController(this);
+		if(defi.type>0) { // Partie rapide
+			base.removeDefi(defi, MyApp.id);
+		} else {
+			defi.resVus = defi.nMatch;
+			base.setResultatsVus(defi.id,defi.nMatch);
+		}
+		if(multijoueur!=null) {
+			if(defi.type>0)
+				multijoueur.get().removeDefi();
+			else
+				multijoueur.get().defi.resVus = defi.nMatch;
+			multijoueur.get().adapt.notifyDataSetChanged();
+			//multijoueur.get().syncData();
+		}
+		startActivity(intent);
+		finish();
 	}
 }
