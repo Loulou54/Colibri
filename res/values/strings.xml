@@ -61,8 +61,8 @@
 	<string name="victoire">Victory!!</string>
 	<string name="resultats">\u0009\u21D2 Press continue for the results!</string>
 	<string name="the_end">THE END</string>
-	<string name="toast_fin">Awesome! You beat the Campaign mode!!</string>
-	<string name="toast_fin2">Congratulations!\nHave you tried the Random Levels and the Multiplayer Challenges yet? ;)</string>
+	<string name="toast_fin">Congratulations!|You beat the Campaign mode!!</string>
+	<string name="toast_fin2">And now&#8230;|Have you tried the Random Levels and the Multiplayer Challenges yet? ;)</string>
 	<string name="enter_pseudo">Please enter your nickname and your password:</string>
 	<string name="register">Register</string>
 	<string name="progress">Transfer&#8230;</string>
@@ -71,13 +71,13 @@
 	<string name="err">Unknown error. Are you connected to Internet?</string>
 	<string name="errServ">Oops, error on the servor side!</string>
 	<string name="deja_pris">This username is already taken.\nTry something else!</string>
-	<string name="enregistre">You\'ve been successfully registered!</string>
+	<string name="enregistre">Welcome!|You\'ve been successfully registered!</string>
 	<string name="hors_connexion">You\'re currently offline.</string>
 	<string name="gcm_register">Registering to Google Cloud Messaging service&#8230;</string>
 	<string name="gcm_success">Done!</string>
 	<string name="sync_fail">Synchronization with remote database failed!</string>
-	<string name="nom_invalide">Invalid name (3 to 14 characters)</string>
-	<string name="nom_invalide_defi">Invalid name (no more than 15 characters)</string>
+	<string name="nom_invalide">Invalid name (3 to 20 characters)</string>
+	<string name="nom_invalide_defi">Invalid name (not more than 30 characters)</string>
 	<string name="etat_attente">Waiting</string>
 	<string name="etat_resultats">Results!</string>
 	<string name="etat_relever">Solve</string>
@@ -143,7 +143,7 @@
 	<string name="mdp_invalide">Invalid password (6 characters at least)</string>
 	<string name="not_registered">This nickname is not registered. Switch to "Register" if you want to register this name.</string>
 	<string name="wrong_password">Wrong password!</string>
-	<string name="connected">You\'ve been successfully connected!</string>
+	<string name="connected">Connected!|You\'ve been successfully connected!</string>
 	<string name="force_quit_msg">You killed the application during a challenge: Forfeit.</string>
 	<string name="left_arrow">&#9664;</string>
 	<string name="right_arrow">&#9654;</string>
@@ -155,8 +155,8 @@
 	<string name="lost_mdp_expl">\u0009(i) You will receive an e-mail at the address you specified when creating the account. Please follow the instructions in it then.</string>
 	<string name="lost_mdp_already_sent">Already sent less than a day ago!\nCheck your mails! ;) (Possibly in SPAM)</string>
 	<string name="lost_mdp_pb">Sending problem! Did you provide a valid address??</string>
-	<string name="lost_mdp_ok">Done! Check your e-mails! :)</string>
-	<string name="patience">Be patient! Everybody has not played this match yet. ;)</string>
+	<string name="lost_mdp_ok">Password recovery|Done! Check your e-mails! :)</string>
+	<string name="patience">Be patient!|Everybody has not played this match yet. ;)</string>
 	<string name="notif_n_newmatch">You have %1$d new challenges to solve!</string>
 	<string name="notif_n_results">The results of %1$d challenges are available!</string>
 	<string name="maj_req">You have to update Colibri to the latest version!</string>

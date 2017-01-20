@@ -1,6 +1,7 @@
 package com.game.colibri;
 
-import android.annotation.SuppressLint;
+import java.lang.ref.WeakReference;
+
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
@@ -14,13 +15,20 @@ public class SuggestionsEditText extends AutoCompleteTextView {
     private static final int MESSAGE_TEXT_CHANGED = 100;
     private static final int AUTOCOMPLETE_DELAY = 750;
     private ProgressBar mLoadingIndicator;
-
-
-    @SuppressLint("HandlerLeak")
-	private final Handler mHandler = new Handler() {
+    private final FilterHandler filterHandler = new FilterHandler(this);
+    
+	private static class FilterHandler extends Handler {
+		
+		private final WeakReference<SuggestionsEditText> act;
+		
+		public FilterHandler(SuggestionsEditText a) {
+			act = new WeakReference<SuggestionsEditText>(a);
+		}
+		
         @Override
         public void handleMessage(Message msg) {
-            SuggestionsEditText.super.performFiltering((CharSequence) msg.obj, msg.arg1);
+        	if(act.get()!=null)
+        		act.get().filter((CharSequence) msg.obj, msg.arg1);
         }
     };
 
@@ -31,14 +39,28 @@ public class SuggestionsEditText extends AutoCompleteTextView {
     public void setLoadingIndicator(ProgressBar progressBar) {
         mLoadingIndicator = progressBar;
     }
-
+    
+    /**
+     * Effectue le vrai filtrage (la requête) en appelant la fonction parente.
+     * @param text
+     * @param keyCode
+     */
+    private void filter(CharSequence text, int keyCode) {
+    	super.performFiltering(text, keyCode);
+    }
+    
+    /**
+     * Appelée lorsque l'on entre des caractères dans l'EditText.
+     * Appelle performFiltering de super (qui fait le vrai filtrage, i.e. la requête)
+     * après un délai, par le Handler qui appelle filter.
+     */
     @Override
     protected void performFiltering(CharSequence text, int keyCode) {
         if (mLoadingIndicator != null) {
             mLoadingIndicator.setVisibility(View.VISIBLE);
         }
-        mHandler.removeMessages(MESSAGE_TEXT_CHANGED);
-        mHandler.sendMessageDelayed(mHandler.obtainMessage(MESSAGE_TEXT_CHANGED, text), AUTOCOMPLETE_DELAY);
+        filterHandler.removeMessages(MESSAGE_TEXT_CHANGED);
+        filterHandler.sendMessageDelayed(filterHandler.obtainMessage(MESSAGE_TEXT_CHANGED, text), AUTOCOMPLETE_DELAY);
     }
     
     @Override

@@ -21,7 +21,10 @@
         android:layout_weight="2"
         android:textSize="18sp"
         android:textColor="@color/theme_gris"
-        android:text="@string/joueur" />
+        android:text="@string/joueur"
+        android:maxLines="1"
+        android:ellipsize="marquee"
+        android:scrollHorizontally="true" />
     
     <TextView
         android:id="@+id/scoreJoueur"

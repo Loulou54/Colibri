@@ -507,6 +507,25 @@ public class DBController  extends SQLiteOpenHelper {
 	}
 	
 	/**
+	 * Crée une tâche serveur pour ajouter exp en expérience.
+	 * @param exp
+	 */
+	public void addExp(int exp) {
+		SQLiteDatabase database = this.getWritableDatabase();
+		ContentValues values = new ContentValues();
+		JSONObject o = new JSONObject();
+		try {
+			o.put("task", "addExp");
+			o.put("exp", exp);
+			values.put("task", o.toString());
+			database.insert("tasks", null, values);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		database.close();
+	}
+	
+	/**
 	 * Supprime tout avant une synchro totale.
 	 */
 	public void taskSyncTotale(int user) {

@@ -15,10 +15,18 @@ public class ResultatsAdapter extends ArrayAdapter<Participation> {
 	public static double prog;
 	public static int etape;
 	private Typeface font;
+	private int partEffectives = 0;
+	private int t_max = 0;
 	
 	public ResultatsAdapter(Context context, Participation[] joueurs) {
 		super(context, R.layout.element_resultat, joueurs);
 		font = Typeface.createFromAsset(context.getAssets(),"fonts/Passing Notes.ttf");
+		for(Participation p : joueurs) {
+			if(p.t_fini < Participation.FORFAIT && p.t_fini > t_max)
+				t_max = p.t_fini;
+			if(p.t_fini!=Participation.NOT_PLAYED)
+				partEffectives++;
+		}
 	}
 	
 	@Override
@@ -33,6 +41,8 @@ public class ResultatsAdapter extends ArrayAdapter<Participation> {
 			h.avatar = (ImageView) convertView.findViewById(R.id.avatarRes);
 			h.nom = (TextView) convertView.findViewById(R.id.nomJoueurRes);
 			h.nom.setTypeface(font);
+			h.nom.setSelected(true);
+			h.nom.setHorizontallyScrolling(true);
 			h.temps = (TextView) convertView.findViewById(R.id.tempsJoueurRes);
 			h.penalite = (TextView) convertView.findViewById(R.id.penaliteJoueurRes);
 			h.exp = (TextView) convertView.findViewById(R.id.expJoueurRes);
@@ -43,9 +53,9 @@ public class ResultatsAdapter extends ArrayAdapter<Participation> {
 		}
 		h.avatar.setImageResource(p.joueur.getAvatar());
 		h.nom.setText(p.joueur.getPseudo());
-		h.score.setText(""+(p.gagne==1 && etape<3 ? p.win-1 : p.win));
+		h.score.setText(""+(p.gagne==1 && partEffectives>1 && etape<3 ? p.win-1 : p.win));
 		if(p.gagne!=0) {
-			h.temps.setText(Jeu.getFormattedTime(etape<2 ? (int) (p.t_fini*prog) : p.t_fini+p.penalite_fini));
+			h.temps.setText(Jeu.getFormattedTime(etape<2 ? Math.min(p.t_fini, (int) (t_max*prog*prog)) : p.t_fini+p.penalite_fini));
 			if(etape>=1)
 				h.penalite.setText(Jeu.getFormattedTime(p.penalite_fini));
 			if(etape>=3)

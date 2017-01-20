@@ -43,7 +43,6 @@ import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 public class Multijoueur extends Activity {
@@ -62,6 +61,7 @@ public class Multijoueur extends Activity {
 	public AsyncHttpClient client;
 	public DBController base;
 	private boolean gcmActive = true;
+	private long lastPress = 0; // timestamp du dernier appui sur un bouton défi pour éviter les doubles clics
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -122,6 +122,33 @@ public class Multijoueur extends Activity {
             Log.e("UnRegister Receiver Error", "> " + e.getMessage());
         }
 		super.onDestroy();
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if(requestCode==1 && resultCode==RESULT_FIRST_USER) { // Afficher résultats de la partie qui a été terminée
+			Intent intent = new Intent(this, Resultats.class);
+			intent.putExtra("defi", new String[] {data.getStringExtra("defi")});
+			startActivityForResult(intent, 2);
+		} else if(requestCode==2 && resultCode==RESULT_FIRST_USER) { // Résultats vus.
+			int[] resVus = data.getIntArrayExtra("resVus");
+			for(int r=0; resVus[r]!=0; r++) {
+				for(int i=0; i<adversaires.size(); i++) {
+					if(adversaires.get(i).id==resVus[r]) {
+						defi = adversaires.get(i);
+						if(defi.type>0) { // Partie rapide
+							base.removeDefi(adversaires.remove(i), MyApp.id);
+						} else {
+							defi.resVus = defi.nMatch;
+							base.setResultatsVus(defi.id,defi.nMatch);
+						}
+						break;
+					}
+				}
+			}
+			adapt.notifyDataSetChanged();
+		}
+		super.onActivityResult(requestCode, resultCode, data);
 	}
 	
 	/**
@@ -241,7 +268,7 @@ public class Multijoueur extends Activity {
 			.putExtra("param", ParamAleat.param)
 			.putExtra("avancement", defi.getProgressMin())
 			.putExtra("defi", defi.toJSON());
-		startActivity(intent);
+		startActivityForResult(intent, 1);
 	}
 	
 	/**
@@ -257,7 +284,7 @@ public class Multijoueur extends Activity {
 			.putExtra("param", defi.match.param)
 			.putExtra("avancement", defi.match.avancement)
 			.putExtra("defi", defi.toJSON());
-		startActivity(intent);
+		startActivityForResult(intent, 1);
 	}
 	
 	public void nouveauDefi(View v) {
@@ -336,6 +363,9 @@ public class Multijoueur extends Activity {
 	}
 	
 	public void actionDefi(View v) {
+		if(System.currentTimeMillis() - lastPress < 1000) // Pour éviter les doubles clics
+			return;
+		lastPress = System.currentTimeMillis();
 		final int groupPosition = (Integer) v.getTag();
 		defi = adversaires.get(groupPosition);
 		switch(defi.getEtat(user.getId())) {
@@ -343,17 +373,16 @@ public class Multijoueur extends Activity {
 			Toast.makeText(this, R.string.patience, Toast.LENGTH_LONG).show();
 			break;
 		case Defi.RESULTATS: // Afficher les résultats
-			Intent intent = new Intent(this, Resultats.class);
-			intent.putExtra("defi", defi.toJSON());
-			if(defi.type>0) { // Partie rapide
-				base.removeDefi(adversaires.remove(groupPosition), user.getId());
-			} else {
-				defi.resVus = defi.nMatch;
-				base.setResultatsVus(defi.id,defi.nMatch);
+			ArrayList<String> defRes = new ArrayList<String>();
+			int nDef = adversaires.size();
+			for(int i=0; i<nDef; i++) {
+				Defi d = adversaires.get((groupPosition + i)%nDef);
+				if(d.getEtat(user.getId())==Defi.RESULTATS)
+					defRes.add(d.toJSON());
 			}
-			adapt.notifyDataSetChanged();
-			//syncData();
-			startActivity(intent);
+			Intent intent = new Intent(this, Resultats.class);
+			intent.putExtra("defi", defRes.toArray(new String[0]));
+			startActivityForResult(intent, 2);
 			break;
 		case Defi.RELEVER: // Lancer le jeu avec Seed donnée
 			releverMatch();
@@ -378,7 +407,7 @@ public class Multijoueur extends Activity {
 			Toast.makeText(this, R.string.hors_connexion, Toast.LENGTH_SHORT).show();
 			return;
 		}
-		MyApp.last_update = 0;
+		MyApp.last_update = -Math.abs(MyApp.last_update);
 		syncData();
 	}
 	
@@ -460,7 +489,7 @@ public class Multijoueur extends Activity {
 				registerUser();
 				return;
 			} else {
-				String title = context.getString(R.string.app_name), msg=newMessage;
+				String title = context.getString(R.string.notification), msg=newMessage;
 				try {
 					JSONObject o = new JSONObject(newMessage);
 					String typ = o.getString("type");
@@ -481,8 +510,11 @@ public class Multijoueur extends Activity {
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
-				Toast.makeText(Multijoueur.this, context.getString(R.string.notification)+" !\n\n"+title+"\n"+msg, Toast.LENGTH_LONG).show();
-				syncData();
+				boolean inGame = (Jeu.multijoueur!=null);
+				Toast.makeText(Multijoueur.this, title+"|"+msg, inGame ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG, inGame).show();
+				long lastSync = MyApp.getApp().pref.getLong("lastNotif", 0);
+				if(System.currentTimeMillis() - lastSync > 5000 && !inGame)
+					syncData();
 			}
 		}
 	};
@@ -531,11 +563,17 @@ public class Multijoueur extends Activity {
 	
 	public void syncData() {
 		adapt.notifyDataSetChanged();
-		if(!connect.isConnectedToInternet())
+		if(!connect.isConnectedToInternet() || !adapt.getLaunchEnabled())
 			return;
 		adapt.setLaunchEnabled(false);
 		loader.showNext();
 		loader.setEnabled(false);
+		((TextView) findViewById(R.id.nvDefi)).setEnabled(false);
+		((TextView) findViewById(R.id.nvPRapide)).setEnabled(false);
+		if(MyApp.expToSync!=0) {
+			base.addExp(MyApp.expToSync);
+			MyApp.expToSync = 0;
+		}
 		RequestParams params = new RequestParams();
 		params.setHttpEntityIsRepeatable(true);
 		params.put("token", APP_TOKEN);
@@ -544,14 +582,17 @@ public class Multijoueur extends Activity {
 		params.put("tasks", base.getTasks());
 		System.out.println(base.getTasks());
 		params.put("last_update", ""+MyApp.last_update);
-		params.put("expToSync", ""+MyApp.expToSync);
+		params.put("expToSync", "0"); // TODO: à enlever à la prochaine version
 		params.put("progress", ""+MyApp.avancement);
 		client.post(SERVER_URL+"/sync_data.php", params, new AsyncHttpResponseHandler() {
 			@Override
 			public void onSuccess(String response) {
 				loader.showNext();
 				loader.setEnabled(true);
+				((TextView) findViewById(R.id.nvDefi)).setEnabled(true);
+				((TextView) findViewById(R.id.nvPRapide)).setEnabled(true);
 				adapt.setLaunchEnabled(true);
+				MyApp.getApp().editor.putLong("lastNotif", System.currentTimeMillis()).commit();
 				if(insertJSONData(response)) {
 					base.clearTasks();
 				}
@@ -561,6 +602,8 @@ public class Multijoueur extends Activity {
 			public void onFailure(int statusCode, Throwable error, String content) {
 				loader.showNext();
 				loader.setEnabled(true);
+				((TextView) findViewById(R.id.nvDefi)).setEnabled(true);
+				((TextView) findViewById(R.id.nvPRapide)).setEnabled(true);
 				adapt.setLaunchEnabled(true);
 				adapt.notifyDataSetChanged();
 				Toast.makeText(Multijoueur.this, R.string.sync_fail, Toast.LENGTH_SHORT).show();
@@ -590,7 +633,7 @@ public class Multijoueur extends Activity {
 		try {
 			JSONObject o = new JSONObject(def);
 			last_up = o.getLong("last_update");
-			if(MyApp.last_update==0) {
+			if(MyApp.last_update<=0) { // Sync totale
 				base.taskSyncTotale(user.getId());
 			}
 			if(o.has("tasks"))
@@ -609,10 +652,11 @@ public class Multijoueur extends Activity {
 			res = false;
 			if(def.equalsIgnoreCase("upgrade"))
 				Toast.makeText(Multijoueur.this, R.string.maj_req, Toast.LENGTH_LONG).show();
+			else
+				Toast.makeText(Multijoueur.this, R.string.err500, Toast.LENGTH_LONG).show();
 		}
 		if(res) {
 			dispUser();
-			MyApp.expToSync = 0;
 			MyApp.experience = user.getExp();
 			MyApp.avancement = user.getProgress();
 			MyApp.last_update = last_up;

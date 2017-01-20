@@ -11,9 +11,9 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="6dp"
-        android:paddingLeft="6dp"
-        android:paddingRight="6dp"
-        android:background="@drawable/papier"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:background="@drawable/toast"
         android:text="@string/the_results"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/theme_vert"
@@ -90,6 +90,18 @@
 
     </LinearLayout>
     
+    <ImageButton
+        android:id="@+id/nextRes"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+	    android:layout_alignParentRight="true"
+	    android:layout_margin="6dp"
+	    android:background="@drawable/bouton_toast"
+	    android:src="@drawable/fw"
+	    android:contentDescription="@string/tiret"
+	    android:onClick="displayNextResults" />
+    
     <com.game.colibri.Artifices
         android:id="@+id/artifices"
         android:layout_width="match_parent"
@@ -100,9 +112,9 @@
     <com.game.colibri.Carte
 	    android:id="@+id/apercuResMini"
 	    android:layout_width="100dp"
-	    android:layout_height="55dp"
+	    android:layout_height="60dp"
 	    android:layout_alignParentTop="true"
-	    android:layout_alignParentRight="true"
+	    android:layout_alignParentLeft="true"
 	    android:layout_margin="6dp"
 	    android:background="@drawable/herbe_nv2"
 	    android:onClick="clickApercu" />

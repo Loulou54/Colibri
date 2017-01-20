@@ -35,7 +35,10 @@
         android:paddingRight="0dp"
         android:textSize="18sp"
         android:textColor="@color/choco"
-        android:text="@string/joueur" />
+        android:text="@string/joueur"
+        android:maxLines="1"
+        android:ellipsize="marquee"
+        android:scrollHorizontally="true" />
     
     <ImageView
         android:id="@+id/paysAdv"

@@ -90,7 +90,7 @@ public class Defi {
 			if(p.t_cours!=Participation.NOT_PLAYED)
 				partEffectives++;
 		}
-		boolean result = (classement[0].t_cours!=0 && classement.length>=type);
+		boolean result = (classement[0].t_cours!=0 && (type==0 || classement.length==type));
 		if(result) { // Tous les participants ont fini.
 			int ligne=0, pos=0, t_pos=0;
 			for(Participation p : classement) {

@@ -1,10 +1,8 @@
 package com.game.colibri;
 
-
-
+import java.lang.ref.WeakReference;
 import java.util.LinkedList;
 
-import android.annotation.SuppressLint;
 import android.os.Handler;
 import android.os.Message;
 import android.util.TypedValue;
@@ -12,7 +10,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
-
 
 /**
  * Classe gérant les déplacements des éléments (colibri, vaches, ...) selon les régles
@@ -53,15 +50,25 @@ public class MoteurJeu {
 	 * Utiliser moveHandler.removeMessages(0) pour arrêter le cycle.
 	 */
 	
-	public RefreshHandler moveHandler = new RefreshHandler();
+	private final RefreshHandler moveHandler = new RefreshHandler(this);
 	
-	@SuppressLint("HandlerLeak")
-	class RefreshHandler extends Handler {
+	private static class RefreshHandler extends Handler {
+		
+		private final WeakReference<MoteurJeu> act;
+		
+		public RefreshHandler(MoteurJeu a) {
+			act = new WeakReference<MoteurJeu>(a);
+		}
+		
 		@Override
 		public void handleMessage(Message msg) {
-			if(msg.what==jeu.n_niv) { // Fin de l'animation de l'explosion. (on utilise le handler pour contourner l'abscence de listener pour AnimationDrawable)
-				MoteurJeu.this.finExplosion(msg.arg1,msg.arg2);
-			} else MoteurJeu.this.move();
+			MoteurJeu mj = act.get();
+			if(mj==null)
+				return;
+			if(msg.what==mj.jeu.n_niv) // Fin de l'animation de l'explosion. (on utilise le handler pour contourner l'abscence de listener pour AnimationDrawable)
+				mj.finExplosion(msg.arg1,msg.arg2);
+			else
+				mj.move();
 		}
 		public void sleep(long delayMillis) {
 			this.removeMessages(0);

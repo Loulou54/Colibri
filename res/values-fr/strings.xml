@@ -61,8 +61,8 @@
 	<string name="victoire">Victoire !!</string>
 	<string name="resultats">\u0009\u21D2 Continuez pour les Résultats !</string>
 	<string name="the_end">FIN</string>
-	<string name="toast_fin">Excellent ! Vous avez fini le mode Campagne !!</string>
-	<string name="toast_fin2">Bravo!\n\nAvez-vous déjà essayé les Niveaux Aléatoires et les Défis Multijoueurs ? ;)</string>
+	<string name="toast_fin">Félicitations !|Vous avez fini le mode Campagne !!</string>
+	<string name="toast_fin2">Et maintenant&#8230;|Avez-vous déjà essayé les Niveaux Aléatoires et les Défis Multijoueurs ? ;)</string>
 	<string name="enter_pseudo">Entrez votre pseudonyme et mot de passe :</string>
 	<string name="register">S\'inscrire</string>
 	<string name="progress">Transfert&#8230;</string>
@@ -71,13 +71,13 @@
 	<string name="err">Erreur inconnue. Êtes-vous bien connectés à Internet ?</string>
 	<string name="errServ">Oups, erreur côté serveur !</string>
 	<string name="deja_pris">Ce pseudo est déjà pris.\nEssayez un autre !</string>
-	<string name="enregistre">Vous vous êtes inscrits avec succès !</string>
+	<string name="enregistre">Bienvenue !|Vous vous êtes inscrits avec succès !</string>
 	<string name="hors_connexion">Vous êtes actuellement hors connexion.</string>
 	<string name="gcm_register">Enregistrement au service Google Cloud Messaging&#8230;</string>
 	<string name="gcm_success">Fait !</string>
 	<string name="sync_fail">La synchronisation avec la base de données distante a échoué !</string>
-	<string name="nom_invalide">Nom invalide (3 à 14 caractères)</string>
-	<string name="nom_invalide_defi">Nom invalide (pas plus de 15 caractères)</string>
+	<string name="nom_invalide">Nom invalide (3 à 20 caractères)</string>
+	<string name="nom_invalide_defi">Nom invalide (pas plus de 30 caractères)</string>
 	<string name="etat_attente">Attente</string>
 	<string name="etat_resultats">Résultats</string>
 	<string name="etat_relever">Relever</string>
@@ -143,7 +143,7 @@
 	<string name="mdp_invalide">Mot de passe invalide (au moins 6 caractères)</string>
 	<string name="not_registered">Ce pseudo n\'est pas inscrit. Cliquez sur "S'inscrire" pour vous inscrire sous ce nom.</string>
 	<string name="wrong_password">Mauvais mot de passe !</string>
-	<string name="connected">Vous vous êtes connecté avec succès !</string>
+	<string name="connected">Connecté !|Vous vous êtes connecté avec succès !</string>
 	<string name="force_quit_msg">Vous avez forcé l\'arrêt de l\'application pendant un défi : vous faites Forfait.</string>
 	<string name="expToSyncMsg">%1$s d\'expérience gagnée hors ligne sera synchronisée avec ce compte !</string>
 	<string name="mail">Adresse mail *</string>
@@ -153,8 +153,8 @@
 	<string name="lost_mdp_expl">\u0009(i) Vous allez recevoir un e-mail à l\'adresse spécifiée à la création de votre compte. Vous en suivrez les instructions.</string>
 	<string name="lost_mdp_already_sent">Déjà envoyé il y a moins d\'un jour !\nLisez vos mails ! ;) (Possiblement dans SPAM !)</string>
 	<string name="lost_mdp_pb">Problème d\'envoi ! Aviez-vous renseigné une adresse valide ??</string>
-	<string name="lost_mdp_ok">C\'est fait ! Lisez vos courriels ! :)</string>
-	<string name="patience">Patience ! Tout le monde n\'a pas encore joué ce match. ;)</string>
+	<string name="lost_mdp_ok">Récupération de MdP|C\'est fait ! Lisez vos courriels ! :)</string>
+	<string name="patience">Patience !|Tout le monde n\'a pas encore joué ce match. ;)</string>
 	<string name="notif_n_newmatch">Vous avez %1$d nouveaux défis à relever !</string>
 	<string name="notif_n_results">Les résultats de %1$d défis sont disponibles !</string>
 	<string name="maj_req">Vous devez mettre à jour Colibri à la dernière version !</string>

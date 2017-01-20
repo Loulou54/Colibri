@@ -25,7 +25,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 import static com.network.colibri.CommonUtilities.APP_TOKEN;
 import static com.network.colibri.CommonUtilities.SERVER_URL;
 
@@ -152,7 +151,7 @@ public class RegisterUser {
 					String mdp = ((EditText) lay.findViewById(R.id.mdp)).getText().toString();
 					String mail = ((EditText) lay.findViewById(R.id.mail)).getText().toString();
 					boolean lostMdp = ((CheckBox) lay.findViewById(R.id.lost_chkbox)).isChecked();
-					if(name.length()<3 || name.length()>14) {
+					if(name.length()<3 || name.length()>20) {
 						Toast.makeText(context, R.string.nom_invalide, Toast.LENGTH_LONG).show();
 						show(name);
 					} else if(!register && lostMdp) {

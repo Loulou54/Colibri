@@ -19,7 +19,6 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ViewFlipper;
 import android.app.Activity;
 import android.app.NotificationManager;
@@ -347,7 +346,7 @@ public class MenuPrinc extends Activity {
 	public void continuer(View v) {
 		opt_infos.setVisibility(View.INVISIBLE);
 		if(MyApp.avancement==1)
-			((TextView) findViewById(R.id.bout1)).setText(R.id.continuer);
+			((TextView) findViewById(R.id.bout1)).setText(R.string.jouer);
 		Intent intent = new Intent(this, Jeu.class);
 		intent.putExtra("mode", Niveau.CAMPAGNE);
 		intent.putExtra("n_niv", Math.min(MyApp.avancement,Jeu.NIV_MAX));

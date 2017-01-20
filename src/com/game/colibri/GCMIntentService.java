@@ -92,6 +92,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 		SharedPreferences pref = MyApp.getApp().pref;
 		SharedPreferences.Editor editor = MyApp.getApp().editor;
 		int nNewM = pref.getInt("nNewM", 0), nRes = pref.getInt("nRes", 0);
+		long lastNotif = pref.getLong("lastNotif", 0);
 		try {
 			JSONObject o = new JSONObject(message);
 			String typ = o.getString("type");
@@ -125,6 +126,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 			}
 			editor.putInt("nNewM", nNewM)
 				.putInt("nRes", nRes)
+				.putLong("lastNotif", when)
 				.commit();
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -150,7 +152,8 @@ public class GCMIntentService extends GCMBaseIntentService {
 		// Play default notification sound
 		//notification.defaults |= Notification.DEFAULT_SOUND;
 		// Vibrate if vibrate is enabled
-		notification.defaults |= Notification.DEFAULT_VIBRATE;
+		if(when - lastNotif > 5000) // Pour ne pas faire vibrer le téléphone à chaque notif lors de rafales !
+			notification.defaults |= Notification.DEFAULT_VIBRATE;
 		notificationManager.notify(id, notification);
 	}
 

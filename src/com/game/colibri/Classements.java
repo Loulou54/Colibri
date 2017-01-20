@@ -2,12 +2,12 @@ package com.game.colibri;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.util.Locale;
 
 import com.loopj.android.http.RequestHandle;
 import com.network.colibri.ConnectionDetector;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
@@ -27,7 +27,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.widget.ViewFlipper;
 
@@ -38,16 +37,26 @@ public class Classements extends Activity {
 	private ViewFlipper vf;
 	private boolean filterFriends = false;
 	private String search = "";
+	private final InputHandler inputHandler = new InputHandler(this);
 	private RequestHandle rh = null;
 	public int nJoueurs = 0;
 	public Joueur[] userRanks;
 	
-	@SuppressLint("HandlerLeak")
-	private final Handler mHandler = new Handler() {
+	private static class InputHandler extends Handler {
+		
+		private final WeakReference<Classements> act;
+		
+		public InputHandler(Classements a) {
+			act = new WeakReference<Classements>(a);
+		}
+		
         @Override
         public void handleMessage(Message msg) {
-            search = (String) msg.obj;
-            refresh();
+        	Classements c = act.get();
+			if(c!=null) {
+				c.search = (String) msg.obj;
+				c.refresh();
+			}
         }
     };
 	
@@ -65,8 +74,8 @@ public class Classements extends Activity {
 		et.addTextChangedListener(new TextWatcher() {
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				mHandler.removeMessages(0);
-		        mHandler.sendMessageDelayed(mHandler.obtainMessage(0, s.toString().trim()), AUTOCOMPLETE_DELAY);
+				inputHandler.removeMessages(0);
+		        inputHandler.sendMessageDelayed(inputHandler.obtainMessage(0, s.toString().trim()), AUTOCOMPLETE_DELAY);
 			}
 			@Override
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}

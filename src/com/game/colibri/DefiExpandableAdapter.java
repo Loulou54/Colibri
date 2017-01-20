@@ -36,6 +36,10 @@ public class DefiExpandableAdapter extends BaseExpandableListAdapter {
 		launchEnabled = b;
 	}
 	
+	public boolean getLaunchEnabled() {
+		return launchEnabled;
+	}
+	
 	@Override
 	public Object getChild(int groupPosition, int childPosition) {
 		return adversaires.get(groupPosition).participants.valueAt(childPosition);
@@ -57,6 +61,8 @@ public class DefiExpandableAdapter extends BaseExpandableListAdapter {
 			h.avatar = (ImageView) convertView.findViewById(R.id.avatar);
 			h.nom = (TextView) convertView.findViewById(R.id.nomJoueur);
 			h.nom.setTypeface(font1);
+			h.nom.setSelected(true);
+			h.nom.setHorizontallyScrolling(true);
 			h.score = (TextView) convertView.findViewById(R.id.scoreJoueur);
 			h.etat = (ImageView) convertView.findViewById(R.id.etatJoueur);
 			h.exp = (TextView) convertView.findViewById(R.id.expJoueur);
@@ -110,6 +116,8 @@ public class DefiExpandableAdapter extends BaseExpandableListAdapter {
 			h = new GroupViewHolder();
 			h.nom = (TextView) convertView.findViewById(R.id.nomDefi);
 			h.nom.setTypeface(font1);
+			h.nom.setSelected(true);
+			h.nom.setHorizontallyScrolling(true);
 			h.nMatch = (TextView) convertView.findViewById(R.id.nMatch);
 			h.etat = (Button) convertView.findViewById(R.id.etat);
 			h.etat.setTypeface(font2);

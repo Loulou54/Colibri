@@ -37,6 +37,7 @@
 	            android:layout_width="0dip"
 	            android:layout_height="match_parent"
 	            android:layout_weight="1"
+	            android:background="@drawable/bouton_toast"
 	            android:onClick="nouveauDefi"
 	            android:text="@string/nouveau_defi"
 	            android:textSize="12sp" />
@@ -47,6 +48,7 @@
 	            android:layout_width="0dip"
 	            android:layout_height="match_parent"
 	            android:layout_weight="1"
+	            android:background="@drawable/bouton_toast"
 	            android:onClick="partieRapide"
 	            android:text="@string/partie_rapide"
 	            android:textSize="12sp" />
@@ -59,6 +61,7 @@
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:layout_gravity="center"
+            android:background="@drawable/bouton_toast"
             android:onClick="syncTotale">
             
             <ImageView

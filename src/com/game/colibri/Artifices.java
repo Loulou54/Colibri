@@ -1,7 +1,9 @@
 package com.game.colibri;
 
+import java.lang.ref.WeakReference;
 import java.util.LinkedList;
 import java.util.Random;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.BlurMaskFilter;
@@ -47,7 +49,7 @@ public class Artifices extends RelativeLayout {
 	private void init() {
 		expl = new LinkedList<Explosion>();
 		ran = new Random();
-		handler = new RefreshHandler();
+		handler = new RefreshHandler(this);
 		p = new Paint();
 		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
 			setLayerType(View.LAYER_TYPE_SOFTWARE, null);
@@ -121,6 +123,11 @@ public class Artifices extends RelativeLayout {
 		handler.sleep(PERIODE);
 	}
 	
+	private void newExplo() {
+		newExplo(ran.nextInt(ww), ran.nextInt(wh));
+		handler.sendMessageDelayed(handler.obtainMessage(NEW_EXPLO), ran.nextInt(MAX_DELAY_MS));
+	}
+	
 	private void newExplo(float x, float y) {
 		Explosion e = new Explosion(x,y,ran); 
 		expl.add(e);
@@ -141,15 +148,22 @@ public class Artifices extends RelativeLayout {
 		}
 	}
 	
-	@SuppressLint("HandlerLeak")
-	class RefreshHandler extends Handler {
+	private static class RefreshHandler extends Handler {
+		
+		private final WeakReference<Artifices> act;
+		
+		public RefreshHandler(Artifices a) {
+			act = new WeakReference<Artifices>(a);
+		}
+		
 		@Override
 		public void handleMessage(Message msg) {
-			if(msg.what==NEW_EXPLO) { // Fin de l'animation de l'explosion. (on utilise le handler pour contourner l'abscence de listener pour AnimationDrawable)
-				Artifices.this.newExplo(ran.nextInt(ww), ran.nextInt(wh));
-				sendMessageDelayed(obtainMessage(NEW_EXPLO), ran.nextInt(MAX_DELAY_MS));
-			} else
-				Artifices.this.move();
+			if(act.get()==null)
+				return;
+			if(msg.what==NEW_EXPLO) // Fin de l'animation de l'explosion. (on utilise le handler pour contourner l'abscence de listener pour AnimationDrawable)
+				act.get().newExplo();
+			else
+				act.get().move();
 		}
 		public void sleep(long delayMillis) {
 			this.removeMessages(0);

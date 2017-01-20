@@ -45,6 +45,8 @@ public class JoueursAdapter extends ArrayAdapter<Joueur> {
 			h.avatar = (ImageView) convertView.findViewById(R.id.avatarAdv);
 			h.nom = (TextView) convertView.findViewById(R.id.nomAdv);
 			h.nom.setTypeface(font);
+			h.nom.setSelected(true);
+			h.nom.setHorizontallyScrolling(true);
 			h.pays = (ImageView) convertView.findViewById(R.id.paysAdv);
 			h.exp = (TextView) convertView.findViewById(R.id.expAdv);
 			h.defis = (TextView) convertView.findViewById(R.id.winDefisAdv);

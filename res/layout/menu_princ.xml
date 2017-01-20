@@ -77,7 +77,7 @@
         android:layout_alignParentBottom="true"
         android:layout_marginLeft="6dp"
         android:layout_marginBottom="6dp"
-        android:background="@drawable/bouton_papier"
+        android:background="@drawable/bouton_toast"
         android:src="@drawable/sound"
         android:contentDescription="@string/app_name"
         android:scaleType="fitXY"
@@ -118,7 +118,7 @@
         android:layout_marginRight="4dp"
         android:layout_marginBottom = "4dp"
         android:onClick="reglages"
-        android:background="@drawable/bouton_papier"
+        android:background="@drawable/bouton_toast"
         android:src="@drawable/info"
         android:scaleType="fitXY"
         android:contentDescription="@string/info" />
@@ -129,13 +129,13 @@
         android:layout_height="64dp"
         android:layout_alignBottom="@+id/infos"
         android:layout_toLeftOf="@+id/infos"
-        android:background="@drawable/papier"
+        android:background="@drawable/toast"
         android:orientation="vertical"
         android:visibility="invisible" >
 
         <Button
             style="@style/button_green"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="0dp"
             android:onClick="instrus"
             android:text="@string/instru" />
         

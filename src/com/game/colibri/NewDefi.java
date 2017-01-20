@@ -33,7 +33,6 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class NewDefi {
 	
@@ -79,7 +78,7 @@ public class NewDefi {
 				if(which==DialogInterface.BUTTON_POSITIVE) {
 					nomDefi = ((EditText) lay.findViewById(R.id.defiName)).getText().toString().trim();
 					t_max = fetchTimeSecond(((Spinner) lay.findViewById(R.id.defiLimit)).getSelectedItemPosition());
-					if(nomDefi.length()>15) {
+					if(nomDefi.length()>30) {
 						Toast.makeText(context, R.string.nom_invalide_defi, Toast.LENGTH_LONG).show();
 						show();
 					} else {

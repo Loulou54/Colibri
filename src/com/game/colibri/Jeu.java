@@ -33,7 +33,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 /**
  * Activité gérant le jeu proprement dit. Elle affiche notamment la View "Carte" en plein écran.
@@ -191,6 +190,10 @@ public class Jeu extends Activity {
 	public boolean onTouchEvent (MotionEvent ev) {
 		if(play.isRunning)
 			menuLateral(play.onTouch(ev), ev);
+		else { // Pour éviter un comportement non voulu si l'ACTION_DOWN s'est produit avant le lancement du jeu.
+			ev.setAction(MotionEvent.ACTION_DOWN);
+			play.onTouch(ev);
+		}
 		return true;
 	}
 	
@@ -285,9 +288,10 @@ public class Jeu extends Activity {
 				MyApp.getApp().editor.remove("defi_fuit");
 				MyApp.getApp().editor.commit();
 				finipartous = defi.finMatch(new DBController(this), MyApp.id, temps_total_ms, (solUsed) ? niv.solution.length*500 : 0);
+				Multijoueur multijoueur = Jeu.multijoueur!=null ? Jeu.multijoueur.get() : null;
 				if(multijoueur!=null) {
-					finipartous = multijoueur.get().defi.finMatch(null, MyApp.id, temps_total_ms, (solUsed) ? niv.solution.length*500 : 0);
-					multijoueur.get().syncData();
+					finipartous = multijoueur.defi.finMatch(null, MyApp.id, temps_total_ms, (solUsed) ? niv.solution.length*500 : 0);
+					multijoueur.syncData();
 				}
 			} else {
 				Participation p = defi.participants.get(MyApp.id);
@@ -417,10 +421,11 @@ public class Jeu extends Activity {
 					if(defi.match==null) {
 						defi.match = new Defi.Match(opt.getInt("mode"), opt.getLong("seed"), opt.getIntArray("param"), opt.getInt("avancement"), niv.progressMin, niv.experience);
 						defi.limite = System.currentTimeMillis()/1000 + defi.t_max;
+						Multijoueur multijoueur = Jeu.multijoueur!=null ? Jeu.multijoueur.get() : null;
 						if(multijoueur!=null) {
-							multijoueur.get().defi.match = defi.match;
-							multijoueur.get().defi.limite = defi.limite;
-							multijoueur.get().adapt.notifyDataSetChanged();
+							multijoueur.defi.match = defi.match;
+							multijoueur.defi.limite = defi.limite;
+							multijoueur.adapt.notifyDataSetChanged();
 						}
 						(new DBController(this)).updateDefi(defi);
 					}
@@ -522,8 +527,12 @@ public class Jeu extends Activity {
 				forfaitBox();
 			} else{
 				if(v.getId()==R.id.continuer) { // appui sur continuer
-					if(finipartous && defi.type==0) {
-						finDefi();
+					if(finipartous) {
+						//finDefi();
+						Intent intent = new Intent();
+						intent.putExtra("defi", defi.toJSON());
+						setResult(RESULT_FIRST_USER, intent);
+						finish();
 					} else {
 						quitter(null);
 					}
@@ -560,25 +569,4 @@ public class Jeu extends Activity {
 		forfait.show();
 	}
 	
-	private void finDefi() {
-		Intent intent = new Intent(this, Resultats.class);
-		intent.putExtra("defi", defi.toJSON());
-		DBController base = new DBController(this);
-		if(defi.type>0) { // Partie rapide
-			base.removeDefi(defi, MyApp.id);
-		} else {
-			defi.resVus = defi.nMatch;
-			base.setResultatsVus(defi.id,defi.nMatch);
-		}
-		if(multijoueur!=null) {
-			if(defi.type>0)
-				multijoueur.get().removeDefi();
-			else
-				multijoueur.get().defi.resVus = defi.nMatch;
-			multijoueur.get().adapt.notifyDataSetChanged();
-			//multijoueur.get().syncData();
-		}
-		startActivity(intent);
-		finish();
-	}
 }
