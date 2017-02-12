@@ -75,7 +75,7 @@ public class Jeu extends Activity {
 			getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
 		}
 		setContentView(R.layout.activity_jeu);
-		n_niv=opt.getInt("n_niv", 1);
+		n_niv = opt.getInt("n_niv", 1);
 		carte = (Carte) findViewById(R.id.carte);
 		bout_dyna = (Button) findViewById(R.id.bout_dyna);
 		menu_lateral = findViewById(R.id.menu_lateral);
@@ -97,7 +97,7 @@ public class Jeu extends Activity {
 			}
 		});
 		final Typeface font = Typeface.createFromAsset(getAssets(),"fonts/Passing Notes.ttf");
-		pause= findViewById(R.id.pause);
+		pause = findViewById(R.id.pause);
 		((ViewStub) pause).setOnInflateListener(new ViewStub.OnInflateListener() {
 			@Override
 			public void onInflate(ViewStub stub, View inflated) {
@@ -109,17 +109,19 @@ public class Jeu extends Activity {
 				}
 			}
 		});
-        perdu= findViewById(R.id.perdu);
+        perdu = findViewById(R.id.perdu);
         ((ViewStub) perdu).setOnInflateListener(new ViewStub.OnInflateListener() {
 			@Override
 			public void onInflate(ViewStub stub, View inflated) {
+				perdu = inflated;
 				((TextView) inflated.findViewById(R.id.perdu_txt)).setTypeface(font);
 			}
 		});
-		gagne= findViewById(R.id.gagner);
+		gagne = findViewById(R.id.gagner);
 		((ViewStub) gagne).setOnInflateListener(new ViewStub.OnInflateListener() {
 			@Override
 			public void onInflate(ViewStub stub, View inflated) {
+				gagne = inflated;
 				((TextView) inflated.findViewById(R.id.bravo_txt)).setTypeface(font);
 				LinearLayout res = (LinearLayout) inflated.findViewById(R.id.gagne_resultats);
 				for(int i=0; i<2; i++)
