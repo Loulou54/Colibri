@@ -31,6 +31,7 @@ public class Carte extends RelativeLayout {
 	public double cw,ch; // caseWidth/Height en pixels
 	private static final int LIG=12, COL=20;
 	public Niveau niv=null; // Le niveau à afficher
+	public Solver solver;
 	public int n_fleur,n_dyna; // Le nombre de fleurs sur la carte et le nombre de dynamites ramassées.
 	private int index_dyna; // L'index de l'animation courante d'explosion.
 	private Bitmap menhir,fleur,fleurm,dyna,menhir_rouge,rainbow,menhir0,fleur0,fleurm0,dyna0,menhir_rouge0,rainbow0; // Les images : -0 sont les originales avant redimensionnement
@@ -145,6 +146,7 @@ public class Carte extends RelativeLayout {
 		Animal.cw=cw;
 		Animal.ch=ch;
 		niv=niveau;
+		solver = new Solver(niv);
 		addView(fond);
 		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ww,wh);
 	    fond.setLayoutParams(params);

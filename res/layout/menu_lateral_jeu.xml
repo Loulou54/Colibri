@@ -49,6 +49,28 @@
         android:alpha="0.6"
         android:contentDescription="@string/temps"
         android:src="@drawable/fw" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Sol T"
+            android:onClick="solutionT" />
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Sol M"
+            android:onClick="solutionM" />
+
+    </LinearLayout>
     
     <ImageButton
         android:layout_width="match_parent"

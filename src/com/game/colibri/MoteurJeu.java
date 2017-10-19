@@ -18,7 +18,7 @@ import android.view.animation.Animation.AnimationListener;
 
 public class MoteurJeu {
 	
-	private static final boolean DEBUG = false;
+	private static final boolean DEBUG = true;
 	private static final int LIG=12, COL=20; // Dimensions de la grille
 	private static int SEUIL=15; // seuil de vitesse de glissement du doigt sur l'écran.
 	public static int PERIODE=1000/25; // pour 25 frames par secondes
@@ -154,8 +154,8 @@ public class MoteurJeu {
 	/**
 	 * Place dans le buffer les déplacements de solution du niveau. 
 	 */
-	public void solution() {
-		for(int[] m : niv.solution) {
+	public void solution(int[][] moves) {
+		for(int[] m : moves) {
     		buf.addLast(m.clone());
     	}
 	}

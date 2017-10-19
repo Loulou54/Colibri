@@ -13,7 +13,7 @@ public class Colibri extends Animal {
 		super(context,dbx,dby,w,h);
 		this.setBackgroundResource(R.drawable.colibri_d);
 		acc=0.1;
-		v_max=0.75;
+		v_max=0.7501;
 	    step=0;
 	}
 	

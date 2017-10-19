@@ -493,6 +493,20 @@ public class Jeu extends Activity {
 		}
 	}
 	
+	public void solutionT(View v) {
+		int[][] sol = carte.solver.getSolution(play.frame, carte.colibri.getRow(), carte.colibri.getCol(), carte.n_fleur, carte.n_dyna, true).getGamesMoves().toArray(new int[0][]);
+		solUsed=true;
+		solvedBySol=true;
+    	play.solution(sol);
+	}
+	
+	public void solutionM(View v) {
+		int[][] sol = carte.solver.getSolution(play.frame, carte.colibri.getRow(), carte.colibri.getCol(), carte.n_fleur, carte.n_dyna, false).getGamesMoves().toArray(new int[0][]);
+		solUsed=true;
+		solvedBySol=true;
+    	play.solution(sol);
+	}
+	
 	public void solution(View v) {
 		if(niv.solution==null) // il n'y a pas de solution
 			return;
@@ -503,7 +517,7 @@ public class Jeu extends Activity {
 		recommencer(v);
 		solUsed=true;
 		solvedBySol=true;
-    	play.solution();
+    	play.solution(niv.solution);
 	}
 	
 	public void suivant(View v) {
