@@ -28,7 +28,14 @@
         android:paddingRight="0dp"
         android:onClick="exploser"
         android:textSize="16sp" />
-  
+
+	<com.game.colibri.PathViewer
+	    android:id="@+id/path_viewer"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:background="@color/path_viewer_bg"
+	    android:visibility="gone" />
+	
 	<include
 	    layout="@layout/menu_lateral_jeu"
 	    android:visibility="invisible" />
@@ -54,5 +61,5 @@
 	    android:layout="@layout/perdu"
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent" />
-    
+	
 </RelativeLayout>

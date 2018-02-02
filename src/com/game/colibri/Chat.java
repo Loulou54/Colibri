@@ -36,11 +36,11 @@ public class Chat extends Animal {
 	private void buildPath() {
 		path = new Path();
 		int px,py;
-		px = (int) ((itineraire[0][1]+0.5)*cw);
-		py = (int) ((itineraire[0][0]+0.5)*ch);
+		px = (int) ((itineraire[0][1]+0.5)*Carte.cw);
+		py = (int) ((itineraire[0][0]+0.5)*Carte.ch);
 		path.moveTo(px, py);
 		for(int i=1; i<itineraire.length; i++) {
-			path.lineTo((int) ((itineraire[i][1]+0.5)*cw), (int) ((itineraire[i][0]+0.5)*ch));
+			path.lineTo((int) ((itineraire[i][1]+0.5)*Carte.cw), (int) ((itineraire[i][0]+0.5)*Carte.ch));
 		}
 		path.lineTo(px, py);
 	}

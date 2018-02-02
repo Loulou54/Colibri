@@ -160,5 +160,7 @@
 	<string name="notif_n_newmatch">You have %1$d new challenges to solve!</string>
 	<string name="notif_n_results">The results of %1$d challenges are available!</string>
 	<string name="maj_req">You have to update Colibri to the latest version!</string>
+	<string name="cancel_sol">Cancelled!|</string>
+	<string name="no_solution">Ouch!|No solution&#8230;</string>
 	
 </resources>

@@ -29,12 +29,13 @@ public class MoteurJeu {
 	public static final int MENHIR_ROUGE=5; // Menhir sur lequel on déposerait une dynamite.
 	public static final char VIDE=0;
 	public static final int UP=1,RIGHT=2,LEFT=3,DOWN=4;
+	public static final int PAUSED=0, RUNNING=1, PAUSE_MENU=2, MORT=3, GAGNE=4, SOL_RESEARCH=5, SOL_READY=6;
 	
 	public int frame, total_frames;
 	private Carte carte;
 	public Niveau niv;
 	private Jeu jeu;
-	public boolean isRunning=false;
+	public int state = PAUSED;
 	private int dejaPasse=0;
 	private int wait = 0;
 	private int directionDyna = 0;
@@ -114,15 +115,15 @@ public class MoteurJeu {
 		for(Chat c : carte.chats) {
 			c.start();
 		}
-		isRunning=true;
+		state = RUNNING;
 		moveHandler.sleep(PERIODE);
 	}
 	
 	/**
-	 * Met le jeu sur pause
+	 * Met le jeu sur pause et dans l'état spécifié.
 	 */
-	public void pause() {
-		isRunning=false;
+	public void pause(int etat) {
+		state = etat;
 		moveHandler.removeMessages(0);
 		carte.colibri.stop();
 		for(Vache v : carte.vaches) {
@@ -134,7 +135,9 @@ public class MoteurJeu {
 	}
 	
 	private void mort() {
-		pause();
+		if(state!=RUNNING)
+			return;
+		pause(MORT);
 		carte.animMort();
 		Animation a = carte.mort.getAnimation();
     	a.setAnimationListener(new AnimationListener() {
@@ -219,7 +222,7 @@ public class MoteurJeu {
 			c.deplacer();
 			collisionChat(c);
 		}
-		if(isRunning) moveHandler.sleep(PERIODE);
+		if(state==RUNNING) moveHandler.sleep(PERIODE);
 	}
 	
 	/**

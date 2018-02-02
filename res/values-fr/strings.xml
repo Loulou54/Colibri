@@ -158,5 +158,7 @@
 	<string name="notif_n_newmatch">Vous avez %1$d nouveaux défis à relever !</string>
 	<string name="notif_n_results">Les résultats de %1$d défis sont disponibles !</string>
 	<string name="maj_req">Vous devez mettre à jour Colibri à la dernière version !</string>
+	<string name="cancel_sol">Annulé !|</string>
+	<string name="no_solution">Aïe !|Pas de solution&#8230;</string>
 	
 </resources>

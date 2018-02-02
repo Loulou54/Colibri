@@ -27,14 +27,15 @@ public class Carte extends RelativeLayout {
 	 * Nécessité de rafraîchir fond à chaque élément ramassé.
 	 */
 	
-	public int ww,wh; // windowWidth/Height
-	public double cw,ch; // caseWidth/Height en pixels
+	public static int ww,wh; // windowWidth/Height
+	public static double cw,ch; // caseWidth/Height en pixels
 	private static final int LIG=12, COL=20;
+	
+	private double cwi,chi; // cwi & chi de l'instance
 	public Niveau niv=null; // Le niveau à afficher
-	public Solver solver;
 	public int n_fleur,n_dyna; // Le nombre de fleurs sur la carte et le nombre de dynamites ramassées.
 	private int index_dyna; // L'index de l'animation courante d'explosion.
-	private Bitmap menhir,fleur,fleurm,dyna,menhir_rouge,rainbow,menhir0,fleur0,fleurm0,dyna0,menhir_rouge0,rainbow0; // Les images : -0 sont les originales avant redimensionnement
+	private Bitmap menhir,fleur,fleurm,dyna,menhir_rouge,rainbow;
 	public Colibri colibri;
 	public LinkedList<Vache> vaches = new LinkedList<Vache>(); // La liste des vaches du niveau
 	public LinkedList<Chat> chats = new LinkedList<Chat>(); // La liste des chats du niveau
@@ -73,12 +74,6 @@ public class Carte extends RelativeLayout {
     	mort.setBackgroundResource(R.drawable.skull);
     	sang = new View(context);
     	sang.setBackgroundResource(R.drawable.sang);
-    	menhir0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.menhir)).getBitmap();
-    	fleur0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.fleur)).getBitmap();
-    	fleurm0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.fleurm)).getBitmap();
-    	dyna0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.dynamite)).getBitmap();
-    	menhir_rouge0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.menhir_rouge)).getBitmap();
-    	rainbow0 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.rainbow)).getBitmap();
     	// Définition du fond qui comporte la carte statique.
     	final Paint mPaint = new Paint();
     	mPaint.setStyle(Paint.Style.STROKE);
@@ -93,35 +88,35 @@ public class Carte extends RelativeLayout {
     	    	    		mPaint.setColor(0x708B4500);
     	    	    		for(Vache v : vaches) {
     	    	    			for(int i=1; i<=3; i++) {
-    	    	    				mPaint.setStrokeWidth((float) ((0.4-i*0.1)*cw));
+    	    	    				mPaint.setStrokeWidth((float) ((0.4-i*0.1)*cwi));
     	    	    				can.drawPath(v.path, mPaint);
     	    	    			}
     	    	    		}
     	    	    		for(Chat c : chats) {
     	    	    			for(int i=1; i<=3; i++) {
-    	    	    				mPaint.setStrokeWidth((float) ((0.4-i*0.1)*cw));
+    	    	    				mPaint.setStrokeWidth((float) ((0.4-i*0.1)*cwi));
     	    	    				can.drawPath(c.path, mPaint);
     	    	    			}
     	    	    		}
     	    		    	for (int l=0; l<LIG; l++) {
     	    		    		for (int c=0; c<COL; c++) {
     	    		    			if (niv.carte[l][c]==1)
-    	    		    				can.drawBitmap(menhir, (int)(c*cw-cw/8), (int)(l*ch), null);
+    	    		    				can.drawBitmap(menhir, (int)(c*cwi-cwi/8), (int)(l*chi), null);
     	    		    			else if (niv.carte[l][c]==2)
-    	    		    				can.drawBitmap(fleur, (int)(c*cw), (int)(l*ch), null);
+    	    		    				can.drawBitmap(fleur, (int)(c*cwi), (int)(l*chi), null);
     	    		    			else if (niv.carte[l][c]==3)
-    	    		    				can.drawBitmap(fleurm, (int)(c*cw), (int)(l*ch), null);
+    	    		    				can.drawBitmap(fleurm, (int)(c*cwi), (int)(l*chi), null);
     	    		    			else if (niv.carte[l][c]==4)
-    	    		    				can.drawBitmap(dyna, (int)(c*cw), (int)(l*ch), null);
+    	    		    				can.drawBitmap(dyna, (int)(c*cwi), (int)(l*chi), null);
     	    		    			else if (niv.carte[l][c]==5)
-    	    		    				can.drawBitmap(menhir_rouge, (int)(c*cw-cw/8), (int)(l*ch), null);
+    	    		    				can.drawBitmap(menhir_rouge, (int)(c*cwi-cwi/8), (int)(l*chi), null);
     	    		    			else if (niv.carte[l][c]>=10) {
     	    		    				mPaint.setColor(colors[(niv.carte[l][c]-10)%colors.length]);
     	    		    				for(int i=1; i<=4; i++) {
-    	    	    	    				mPaint.setStrokeWidth((float) ((0.8-i*0.15)*cw));
-    	    	    	    				can.drawPoint((float) (cw*(c+0.5)), (float) (ch*(l+0.7)), mPaint);
+    	    	    	    				mPaint.setStrokeWidth((float) ((0.8-i*0.15)*cwi));
+    	    	    	    				can.drawPoint((float) (cwi*(c+0.5)), (float) (chi*(l+0.7)), mPaint);
     	    		    				}
-    	    		    				can.drawBitmap(rainbow, (int)(c*cw-cw/4), (int)(l*ch), null);
+    	    		    				can.drawBitmap(rainbow, (int)(c*cwi-cwi/4), (int)(l*chi), null);
     	    		    			}
     	    		    		}
     	    		    	}
@@ -143,10 +138,8 @@ public class Carte extends RelativeLayout {
 		explo.clear();
 		rainbows.clear();
     	
-		Animal.cw=cw;
-		Animal.ch=ch;
+		cw = cwi; ch = chi; // 
 		niv=niveau;
-		solver = new Solver(niv);
 		addView(fond);
 		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ww,wh);
 	    fond.setLayoutParams(params);
@@ -204,10 +197,10 @@ public class Carte extends RelativeLayout {
      * Effectue l'animation de mort du colibri. :( (flaque de sang qui se répend + tête de mort qui s'envole)
      */
     public void animMort() {
-    	RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams((int)(3*cw/2), (int)(3*ch/2));
+    	RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams((int)(3*cwi/2), (int)(3*chi/2));
     	double[] pos = colibri.getPos();
-		params.leftMargin = (int)(cw*pos[0]-cw/4);
-	    params.topMargin = (int)(ch*pos[1]-ch/4);
+		params.leftMargin = (int)(cwi*pos[0]-cwi/4);
+	    params.topMargin = (int)(chi*pos[1]-chi/4);
 	    mort.setLayoutParams(params);
 	    mort.setVisibility(VISIBLE);
 	    sang.setLayoutParams(params);
@@ -222,10 +215,10 @@ public class Carte extends RelativeLayout {
     public void animBoom(int l, int c) {
     	index_dyna--;
     	View e = explo.get(index_dyna);
-    	RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams((int)(3*cw/2), (int)(3*ch/2));
-		params.leftMargin = (int)(c*cw-cw/4);
-	    params.topMargin = (int)(l*ch);
-	    params.bottomMargin = (int)((LIG-l)*ch+3*ch/2);
+    	RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams((int)(3*cwi/2), (int)(3*chi/2));
+		params.leftMargin = (int)(c*cwi-cwi/4);
+	    params.topMargin = (int)(l*chi);
+	    params.bottomMargin = (int)((LIG-l)*chi+3*chi/2);
 	    e.setLayoutParams(params);
     	e.setVisibility(VISIBLE);
     	((AnimationDrawable) e.getBackground()).start();
@@ -243,14 +236,14 @@ public class Carte extends RelativeLayout {
 		ww=super.getWidth();
 		wh=super.getHeight();
 		Log.i("Dimensions écran :",ww+"*"+wh);
-		cw=((double)ww)/COL;
-		ch=((double)wh)/LIG;
-		menhir = Bitmap.createScaledBitmap(menhir0, (int)(5*cw/4), (int)(5*ch/4), true);
-		fleur = Bitmap.createScaledBitmap(fleur0, (int)cw, (int)ch, true);
-		fleurm = Bitmap.createScaledBitmap(fleurm0, (int)cw, (int)ch, true);
-		dyna = Bitmap.createScaledBitmap(dyna0, (int)cw, (int)ch, true);
-		menhir_rouge = Bitmap.createScaledBitmap(menhir_rouge0, (int)(5*cw/4), (int)(5*ch/4), true);
-		rainbow = Bitmap.createScaledBitmap(rainbow0, (int)(3*cw/2), (int)ch, true);
+		cwi=((double)ww)/COL;
+		chi=((double)wh)/LIG;
+		menhir = Bitmap.createScaledBitmap(((BitmapDrawable) getResources().getDrawable(R.drawable.menhir)).getBitmap(), (int)(5*cwi/4), (int)(5*chi/4), true);
+		fleur = Bitmap.createScaledBitmap(((BitmapDrawable) getResources().getDrawable(R.drawable.fleur)).getBitmap(), (int)cwi, (int)chi, true);
+		fleurm = Bitmap.createScaledBitmap(((BitmapDrawable) getResources().getDrawable(R.drawable.fleurm)).getBitmap(), (int)cwi, (int)chi, true);
+		dyna = Bitmap.createScaledBitmap(((BitmapDrawable) getResources().getDrawable(R.drawable.dynamite)).getBitmap(), (int)cwi, (int)chi, true);
+		menhir_rouge = Bitmap.createScaledBitmap(((BitmapDrawable) getResources().getDrawable(R.drawable.menhir_rouge)).getBitmap(), (int)(5*cwi/4), (int)(5*chi/4), true);
+		rainbow = Bitmap.createScaledBitmap(((BitmapDrawable) getResources().getDrawable(R.drawable.rainbow)).getBitmap(), (int)(3*cwi/2), (int)chi, true);
     	this.invalidate();
 	}
 }

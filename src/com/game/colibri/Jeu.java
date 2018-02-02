@@ -133,6 +133,7 @@ public class Jeu extends Activity {
 			}
 		});
 		play = new MoteurJeu(this,carte);
+		PathViewer.mj = play;
 		this.savedInstanceState = savedInstanceState;
 		if(multi) { // On sauvegarde le fait que ce défi a été entammé.
 			MyApp.getApp().editor.putInt("defi_fuit", defi.id);
@@ -179,8 +180,8 @@ public class Jeu extends Activity {
 				savedInstanceState = null;
 			}
 			brandNew=false;
-		} else if(!hasFocus && play.isRunning) {
-			play.pause();
+		} else if(!hasFocus && play.state==MoteurJeu.RUNNING) {
+			play.pause(MoteurJeu.PAUSE_MENU);
 			pause.setVisibility(View.VISIBLE);
 		}
 	}
@@ -190,9 +191,12 @@ public class Jeu extends Activity {
 	 */
 	@Override
 	public boolean onTouchEvent (MotionEvent ev) {
-		if(play.isRunning)
+		if(play.state==MoteurJeu.RUNNING) {
 			menuLateral(play.onTouch(ev), ev);
-		else { // Pour éviter un comportement non voulu si l'ACTION_DOWN s'est produit avant le lancement du jeu.
+		} else if(play.state==MoteurJeu.SOL_READY) {
+			play.start();
+			play.onTouch(ev);
+		} else { // Pour éviter un comportement non voulu si l'ACTION_DOWN s'est produit avant le lancement du jeu.
 			ev.setAction(MotionEvent.ACTION_DOWN);
 			play.onTouch(ev);
 		}
@@ -201,7 +205,7 @@ public class Jeu extends Activity {
 	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if(play.isRunning) { // Commande en cours de jeu
+		if(play.state==MoteurJeu.RUNNING) { // Commande en cours de jeu
 			if(keyCode == KeyEvent.KEYCODE_DPAD_UP) {
 				play.direction(MoteurJeu.UP);
 			} else if(keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
@@ -211,24 +215,27 @@ public class Jeu extends Activity {
 			} else if(keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
 				play.direction(MoteurJeu.DOWN);
 			} else if(keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU || keyCode == KeyEvent.KEYCODE_ESCAPE) {
-				play.pause();
+				play.pause(MoteurJeu.PAUSE_MENU);
 				menuLateral(0,null);
 				pause.setVisibility(View.VISIBLE);
 				pause.startAnimation(AnimationUtils.loadAnimation(this, R.anim.aleat_opt_anim));
 			} else
 				return false;
-		} else if(pause.getVisibility()==View.VISIBLE) { // Jeu en pause
+		} else if(play.state==MoteurJeu.PAUSE_MENU) { // Jeu en pause
 			if(keyCode == KeyEvent.KEYCODE_BACK)
 				reprendre(null);
 			else
 				return false;
-		} else if(gagne.getVisibility()!=View.VISIBLE) { // Mort
+		} else if(play.state==MoteurJeu.MORT) { // Mort
 			if(keyCode == KeyEvent.KEYCODE_BACK) {
 				carte.sang.clearAnimation();
 				carte.mort.clearAnimation();
 				recommencer(null);
 			} else
 				return false;
+		} else if(play.state==MoteurJeu.SOL_RESEARCH) { // Interrupt research
+			if(Solver.instance!=null)
+				Solver.instance.cancel(true);
 		} else {
 			return false;
 		}
@@ -278,7 +285,7 @@ public class Jeu extends Activity {
 			return;
 		}
 		gagne.setVisibility(View.VISIBLE);
-		play.pause();
+		play.pause(MoteurJeu.GAGNE);
 		play.frame = 0;
 		play.total_frames = 0;
 		if(carte.n_dyna>0) hideDyna();
@@ -352,7 +359,7 @@ public class Jeu extends Activity {
 	 * Le colibri est mort : affiche l'écran associé.
 	 */
 	public void mort() {
-		if(!play.isRunning && pause.getVisibility()!=View.VISIBLE) {
+		if(play.state!=MoteurJeu.RUNNING) {
 			perdu.setVisibility(View.VISIBLE);
 		}
 	}
@@ -362,7 +369,7 @@ public class Jeu extends Activity {
 	 * 	@param v le bouton
 	 */
 	public void exploser(View v) {
-		if(play.isRunning && carte.n_dyna>0)
+		if(play.state==MoteurJeu.RUNNING && carte.n_dyna>0)
 			play.dynamite();
 	}
 	
@@ -494,17 +501,29 @@ public class Jeu extends Activity {
 	}
 	
 	public void solutionT(View v) {
-		int[][] sol = carte.solver.getSolution(play.frame, carte.colibri.getRow(), carte.colibri.getCol(), carte.n_fleur, carte.n_dyna, true).getGamesMoves().toArray(new int[0][]);
+		if(play.state!=MoteurJeu.RUNNING)
+			return;
+		menuLateral(0,null);
+		play.pause(MoteurJeu.SOL_RESEARCH);
+		(new Solver(niv, (PathViewer) findViewById(R.id.path_viewer))).execute(play.frame, carte.colibri.getRow(), carte.colibri.getCol(), carte.n_fleur, carte.n_dyna, 1);
+		/*
+		int[][] sol = p.getGamesMoves().toArray(new int[0][]);
 		solUsed=true;
 		solvedBySol=true;
-    	play.solution(sol);
+    	play.solution(sol);*/
 	}
 	
 	public void solutionM(View v) {
-		int[][] sol = carte.solver.getSolution(play.frame, carte.colibri.getRow(), carte.colibri.getCol(), carte.n_fleur, carte.n_dyna, false).getGamesMoves().toArray(new int[0][]);
+		if(play.state!=MoteurJeu.RUNNING)
+			return;
+		menuLateral(0,null);
+		play.pause(MoteurJeu.SOL_RESEARCH);
+		(new Solver(niv, (PathViewer) findViewById(R.id.path_viewer))).execute(play.frame, carte.colibri.getRow(), carte.colibri.getCol(), carte.n_fleur, carte.n_dyna, 0);
+		/*
+		int[][] sol = p.getGamesMoves().toArray(new int[0][]);
 		solUsed=true;
 		solvedBySol=true;
-    	play.solution(sol);
+    	play.solution(sol);*/
 	}
 	
 	public void solution(View v) {
@@ -523,8 +542,8 @@ public class Jeu extends Activity {
 	public void suivant(View v) {
 		gagne.setVisibility(View.GONE);
 		if(bout_dyna.getVisibility()==View.VISIBLE) hideDyna();
-		if(play.isRunning)
-			play.pause();
+		if(play.state==MoteurJeu.RUNNING)
+			play.pause(MoteurJeu.PAUSED);
 		if(opt.getInt("mode", 0)==Niveau.CAMPAGNE) {
 			if(n_niv==NIV_MAX) {
 				setResult(2);
@@ -541,7 +560,7 @@ public class Jeu extends Activity {
 		} else if(multi) {
 			if(!solved) { // j1 ou j2 appui bouton Suivant => Forfait
 				forfaitBox();
-			} else{
+			} else {
 				if(v.getId()==R.id.continuer) { // appui sur continuer
 					if(finipartous) {
 						//finDefi();
@@ -556,6 +575,11 @@ public class Jeu extends Activity {
 					gagne(10);
 			}
 			return;
+		}
+		PathViewer pv = (PathViewer) findViewById(R.id.path_viewer);
+		if(pv.getVisibility()==View.VISIBLE) {
+			pv.clear();
+			pv.setVisibility(View.GONE);
 		}
 		launch_niv(false);
 	}

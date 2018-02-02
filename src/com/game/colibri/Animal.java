@@ -9,7 +9,6 @@ import android.widget.RelativeLayout;
 public abstract class Animal extends ImageView {
 	
 	protected RelativeLayout.LayoutParams params;
-	public static double cw,ch; // largeur et hauteur d'une case en pixels
 	private double ww,hh; // Largeur et hauteur de l'animal en pixels
 	protected double xx,yy; // Position en cases
 	public double v_max; // Vitesse maximale en case/frame
@@ -29,7 +28,7 @@ public abstract class Animal extends ImageView {
 	public Animal(Context context, double dbx, double dby, double w, double h) {
 		super(context);
 		ww=w; hh=h;
-		params=new RelativeLayout.LayoutParams((int)(w*cw), (int)(h*ch));
+		params=new RelativeLayout.LayoutParams((int)(w*Carte.cw), (int)(h*Carte.ch));
 		setPos(dbx,dby);
 	    mx=0;
 	    my=0;
@@ -59,8 +58,8 @@ public abstract class Animal extends ImageView {
 	 */
 	public void setPos(double x, double y) {
 		xx=x; yy=y;
-		params.leftMargin = (int)(xx*cw);
-	    params.topMargin = (int)(yy*ch);
+		params.leftMargin = (int)(xx*Carte.cw);
+	    params.topMargin = (int)(yy*Carte.ch);
 		this.setLayoutParams(params);
 	}
 	
@@ -93,8 +92,8 @@ public abstract class Animal extends ImageView {
 	 */
 	public void deplacer(double dx, double dy) {
 		xx+=dx; yy+=dy;
-		params.leftMargin = (int)(xx*cw);
-	    params.topMargin = (int)(yy*ch);
+		params.leftMargin = (int)(xx*Carte.cw);
+	    params.topMargin = (int)(yy*Carte.ch);
 		this.setLayoutParams(params);
 	}
 	

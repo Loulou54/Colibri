@@ -1,6 +1,5 @@
 package com.game.colibri;
 
-
 import java.io.BufferedReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -542,12 +541,30 @@ public class Niveau {
 	private double step,v_max,acc;
 	public int nVaches=3, nDyna=3, nChats=2, nArcs=2; // Paramètres de quantité, dans [0,6]
 	public SparseArray<int[]> rainbows;
+	public boolean[] presenceRainbows; // Indicates the presence of rainbows on cols and rows
 	
 	private void importParam(int[] param) {
 		nVaches = Math.max(param[1],0);
 		nDyna = Math.max(param[2],0);
 		nChats = Math.max(param[3],0);
 		nArcs = Math.max(param[4],0);
+	}
+	
+	/**
+	 * Construit presenceRainbows utilisé par la visualisation de solution.
+	 * presenceRainbows est indexé par colonne ou N_COL + ligne et contient true
+	 * si au moins un arc-en-ciel est présent sur la colonne/ligne.
+	 */
+	public void computePresenceRainbows() {
+		presenceRainbows = new boolean[20+12];
+		int n = rainbows.size();
+		for(int i=0; i<n; i++) {
+			int[] arcPair = rainbows.valueAt(i);
+			presenceRainbows[20+arcPair[0]] = true;
+			presenceRainbows[arcPair[1]] = true;
+			presenceRainbows[20+arcPair[2]] = true;
+			presenceRainbows[arcPair[3]] = true;
+		}
 	}
 	
 	private void fillPosAleat(int dist, LinkedList<Integer> pos, int sig) { // Génération des possibilités.
@@ -1496,6 +1513,7 @@ public class Niveau {
 			init();
 			geneNivRand(lon,var,base,random.nextLong());
 		}
+		computePresenceRainbows();
 		experience = solution.length*(10+solution.length/4)+vaches.size()*20+nbDyna*15+chats.size()*40+nbArcs*30;
 	}
 

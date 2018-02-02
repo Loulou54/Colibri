@@ -15,5 +15,6 @@
 	<color name="theme_vert">#4BC0A1</color>
 	<color name="theme_beige">#E6E6DC</color>
 	<color name="theme_gris_alpha">#704A535A</color>
+	<color name="path_viewer_bg">#704A535A</color>
 	
 </resources>

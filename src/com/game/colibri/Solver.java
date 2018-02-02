@@ -8,6 +8,9 @@ import java.util.PriorityQueue;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import android.os.AsyncTask;
+import android.view.View;
+
 import com.game.colibri.Niveau.Occurrence;
 
 /**
@@ -16,18 +19,21 @@ import com.game.colibri.Niveau.Occurrence;
  * @author Louis
  *
  */
-public class Solver {
+public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.Path> {
 	
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 	public final static int STEPS_VACHES = 20; // 20 ticks par case
 	public final static int STEPS_CHATS = 4; // 4 ticks par case
 	public final static int STEPS_COLIBRI_ACC = 4; // lorsque à l'arrêt, 2 ticks de switch delay + 4 ticks pour sortir d'une case
 	public final static int STEPS_COLIBRI_FULL = 2; // lancé full speed
 	public final static int DYNA_EXPL_TIME = 25; // Ticks avant fin explosion dynamite
 	
+	public static Solver instance; // Instance en cours de cette classe singleton.
+	
 	public boolean OPT_TIME = true; // Optimisation du temps (true) ou du nombre de coups (false)
 	private Niveau niv; // Le niveau
-	private int sol_r=-1, sol_c=-1; // La position pour laquelle a été calculée "solution".
+	private PathViewer pathView; // La view de visualisation de la solution
+	public int sol_r=-1, sol_c=-1; // La position pour laquelle a été calculée "solution".
 	private Heuristic heuristic; // La structure de données pour un calcul rapide de l'heuristique.
 	private Path solution; // La solution à partir de (sol_r,sol_c). Si aucune solution: null et sol_r et sol_c != -1
 	private HashSet<String> closedSet;
@@ -37,9 +43,63 @@ public class Solver {
 	 * Constructeur du Solveur pour le niveau niv.
 	 * @param niv
 	 */
-	public Solver(Niveau niv) {
+	public Solver(Niveau niv, PathViewer pv) {
 		this.niv = niv;
+		pathView = pv;
 		heuristic = new Heuristic(niv);
+		if(instance!=null)
+			instance.cancel(true);
+		instance = this;
+	}
+	
+	/**
+	 * Affiche le PathViewer.
+	 */
+	@Override
+	protected void onPreExecute() {
+		pathView.clear();
+		pathView.setVisibility(View.VISIBLE);
+		super.onPreExecute();
+	}
+	
+	/**
+	 * Cherche la solution du niveau. Fournir les int suivants en paramètres.
+	 * @param p frame, r, c, nFleurs, nDynas, opt_time (1 ou 0)
+	 * @return le Path solution
+	 */
+	@Override
+	protected Path doInBackground(Integer... p) {
+		return getSolution(p[0], p[1], p[2], p[3], p[4], p[5]!=0);
+	}
+	
+	/**
+	 * Affiche la meilleure solution actuelle.
+	 * @param values
+	 */
+	@Override
+	protected void onProgressUpdate(LinkedList<Move>... values) {
+		pathView.setPath(sol_r, sol_c, values[0]);
+		super.onProgressUpdate(values);
+	}
+	
+	@Override
+	protected void onCancelled() {
+		Toast.makeText(MyApp.getApp(), R.string.cancel_sol, Toast.LENGTH_SHORT).show();
+		pathView.cancelResearch();
+		instance = null;
+		super.onCancelled();
+	}
+	
+	@Override
+	protected void onPostExecute(Path result) {
+		if(result.length>0)
+			pathView.setPathAndAnimate(sol_r, sol_c, result.getMoves());
+		else {
+			Toast.makeText(MyApp.getApp(), R.string.no_solution, Toast.LENGTH_SHORT).show();
+			pathView.cancelResearch();
+		}
+		instance = null;
+		super.onPostExecute(result);
 	}
 	
 	/**
@@ -52,7 +112,7 @@ public class Solver {
 	 * @param nDynas le nombre de dynamites en stock
 	 * @return solution null si impossible
 	 */
-	public Path getSolution(int frame, int r, int c, int nFleurs, int nDynas, boolean opt_time) {
+	private Path getSolution(int frame, int r, int c, int nFleurs, int nDynas, boolean opt_time) {
 		if(r==sol_r && c==sol_c && opt_time==OPT_TIME) {
 			return solution;
 		} else {
@@ -82,13 +142,14 @@ public class Solver {
 	 * @param nFleurs
 	 * @param nDynas
 	 */
+	@SuppressWarnings("unchecked")
 	private void findSolution(int frame, int rd, int cd, int nFleurs, int nDynas) {
 		closedSet = new HashSet<String>(128); // Contient les hash des états déjà visités.
 		openSet = new PriorityQueue<State>(); // Contient les états à la frontière.
 		
 		openSet.add(new State(frame, rd, cd, nFleurs, nDynas));
 		int n = 0;
-		while(!openSet.isEmpty()) {
+		while(!openSet.isEmpty() && !isCancelled()) {
 			//System.out.println(openSet.size()+"  |  "+closedSet.size());
 			//System.out.println(openSet);
 			State current = openSet.poll();
@@ -121,6 +182,8 @@ public class Solver {
 					}
 				}
 			}
+			if(n % 256==0) // Update the progress on the PathViewer
+				publishProgress(current.path.getMoves());
 			n++;
 		}
 	}
@@ -254,7 +317,7 @@ public class Solver {
 		}
 		
 		private void addMoveDynamite(LinkedList<Move> pMoves, int dir) {
-			pMoves.add(new Move(10+dir, 0, (path.move.direction==dir ? 1 : 3), path.move.step, pos));
+			pMoves.add(new Move(10+dir, 0, (path.move!=null && path.move.direction==dir ? 1 : 3), path.move!=null ? path.move.step : 0, pos));
 		}
 		
 		private void addMovePushedByVache(LinkedList<Move> pMoves, int dir, LinkedList<Niveau.Occurrence> occs, IntervalsModulo arrivVoulue) {
@@ -289,12 +352,12 @@ public class Solver {
 		
 		private void addMoveWithin(LinkedList<Move> pMoves, Position dest, int dir, IntervalsModulo possibIntervals) {
 			if(possibIntervals.isEmpty()) { // Voyage impossible...
-				System.out.println("IMPOSSIBLE");
+				//System.out.println("IMPOSSIBLE");
 				return;
 			}
 			int depart = possibIntervals.getFirstPossib();
 			if(depart > 0 && possibPresence.firstClose() - 2 < depart) { // attente impossible (+2 pour prendre en compte deux frames supplémentaires d'accélération après un wait)
-				System.out.println("PARENT");
+				//System.out.println("PARENT");
 				if(parent==null)
 					return;
 				// Appel au parent pour venir plus tard
@@ -507,7 +570,7 @@ public class Solver {
 		}
 	}
 	
-	public static class Path {
+	public class Path {
 		public Move move;
 		public Path prevPath;
 		public int length;
@@ -534,6 +597,58 @@ public class Solver {
 			prevPath = p;
 			length = p.length + 1;
 			t_cumul = p.t_cumul + m.wait + m.travel;
+		}
+		
+		/**
+		 * Retourne la liste de Moves.
+		 * @return
+		 */
+		public LinkedList<Move> getMoves() {
+			if(move==null)
+				return new LinkedList<Move>();
+			LinkedList<Move> moves = prevPath.getMoves();
+			addMoveAndDecomposeRainbows(moves, move);
+			return moves;
+		}
+		
+		/**
+		 * Ajoute le move m à la liste en le décomposant en plusieurs moves s'il
+		 * passe à travers des arcs-en-ciel. (Uniquement pour la visualisation
+		 * de la solution dans PathViewer)
+		 * @param moves
+		 * @param m
+		 */
+		private void addMoveAndDecomposeRainbows(LinkedList<Move> moves, Move m) {
+			if(m.direction>=10) {
+				moves.add(m);
+				return;
+			}
+			Position stopPos = m.posFinale.next(m.direction);
+			if(!stopPos.isOut() && niv.carte[stopPos.r][stopPos.c]%2!=1) // Arrêt contre vache : on copie m pour mettre s à -1 pour signaler PathViewer
+				m = new Move(m.direction, m.wait, m.travel, -1, m.posFinale);
+			Position lastP = moves.isEmpty() ? new Position(sol_r, sol_c, 0, 0, null) : moves.getLast().posFinale;
+			boolean onRow = m.direction==Move.LEFT || m.direction==Move.RIGHT;
+			Position p = new Position(lastP.r, lastP.c, 0, 0, null); // position initiale
+			outerloop:
+			while(niv.presenceRainbows[onRow ? Position.COL + p.r : p.c]) { // TODO: indicates if rainbow on row/col
+				do {
+					if(p.equals(m.posFinale)) // Arrivé !
+						break outerloop;
+					p.step(m.direction);
+				} while(niv.carte[p.r][p.c]<10);
+				// Ajoute Move intermédiaire
+				moves.add(new Move(m.direction, 0, 0, 0, p));
+				int[] arcPair = niv.rainbows.get(niv.carte[p.r][p.c]);
+				if(p.r==arcPair[0] && p.c==arcPair[1])
+					p = new Position(arcPair[2], arcPair[3], 0, 0, null);
+				else
+					p = new Position(arcPair[0], arcPair[1], 0, 0, null);
+				boolean fin = p.equals(m.posFinale);
+				moves.add(new Move(m.direction, -1, fin?-1:0, fin?m.step:0, new Position(p))); // wait==-1 pour signaler PathViewer un moveTo au lieu d'un cubicTo ; travel==-1 s'il n'y a pas de Move après l'arc.
+				if(fin)
+					return;
+			}
+			moves.add(m);
 		}
 		
 		/**
@@ -695,7 +810,7 @@ public class Solver {
 		 * @param dir la direction
 		 * @return this après modification
 		 */
-		private Position step(int dir) {
+		public Position step(int dir) {
 			switch(dir) {
 			case Move.UP:
 				r--;
@@ -728,6 +843,10 @@ public class Solver {
 		 */
 		public Position prev(int dir) {
 			return (new Position(this)).step(5-dir);
+		}
+		
+		public boolean equals(Position p) {
+			return r==p.r && c==p.c;
 		}
 	}
 	

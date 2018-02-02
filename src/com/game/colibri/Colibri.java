@@ -60,7 +60,7 @@ public class Colibri extends Animal {
 	 */
 	public void setPosFinAnim() {
 		params=(RelativeLayout.LayoutParams) this.getLayoutParams();
-		setPos(xf/cw,yf/ch);
+		setPos(xf/Carte.cw,yf/Carte.ch);
 	    if(versDroite) {
 	    	mx=1;
 	    	setSpriteDirection();
