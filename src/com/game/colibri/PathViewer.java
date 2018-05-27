@@ -198,6 +198,8 @@ public class PathViewer extends RelativeLayout {
 	public void cancelResearch() {
 		mj.start();
 		setVisibility(View.GONE);
+		moves = null;
+		movesIterator = null;
 	}
 	
 	/**
@@ -289,6 +291,8 @@ public class PathViewer extends RelativeLayout {
 				mj.start();
 			showAndFadeOut();
 			((AnimationDrawable) colibri.getBackground()).stop();
+			moves = null;
+			movesIterator = null;
 			return;
 		}
 		float xd = xc, yd = yc;

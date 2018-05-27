@@ -1,16 +1,19 @@
 package com.game.colibri;
 
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
-import java.util.TreeMap;
 import java.util.TreeSet;
-
+import android.annotation.SuppressLint;
 import android.os.AsyncTask;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.view.View;
-
 import com.game.colibri.Niveau.Occurrence;
 
 /**
@@ -35,9 +38,10 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 	private PathViewer pathView; // La view de visualisation de la solution
 	public int sol_r=-1, sol_c=-1; // La position pour laquelle a été calculée "solution".
 	private Heuristic heuristic; // La structure de données pour un calcul rapide de l'heuristique.
-	private Path solution; // La solution à partir de (sol_r,sol_c). Si aucune solution: null et sol_r et sol_c != -1
-	private HashSet<String> closedSet;
+	private HashSet<Hash> closedSet;
 	private PriorityQueue<State> openSet;
+	private HashMap<Integer, Integer> collectiblesIndexes; // Pour une clé r*COL+c, retourne l'index de l'élément ramassable dans l'ordre allant de (0,0) à (ROW,COL) de gauche à droite.
+	private LinkedList<Niveau.Occurrence> emptyCell = new LinkedList<Niveau.Occurrence>(); // Utilisé par DynaGrid.obstacle pour les cases sans obstacles.
 	
 	/**
 	 * Constructeur du Solveur pour le niveau niv.
@@ -92,14 +96,40 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 	
 	@Override
 	protected void onPostExecute(Path result) {
-		if(result.length>0)
-			pathView.setPathAndAnimate(sol_r, sol_c, result.getMoves());
-		else {
+		System.out.println("Moves : "+result.length+" ; t_cumul : "+result.t_cumul);
+		if(result.length>0) {
+			//pathView.setPathAndAnimate(sol_r, sol_c, result.getMoves());
+			PathViewer.mj.solution(result.getGamesMoves().toArray(new int[0][]));
+			pathView.cancelResearch();
+		} else {
 			Toast.makeText(MyApp.getApp(), R.string.no_solution, Toast.LENGTH_SHORT).show();
 			pathView.cancelResearch();
 		}
 		instance = null;
 		super.onPostExecute(result);
+	}
+	
+	@SuppressLint("UseSparseArrays")
+	private void buildCollectibleIndexes() {
+		collectiblesIndexes = new HashMap<Integer, Integer>(100);
+		int index=0;
+		for(int r=0; r<Position.ROW; r++) {
+			for(int c=0; c<Position.COL; c++) {
+				int e = niv.carte[r][c];
+				if(e>=2 && e<=4)
+					collectiblesIndexes.put(r*Position.COL + c, index++);
+			}
+		}
+	}
+	
+	/**
+	 * Pour pos_index valant r*COL+c, retourne l'index de l'élément ramassable dans
+	 * la carte dans l'ordre allant de (0,0) à (ROW,COL), de gauche à droite.
+	 * @param pos_index r*COL+c
+	 * @return l'index de l'élément ramassable, OU null s'il ne s'agit pas d'un élément ramassable.
+	 */
+	public Integer getIndexOfCollectible(int pos_index) {
+		return collectiblesIndexes.get(pos_index);
 	}
 	
 	/**
@@ -113,25 +143,21 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 	 * @return solution null si impossible
 	 */
 	private Path getSolution(int frame, int r, int c, int nFleurs, int nDynas, boolean opt_time) {
-		if(r==sol_r && c==sol_c && opt_time==OPT_TIME) {
-			return solution;
-		} else {
-			solution = null;
-			sol_r=r;
-			sol_c=c;
-			OPT_TIME = opt_time;
-			heuristic.prepareRootState();
-			findSolution(frame, r,c,nFleurs,nDynas);
-			if(solution==null) {
-				System.out.println("Pas de solution !");
-				solution = new Path(0);
-			}
-			if(DEBUG) {
-				System.out.println("direction, wait, travel, rf, cf");
-				System.out.println("Temps : "+(solution.t_cumul - frame)+" ; Moves : "+solution.length);
-			}
-			return solution;
+		sol_r=r;
+		sol_c=c;
+		OPT_TIME = opt_time;
+		buildCollectibleIndexes();
+		heuristic.prepareRootState();
+		Path solution = findSolution(frame, r,c,nFleurs,nDynas);
+		if(solution==null) {
+			System.out.println("Pas de solution !");
+			solution = new Path(0);
 		}
+		if(DEBUG) {
+			System.out.println("direction, wait, travel, rf, cf");
+			System.out.println("Temps : "+(solution.t_cumul - frame)+" ; Moves : "+solution.length);
+		}
+		return solution;
 	}
 	
 	/**
@@ -143,35 +169,24 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 	 * @param nDynas
 	 */
 	@SuppressWarnings("unchecked")
-	private void findSolution(int frame, int rd, int cd, int nFleurs, int nDynas) {
-		closedSet = new HashSet<String>(128); // Contient les hash des états déjà visités.
+	private Path findSolution(int frame, int rd, int cd, int nFleurs, int nDynas) {
+		closedSet = new HashSet<Hash>(); // Contient les hash des états déjà visités.
 		openSet = new PriorityQueue<State>(); // Contient les états à la frontière.
+		long startTime = System.currentTimeMillis();
 		
 		openSet.add(new State(frame, rd, cd, nFleurs, nDynas));
 		int n = 0;
 		while(!openSet.isEmpty() && !isCancelled()) {
-			//System.out.println(openSet.size()+"  |  "+closedSet.size());
-			//System.out.println(openSet);
 			State current = openSet.poll();
-			//System.out.println(current);
-			/*
-			if(n==100) {
-				try {
-					System.in.read();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}*/
 			if(n == 800) { // Paramétrization de l'heuristique: approxime davantage si la recherche devient trop longue.
 				heuristic.h_param += 2;
-				if(heuristic.h_param < 14)
+				if(heuristic.h_param < 8)
 					n -= 400;
 			}
 			if(current.goal_reached) { // <=> h=0 : FIN !
-				solution = current.path;
 				System.out.println("Itérations : "+(n + heuristic.h_param/2*400)+"  |  h_param : "+heuristic.h_param+"  |  openSet : "+openSet.size()+"  |  closedSet : "+closedSet.size());
-				return;
+				System.out.println("Time (ms) : "+(System.currentTimeMillis()-startTime));
+				return current.path;
 			}
 			if(closedSet.add(current.hash)) { // Ajoute l'état dans le closedSet, si déjà présent, false.
 				current.computeNeighbors();
@@ -186,15 +201,69 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 				publishProgress(current.path.getMoves());
 			n++;
 		}
+		return null;
 	}
 	
 	
 	// Structures
 	
+	private static class Hash {
+		// Chaque bit représente l'état des objets ramassables (1=ramassé), dans l'ordre de leur disposition.
+		private BitSet collectiblesState;
+		// Positions du colibri (byte 0) + des dynas posées OU explosées dans l'ordre de leur disposition (byte 1-6) + état explosé (1) ou non (0) (byte 7 > bits 0-5)
+		private long coliDynaPositions = 0;
+		
+		public Hash() {
+			collectiblesState = new BitSet();
+		}
+		
+		public Hash(Hash h) {
+			collectiblesState = (BitSet)h.collectiblesState.clone();
+			coliDynaPositions = h.coliDynaPositions;
+		}
+		
+		@Override
+		public int hashCode() {
+			return collectiblesState.hashCode();
+		}
+		
+		@Override
+		public boolean equals(Object o) {
+			Hash h = (Hash)o;
+			return collectiblesState.equals(h.collectiblesState) && coliDynaPositions==h.coliDynaPositions;
+		}
+		
+		/**
+		 * "Ramasse" l'élément à index.
+		 * @param index l'index de l'élément tel que retourné par getIndexOfCollectible(pos_index).
+		 */
+		public void pick(int index) {
+			collectiblesState.set(index);
+		}
+		
+		/**
+		 * Détermine si l'élément à l'index spécifié a été ramassé.
+		 * @param index l'index de l'élément tel que retourné par getIndexOfCollectible(pos_index).
+		 * @return true=ramassé ; false=non ramassé
+		 */
+		public boolean hasBeenPicked(int index) {
+			return collectiblesState.get(index);
+		}
+		
+		/**
+		 * Sets the value of the hash concerning the positions of the colibri and dynamites
+		 * and the state of the dynamites.
+		 * @param value a long containing 8 bytes with: [0:pos_colibri][1-6:pos_dyna][7:exploded_flag_bits]
+		 */
+		public void setColiDynaPositions(long value) {
+			coliDynaPositions = value;
+		}
+	}
+	
 	private class State implements Comparable<State> {
 		private State parent; // L'état parent, null si root.
 		private Position pos; // Position du colibri dans cet état.
-		private String hash; // Identifie un état : r,c+grid.hash
+		private Hash hash; // Identifie un état : pos_coli+grid.hash
 		private DynaGrid grid; // Grille du niveau avec les changements.
 		private Path path; // Les déplacements jusqu'ici.
 		private LinkedList<State> voisins; // Les prochaines destinations possibles
@@ -214,7 +283,7 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 			parent = null;
 			path = new Path(frame);
 			grid = new DynaGrid(nFleurs, nDynas);
-			pos = new Position(r, c, 0, path.t_cumul, grid);
+			pos = new Position(r, c, 0, path.t_cumul);
 			voisins = new LinkedList<State>();
 			possibPresence = grid.getFreeIntervals(pos, 0, STEPS_COLIBRI_ACC);
 			computeHash();
@@ -230,7 +299,7 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 			parent = s;
 			path = new Path(s.path, m);
 			grid = new DynaGrid(s.grid, s.pos, m, s.path.t_cumul);
-			pos = new Position(m.posFinale.r, m.posFinale.c, m.step, path.t_cumul, grid);
+			pos = new Position(m.posFinale.r, m.posFinale.c, m.step, path.t_cumul);
 			voisins = new LinkedList<State>();
 			possibPresence = grid.getFreeIntervals(pos, 0, STEPS_COLIBRI_ACC);
 			computeHash();
@@ -245,7 +314,7 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		 * Calcule le hash représentant cet état : position du colibri et état de la grille.
 		 */
 		private void computeHash() {
-			hash = pos.r+","+pos.c+" "+grid.getHash(path.t_cumul);
+			hash = grid.getHash((byte) (pos.r*Position.COL + pos.c), path.t_cumul);
 		}
 		
 		/**
@@ -288,8 +357,9 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 			Position tempPos = new Position(pos);
 			LinkedList<Niveau.Occurrence> cell = grid.obstacle(tempPos.step(dir)); // null=obstacle fixe, sinon, occurrences des vaches.
 			// Dynamite
-			if(cell==null) { // On est bloqué : si menhir, dynamite ?
-				if(grid.getCell(tempPos)==1 && grid.nDynas>0)
+			if(cell==null) { // On est bloqué : si menhir (rouge), dynamite ?
+				int cellVal = grid.getCell(tempPos);
+				if((cellVal==1 || cellVal==5) && grid.nDynas>0)
 					addMoveDynamite(pMoves, dir);
 				return pMoves;
 			}
@@ -299,15 +369,15 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 				addMovePushedByVache(pMoves, dir, occs, new IntervalsModulo(true));
 			}
 			// Déplacements
-			grid.addCatsObstacles(tempPos, cell); // Pour ajouter les chats comme obstacles au déplacement
-			tempPos.simul(cell, niv);
+			cell = grid.addCatsObstacles(tempPos, cell); // Pour ajouter les chats comme obstacles au déplacement
+			tempPos.simul(cell, niv, grid);
 			cell = grid.obstacle(tempPos.step(dir));
 			int steps = 0; // Pour détecter une boucle infinie entre deux arcs-en-ciel.
 			while(cell!=null && steps < 2*Position.COL) {
 				if(!cell.isEmpty() && cell.getFirst().mod!=Integer.MAX_VALUE) // Arrêt contre une vache (et non une dynamite qui va exploser)
 					addMoveToVache(pMoves, tempPos.prev(dir), dir, cell, new IntervalsModulo(true));
-				grid.addCatsObstacles(tempPos, cell);
-				tempPos.simul(cell, niv);
+				cell = grid.addCatsObstacles(tempPos, cell);
+				tempPos.simul(cell, niv, grid);
 				cell = grid.obstacle(tempPos.step(dir));
 				steps++;
 			}
@@ -384,7 +454,7 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 				LinkedList<Niveau.Occurrence> occs = grid.getVachesPushingTo(m.posFinale,-m.direction);
 				addMovePushedByVache(pMoves, -m.direction, occs, arrivVoulue);
 			} else {
-				LinkedList<Niveau.Occurrence> cell = grid.obstacle(m.posFinale.next(m.direction));
+				LinkedList<Niveau.Occurrence> cell = grid.obstacle(m.posFinale.nextSimplePos(m.direction));
 				if(cell==null)
 					addMoveToMenhir(pMoves, m.posFinale, m.direction, arrivVoulue);
 				else
@@ -393,7 +463,7 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 			if(pMoves.isEmpty())
 				return;
 			State s = new State(this, pMoves.getFirst());
-			s.hash += "d"+s.path.t_cumul; // Pour rendre cet état unique
+			s.hash.setColiDynaPositions(-path.t_cumul);; // Pour rendre cet état unique
 			voisins.add(s);
 			s.computeScores();
 			openSet.add(s);
@@ -401,8 +471,9 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 	}
 	
 	private class DynaGrid {
-		public TreeMap<Integer, Integer> changes; // Les cases changées à r*col+c
-		public char[] flowersBySegment; // Dénote le nombre de fleurs non ramassées par segment de heuristic.minSegments
+		public Hash hash; // Représente l'état de la grille i.e., les modifications par rapport à niv.
+		public SparseIntArray dynamites; // Les dynamites posées à r*col+c, et l'instant de dépos.
+		public byte[] flowersBySegment; // Dénote le nombre de fleurs non ramassées par segment de heuristic.minSegments
 		public int nFleurs, nDynas; // Fleurs restantes et dynamites en stock
 		
 		/**
@@ -413,11 +484,23 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		public DynaGrid(int nF, int nD) {
 			nFleurs = nF;
 			nDynas = nD;
-			changes = new TreeMap<Integer, Integer>();
-			flowersBySegment = new char[heuristic.minSegments.size()];
+			hash = new Hash();
+			dynamites = new SparseIntArray();
+			flowersBySegment = new byte[heuristic.minSegments.size()];
 			int i = 0;
 			for(Heuristic.Segment s : heuristic.minSegments) {
 				flowersBySegment[i++] = s.nFleurs;
+			}
+			// Pour le cas où un objet est présent là où se trouve initialement le colibri
+			int cell = niv.carte[sol_r][sol_c];
+			if(cell==2 || cell==3) { // fleur ou fleur magique
+				int index = sol_r*Position.COL + sol_c;
+				hash.pick(getIndexOfCollectible(index));
+				nFleurs--;
+				flowersBySegment[heuristic.fleurToSegment.get(index)]--;
+			} else if(cell==4) { // Dynamite
+				hash.pick(getIndexOfCollectible(sol_r*Position.COL + sol_c));
+				nDynas++;
 			}
 		}
 
@@ -429,7 +512,8 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		public DynaGrid(DynaGrid dg, Position p_init, Move m, int t_cumul) {
 			nFleurs = dg.nFleurs;
 			nDynas = dg.nDynas;
-			changes = new TreeMap<Integer, Integer>(dg.changes);
+			hash = new Hash(dg.hash);
+			dynamites = dg.dynamites.clone();
 			flowersBySegment = dg.flowersBySegment.clone();
 			performMove(p_init, m, t_cumul);
 		}
@@ -440,18 +524,18 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		 * @param m
 		 */
 		private void performMove(Position p_init, Move m, int t_cumul) {
-			Position p = new Position(p_init);
+			SimplePos p = new SimplePos(p_init);
 			int cell;
 			while(p.r!=m.posFinale.r || p.c!=m.posFinale.c) {
 				p.step(m.direction);
 				cell = getCell(p);
 				if(cell==2 || cell==3) { // fleur ou fleur magique
 					int index = p.r*Position.COL + p.c;
-					changes.put(index, cell - 2);
+					hash.pick(getIndexOfCollectible(index));
 					nFleurs--;
 					flowersBySegment[heuristic.fleurToSegment.get(index)]--;
 				} else if(cell==4) { // Dynamite
-					changes.put(p.r*Position.COL + p.c, 0);
+					hash.pick(getIndexOfCollectible(p.r*Position.COL + p.c));
 					nDynas++;
 				} else if(cell>=10) { // Arc-en-ciel
 					int[] dest = niv.rainbows.get(cell);
@@ -464,26 +548,34 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 			}
 			if(m.direction > 10) { // Pose de dynamite
 				p.step(m.direction - 10);
-				changes.put(p.r*Position.COL + p.c, -t_cumul);
+				dynamites.put(p.r*Position.COL + p.c, -t_cumul);
 				nDynas--;
 			}
 		}
 		
 		/**
-		 * Computes and return the string representation of the changes.
+		 * Calcule et retourne le hash représentant les changements (donc l'état) de cette DynaGrid.
+		 * @param pos_coli la position du colibri dans le State correspondant
+		 * @param t_cumul l'instant présent en frames
+		 * @return le hash de la grille et de la position du colibri
 		 */
-		public String getHash(int t_cumul) {
-			String hash = "";
-			for(Entry<Integer,Integer> pair : changes.entrySet()) {
-				int v = pair.getValue();
+		public Hash getHash(int pos_coli, int t_cumul) {
+			long coliDynaPositions = pos_coli;
+			int dynaExplodedState = 0;
+			int ndyna = dynamites.size();
+			for(int d=0; d < ndyna; d++) {
+				int k = dynamites.keyAt(d), v = dynamites.valueAt(d);
 				if(v<0) {
 					if(-v+DYNA_EXPL_TIME < t_cumul) { // Menhir déjà explosé
-						changes.put(pair.getKey(), 0);
+						dynamites.put(k, 0);
+						//v = 0;
 						continue;
 					}
 				}
-				hash += pair.getKey()+"="+v+";";
+				coliDynaPositions = (coliDynaPositions << 8) | k;
+				dynaExplodedState = (dynaExplodedState << 1) | (v==0 ? 1 : 0);
 			}
+			hash.setColiDynaPositions((coliDynaPositions << 8) | dynaExplodedState);
 			return hash;
 		}
 		
@@ -493,11 +585,26 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		 * @param pos la position
 		 * @return contenu de la case
 		 */
-		public int getCell(Position pos) {
+		public int getCell(SimplePos pos) {
 			if(pos.isOut())
 				return -1;
-			Integer cell = changes.get(pos.r*Position.COL + pos.c);
-			return cell==null ? niv.carte[pos.r][pos.c] : cell;
+			int origCell = niv.carte[pos.r][pos.c];
+			if(origCell==0) {
+				return 0;
+			} else if(origCell==1 || origCell==5) {
+				return dynamites.get(pos.r*Position.COL + pos.c, 1);
+			} else {
+				Integer index = getIndexOfCollectible(pos.r*Position.COL + pos.c);
+				if(index!=null && hash.hasBeenPicked(index)) {
+					if(origCell==3) {
+						return dynamites.get(pos.r*Position.COL + pos.c, 1);
+					} else {
+						return 0;
+					}
+				} else {
+					return origCell;
+				}
+			}
 		}
 		
 		/**
@@ -525,9 +632,9 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		 * @param pos la position dans la grille
 		 * @return liste d'occurrences ou null
 		 */
-		public LinkedList<Niveau.Occurrence> obstacle(Position pos) {
+		public LinkedList<Niveau.Occurrence> obstacle(SimplePos pos) {
 			int cell = getCell(pos);
-			if(pos.isOut() || cell==1) { // Obstacle fixe : menhir ou bord
+			if(pos.isOut() || cell==1 || cell==5) { // Obstacle fixe : bord ou menhir ou menhir rouge
 				return null;
 			} else if(cell < 0) { // Dynamite posée à t = -cell
 				LinkedList<Niveau.Occurrence> dyna_ex = new LinkedList<Niveau.Occurrence>();
@@ -535,7 +642,7 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 				return dyna_ex;
 			} else { // Occurrences de vaches (possiblement vides)
 				LinkedList<Niveau.Occurrence> occs = niv.passVaches.getOccurrences(pos.r,  pos.c);
-				return occs==null ? new LinkedList<Niveau.Occurrence>() : occs;
+				return occs==null ? emptyCell : occs;
 			}
 		}
 		
@@ -544,10 +651,16 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		 * @param pos la position sur la carte
 		 * @param cell les occurrences sur cette case auquels ajouter les chats
 		 */
-		public void addCatsObstacles(Position pos, LinkedList<Occurrence> cell) {
+		public LinkedList<Occurrence> addCatsObstacles(Position pos, LinkedList<Occurrence> cell) {
 			LinkedList<Niveau.Occurrence> chats = niv.passChats.getOccurrences(pos.r, pos.c);
-			if(chats!=null)
-				cell.addAll(chats);
+			if(chats==null) // Pas de chats
+				return cell;
+			if(cell.isEmpty()) // Pas de vache
+				return chats;
+			// Dans le cas où il y a des vaches ET des chats sur la même case, on crée une nouvelle instance qui rassemble toutes les occurrences.
+			LinkedList<Occurrence> allOccs = new LinkedList<Occurrence>(cell);
+			allOccs.addAll(chats);
+			return allOccs;
 		}
 		
 		/**
@@ -570,7 +683,7 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		}
 	}
 	
-	public class Path {
+	public static class Path {
 		public Move move;
 		public Path prevPath;
 		public int length;
@@ -623,26 +736,26 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 				moves.add(m);
 				return;
 			}
-			Position stopPos = m.posFinale.next(m.direction);
-			if(!stopPos.isOut() && niv.carte[stopPos.r][stopPos.c]%2!=1) // Arrêt contre vache : on copie m pour mettre s à -1 pour signaler PathViewer
+			SimplePos stopPos = m.posFinale.nextSimplePos(m.direction);
+			if(!stopPos.isOut() && Solver.instance.niv.carte[stopPos.r][stopPos.c]%2!=1) // Arrêt contre vache : on copie m pour mettre s à -1 pour signaler PathViewer
 				m = new Move(m.direction, m.wait, m.travel, -1, m.posFinale);
-			Position lastP = moves.isEmpty() ? new Position(sol_r, sol_c, 0, 0, null) : moves.getLast().posFinale;
+			SimplePos lastP = moves.isEmpty() ? new SimplePos(Solver.instance.sol_r, Solver.instance.sol_c) : moves.getLast().posFinale;
 			boolean onRow = m.direction==Move.LEFT || m.direction==Move.RIGHT;
-			Position p = new Position(lastP.r, lastP.c, 0, 0, null); // position initiale
+			Position p = new Position(lastP.r, lastP.c, 0, 0); // position initiale
 			outerloop:
-			while(niv.presenceRainbows[onRow ? Position.COL + p.r : p.c]) { // TODO: indicates if rainbow on row/col
+			while(Solver.instance.niv.presenceRainbows[onRow ? Position.COL + p.r : p.c]) { // TODO: indicates if rainbow on row/col
 				do {
 					if(p.equals(m.posFinale)) // Arrivé !
 						break outerloop;
 					p.step(m.direction);
-				} while(niv.carte[p.r][p.c]<10);
+				} while(Solver.instance.niv.carte[p.r][p.c]<10);
 				// Ajoute Move intermédiaire
 				moves.add(new Move(m.direction, 0, 0, 0, p));
-				int[] arcPair = niv.rainbows.get(niv.carte[p.r][p.c]);
+				int[] arcPair = Solver.instance.niv.rainbows.get(Solver.instance.niv.carte[p.r][p.c]);
 				if(p.r==arcPair[0] && p.c==arcPair[1])
-					p = new Position(arcPair[2], arcPair[3], 0, 0, null);
+					p = new Position(arcPair[2], arcPair[3], 0, 0);
 				else
-					p = new Position(arcPair[0], arcPair[1], 0, 0, null);
+					p = new Position(arcPair[0], arcPair[1], 0, 0);
 				boolean fin = p.equals(m.posFinale);
 				moves.add(new Move(m.direction, -1, fin?-1:0, fin?m.step:0, new Position(p))); // wait==-1 pour signaler PathViewer un moveTo au lieu d'un cubicTo ; travel==-1 s'il n'y a pas de Move après l'arc.
 				if(fin)
@@ -717,14 +830,85 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		}
 	}
 	
-	public static class Position {
+	/**
+	 * Une classe basique quin'opère que sur (row, column) d'une position.
+	 */
+	public static class SimplePos {
 		public static final int ROW=12, COL=20;
-		private static final double v_max = 0.7501;
-		private static final double acc = 0.1;
 		
 		public int r;
 		public int c;
 		
+		public SimplePos(int r, int c) {
+			this.r = r;
+			this.c = c;
+		}
+		
+		public SimplePos(SimplePos p) {
+			r = p.r;
+			c = p.c;
+		}
+		
+		@Override
+		public String toString() {
+			return "("+r+","+c+")";
+		}
+		
+		public boolean isOut() {
+			return r<0 || r>=ROW || c<0 || c>=COL;
+		}
+		
+		public boolean equals(SimplePos p) {
+			return r==p.r && c==p.c;
+		}
+		
+		/**
+		 * Distance de Manhattan entre this et p.
+		 * @param p l'autre position
+		 * @return la distance de Manhattan
+		 */
+		public int distance(SimplePos p) {
+			return Math.abs(r-p.r) + Math.abs(c-p.c);
+		}
+		
+		/**
+		 * Fait progresser la position d'un pas vers la direction dir
+		 * et retourne l'objet modifié.
+		 * @param dir la direction
+		 * @return this après modification
+		 */
+		public SimplePos step(int dir) {
+			switch(dir) {
+			case Move.UP:
+				r--;
+				break;
+			case Move.RIGHT:
+				c++;
+				break;
+			case Move.LEFT:
+				c--;
+				break;
+			case Move.DOWN:
+				r++;
+			}
+			return this;
+		}
+		
+		public SimplePos nextSimplePos(int dir) {
+			SimplePos p = new SimplePos(this);
+			p.step(dir);
+			return p;
+		}
+	}
+	
+	/**
+	 * Une classe plus complexe qui gère les déplacements du colibri et les contraintes liées.
+	 * (État présent de la carte, instants des départs possibles, dynamique du colibri, ...)
+	 * Hérite de SimplePos.
+	 */
+	public static class Position extends SimplePos {
+		private static final double v_max = 0.7501;
+		private static final double acc = 0.1;
 		/* Variables de simulation pour déterminer le temps de déplacement dans le cas
 		   vitesse conservée (0) ou vitesse réinitialisée (1) */
 		private double[] dep; // Le déplacement effectué dans le moteur physique
@@ -733,32 +917,22 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		private int t_cumul;
 		private IntervalsModulo departsPossibles; // Les intervals de départ possibles pour faire ce déplacement
 		
-		private DynaGrid grid; // La grille sur laquelle évolue la position
-		
-		public Position(int r, int c, double currentStep, int t_cumul, DynaGrid grid) {
-			this.r = r;
-			this.c = c;
+		public Position(int r, int c, double currentStep, int t_cumul) {
+			super(r,c);
 			dep = new double[] {0.5, 0.5};
 			step = new double[] {currentStep, 0};
 			t_travel = new int[] {2, 1}; // Init : temps de commutation entre deux coups.
 			this.t_cumul = t_cumul;
 			departsPossibles = new IntervalsModulo(true);
-			this.grid = grid;
 		}
 		
 		public Position(Position p) {
-			r = p.r;
-			c = p.c;
+			super(p);
 			dep = p.dep.clone();
 			step = p.step.clone();
 			t_travel = p.t_travel.clone();
 			t_cumul = p.t_cumul;
 			departsPossibles = new IntervalsModulo(p.departsPossibles);
-			grid = p.grid;
-		}
-		
-		public boolean isOut() {
-			return r<0 || r>ROW-1 || c<0 || c>COL-1;
 		}
 		
 		public IntervalsModulo getDepartsIntervals() {
@@ -770,22 +944,27 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		 * @param occs les occurrences de la prochaine case à ajouter dans departsPossibles
 		 * @param niv référence vers le niveau en cours pour avoir les correspondances d'arc-en-ciel
 		 */
-		public void simul(LinkedList<Niveau.Occurrence> occs, Niveau niv) {
+		public void simul(LinkedList<Niveau.Occurrence> occs, Niveau niv, DynaGrid grid) {
 			//System.out.println("Step on "+r+","+c);
 			// Effectue le pas
 			int [] t_travel = {0, 0};
 			for(int i=0; i<2; i++) {
 				int n = (int) dep[i];
+				boolean limitReached = false;
 				do {
-					step[i] = Math.min(step[i]+acc, v_max);
+					if(!limitReached) {
+						step[i] += acc;
+						if(step[i] > v_max) {
+							step[i] = v_max;
+							limitReached = true;
+						}
+					}
 					dep[i] += step[i];
 					t_travel[i]++;
 				} while(n == (int) dep[i]);
 			}
 			int cell = grid.getCell(this);
 			if(cell>=10) { // Arc-en-ciel
-				//System.out.println(r+","+c+" : "+cell);
-				//System.out.println(grid.changes);
 				int[] dest = niv.rainbows.get(cell);
 				if(dest[0]==r && dest[1]==c) {
 					r=dest[2]; c=dest[3];
@@ -805,35 +984,14 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		}
 		
 		/**
-		 * Fait progresser la position d'un pas vers la direction dir
-		 * et retourne l'objet modifié.
-		 * @param dir la direction
-		 * @return this après modification
-		 */
-		public Position step(int dir) {
-			switch(dir) {
-			case Move.UP:
-				r--;
-				break;
-			case Move.RIGHT:
-				c++;
-				break;
-			case Move.LEFT:
-				c--;
-				break;
-			case Move.DOWN:
-				r++;
-			}
-			return this;
-		}
-		
-		/**
 		 * Nouvel objet Position après un pas dans la direction dir.
 		 * @param dir la direction
 		 * @return nouvelle position
 		 */
 		public Position next(int dir) {
-			return (new Position(this)).step(dir);
+			Position p = new Position(this);
+			p.step(dir);
+			return p;
 		}
 		
 		/**
@@ -842,11 +1000,9 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		 * @return nouvelle position
 		 */
 		public Position prev(int dir) {
-			return (new Position(this)).step(5-dir);
-		}
-		
-		public boolean equals(Position p) {
-			return r==p.r && c==p.c;
+			Position p = new Position(this);
+			p.step(5-dir);
+			return p;
 		}
 	}
 	
@@ -1223,17 +1379,33 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 			int openCount = 0; // +1 quand open, -1 quand close.
 			if(!intervals.first().open) openCount++; // Si première Bound close
 			if(!im.intervals.first().open) openCount++; // Idem
-			intervals.addAll(im.intervals); // On ajoute toutes les bornes à un même interval
 			TreeSet<Bound> inter = new TreeSet<Bound>();
-			for(Bound b : intervals) {
-				if(b.open) {
-					openCount++;
-					if(openCount>=2)
-						inter.add(b);
+			Iterator<Bound> inter1 = intervals.iterator();
+			Iterator<Bound> inter2 = im.intervals.iterator();
+			Bound b1=inter1.next(), b2=inter2.next();
+			while(b1!=null || b2!=null) {
+				if(b2==null || (b1!=null && (b1.value<b2.value || (b1.value==b2.value && !b1.open)))){ // !b1.open est pour éviter les cas où pour une même valeur on a une borne ouvrante et une fermante
+					if(b1.open) {
+						openCount++;
+						if(openCount>=2)
+							inter.add(b1);
+					} else {
+						if(openCount>=2)
+							inter.add(b1);
+						openCount--;
+					}
+					b1 = inter1.hasNext() ? inter1.next() : null;
 				} else {
-					if(openCount>=2)
-						inter.add(b);
-					openCount--;
+					if(b2.open) {
+						openCount++;
+						if(openCount>=2)
+							inter.add(b2);
+					} else {
+						if(openCount>=2)
+							inter.add(b2);
+						openCount--;
+					}
+					b2 = inter2.hasNext() ? inter2.next() : null;
 				}
 			}
 			intervals = inter;
@@ -1340,8 +1512,9 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		private Niveau niv;
 		public int h_param = 0; // nb de frames en plus par segment : utilisé pour paramétrer la résolution de l'heuristique
 		public int h_t, h_m; // Heuristique temporelle et nombre de coups
-		public TreeMap<Integer, Integer> fleurToSegment; // Segment parent de la fleur d'indice r*COL+c.
-		public LinkedList<Segment> minSegments;
+		public SparseIntArray fleurToSegment; // Segment parent de la fleur d'indice r*COL+c.
+		public ArrayList<Segment> minSegments;
+		private SparseArray<LinkedList<DistantSegment>> distToSegments;
 		
 		public Heuristic(Niveau niveau) {
 			niv = niveau;
@@ -1352,8 +1525,9 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		 * par "compute" pour le calcul de l'heuristique de chaque état.
 		 */
 		public void prepareRootState() {
-			minSegments = new LinkedList<Segment>();
-			fleurToSegment = new TreeMap<Integer, Integer>();
+			distToSegments = new SparseArray<LinkedList<DistantSegment>>();
+			minSegments = new ArrayList<Segment>();
+			fleurToSegment = new SparseIntArray();
 			PriorityQueue<Segment> segments = new PriorityQueue<Segment>();
 			Segment colSegment = new Segment();
 			Segment[] rowSegments = new Segment[Position.ROW];
@@ -1390,13 +1564,13 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 			}
 			// Sélection d'un set non recouvrant par ordre des plus grands segments
 			Segment s;
+			int indexSeg = 0;
 			while(!segments.isEmpty()) {
 				s = segments.poll();
 				if(s.nFleurs==0)
 					break;
-				int indexSeg = minSegments.size();
 				minSegments.add(s);
-				s.invalidFlowers(segments, fleurToSegment, indexSeg);
+				s.invalidFlowers(segments, fleurToSegment, indexSeg++);
 				s.computeLength();
 			}
 		}
@@ -1409,18 +1583,51 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		 * @param grid DynaGrid de l'état actuel de niv
 		 * @return
 		 */
-		public void compute(Position coli, DynaGrid grid) {
+		public void compute(SimplePos coli, DynaGrid grid) {
 			int i = 0;
 			h_t = 0;
 			h_m = 0;
 			for(Segment s : minSegments) {
 				if(grid.flowersBySegment[i++] > 0) { // Le segment n'a pas été complètement ramassé.
-					h_t += s.length * 4 / 3 + h_param;
+					h_t += Math.round(s.length/0.75) + h_param;
 					h_m += 1 + h_param/2;
 				}
 			}
+			// On ajoute la distance au plus proche segment (en temps et moves)
+			int[] dist = distanceToClosestSegment(coli, grid);
+			h_t += Math.round(dist[0]/0.75);
+			h_m += dist[1];
 		}
 		
+		/**
+		 * Retourne le couple (distance minimum à un segment non ramassé, moves minimum au même).
+		 * @param coli la position du colibri
+		 * @param grid l'état de la grille courante
+		 * @return (minDist, minMoves)
+		 */
+		private int[] distanceToClosestSegment(SimplePos coli, DynaGrid grid) {
+			LinkedList<DistantSegment> distantSegments = distToSegments.get(coli.r*Position.COL + coli.c);
+			if(distantSegments==null) { // Première fois demandé: on construit la liste ordonnée pour cette position
+				PriorityQueue<DistantSegment> orderedSegs = new PriorityQueue<DistantSegment>();
+				for(Segment s : minSegments) {
+					orderedSegs.add(new DistantSegment(coli, s));
+				}
+				distantSegments = new LinkedList<DistantSegment>();
+				while(!orderedSegs.isEmpty()) {
+					distantSegments.add(orderedSegs.poll());
+				}
+				distToSegments.put(coli.r*Position.COL + coli.c, distantSegments);
+			}
+			// Récupère le segment le plus proche qui n'est pas encore totalement ramassé
+			Iterator<DistantSegment> it = distantSegments.iterator();
+			while(it.hasNext()) {
+				DistantSegment dSeg = it.next();
+				if(grid.flowersBySegment[dSeg.segment.index]>0) { // Segment non ramassé
+					return new int[] {dSeg.distance, dSeg.moves};
+				}
+			}
+			return new int[] {0, 0};
+		}
 		
 		public static class Flower {
 			public int r, c;
@@ -1438,12 +1645,19 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		}
 		
 		public static class Segment implements Comparable<Segment>  {
-			public char nFleurs = 0;
-			public int length = 0;
+			public int index; // L'index du segment dans minSegments
+			public SimplePos e1, e2; // Les extrémités du segment
+			public byte nFleurs = 0; // le nombre de fleurs non attribuées qu'il recouvre
+			public int length = 0; // La longueur du segment
 			public LinkedList<Flower> flowers;
 			
 			public Segment() {
 				flowers = new LinkedList<Flower>();
+			}
+			
+			@Override
+			public String toString() {
+				return e1+"->"+e2+": "+((int)nFleurs);
 			}
 			
 			@Override
@@ -1458,22 +1672,27 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 			}
 			
 			/**
-			 * Calcule la longueur du segment en nombre de cases puis efface les fleurs.
+			 * Calcule la longueur du segment en nombre de cases, définit ses extrémités,
+			 * puis efface les fleurs.
 			 */
 			public void computeLength() {
 				Flower f1 = flowers.getFirst();
 				Flower f2 = flowers.getLast();
 				length = f2.r - f1.r + f2.c - f1.c + 1;
+				e1 = new SimplePos(f1.r, f1.c);
+				e2 = new SimplePos(f2.r, f2.c);
 				flowers = null; // Pour ne pas garder les objets Fleur en mémoire.
 			}
 			
 			/**
-			 * Invalide ses fleurs dans les autres segments.
+			 * Invalide ses fleurs dans les autres segments et référence ce segment
+			 * comme parent de ses fleurs. Aussi, enregistre son index dans minSegments.
 			 * @param segs queue de tous les segments
 			 * @param fleurToSegment map de fleur à segment parent
 			 * @param indexSeg indice du segment dans minSegments
 			 */
-			public void invalidFlowers(PriorityQueue<Segment> segs, TreeMap<Integer, Integer> fleurToSegment, int indexSeg) {
+			public void invalidFlowers(PriorityQueue<Segment> segs, SparseIntArray fleurToSegment, int indexSeg) {
+				this.index = indexSeg;
 				for(Flower f : flowers) {
 					fleurToSegment.put(f.r*Position.COL + f.c, indexSeg);
 					for(Segment s : f.segments) {
@@ -1487,5 +1706,36 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 				}
 			}
 		}
+		
+		public static class DistantSegment implements Comparable<DistantSegment> {
+			public Segment segment; // Le segment en question
+			public byte distance; // la distance minimale, en cases, à l'une ou l'autre extrémité du segment
+			public byte moves; // le nombre de moves à effectuer pour rejoindre l'une ou l'autre extrémité du segment
+			
+			public DistantSegment(SimplePos coli, Segment s) {
+				segment = s;
+				computeDistance(coli);
+			}
+			
+			private void computeDistance(SimplePos coli) {
+				// TODO: min(d(coli,segment.e1), d(coli, segment.e2))
+				distance = (byte) Math.min(coli.distance(segment.e1), coli.distance(segment.e2));
+				if(segment.e1.r==segment.e2.r) { // Selon la ligne
+					moves = (byte) ((coli.r==segment.e1.r) ? 0 : 1);
+					if(segment.e1.c < coli.c && coli.c < segment.e2.c)
+						moves++;
+				} else { // selon la colonne
+					moves = (byte) ((coli.c==segment.e1.c) ? 0 : 1);
+					if(segment.e1.r < coli.r && coli.r < segment.e2.r)
+						moves++;
+				}
+			}
+			
+			@Override
+			public int compareTo(DistantSegment ds) {
+				return distance - ds.distance;
+			}
+		}
+		
 	}
 }

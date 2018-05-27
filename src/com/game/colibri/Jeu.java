@@ -501,6 +501,7 @@ public class Jeu extends Activity {
 	}
 	
 	public void solutionT(View v) {
+		recommencer(v); // TODO: debug
 		if(play.state!=MoteurJeu.RUNNING)
 			return;
 		menuLateral(0,null);
