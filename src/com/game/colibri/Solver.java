@@ -9,11 +9,13 @@ import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 import java.util.TreeSet;
+
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.View;
+
 import com.game.colibri.Niveau.Occurrence;
 
 /**
@@ -324,8 +326,8 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 			heuristic.compute(pos, grid);
 			if(heuristic.h_m==0)
 				goal_reached = true;
-			f_score_t = path.t_cumul + heuristic.h_t;
 			f_score_m = path.length + heuristic.h_m;
+			f_score_t = path.t_cumul + heuristic.h_t + f_score_m*8;
 		}
 		
 		@Override
@@ -425,6 +427,7 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 				//System.out.println("IMPOSSIBLE");
 				return;
 			}
+			//System.out.println("dep : "+possibIntervals.intervals.size()+" ; pres : "+possibPresence.intervals.size());
 			int depart = possibIntervals.getFirstPossib();
 			if(depart > 0 && possibPresence.firstClose() - 2 < depart) { // attente impossible (+2 pour prendre en compte deux frames supplémentaires d'accélération après un wait)
 				//System.out.println("PARENT");
@@ -1051,9 +1054,10 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		 * Crée une copie de im.
 		 * @param im
 		 */
+		@SuppressWarnings("unchecked")
 		public IntervalsModulo(IntervalsModulo im) {
 			mod = im.mod;
-			intervals = new TreeSet<Bound>(im.intervals);
+			intervals = (TreeSet<Bound>) im.intervals.clone();
 			state_t0 = im.state_t0;
 			empty_state = im.empty_state;
 		}
