@@ -269,7 +269,7 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		private DynaGrid grid; // Grille du niveau avec les changements.
 		private Path path; // Les déplacements jusqu'ici.
 		private LinkedList<State> voisins; // Les prochaines destinations possibles
-		private IntervalsModulo possibPresence; // Les intervalles possibles de présence sur cette case.
+		private IntervalsModuloHandler possibPresence; // Les intervalles possibles de présence sur cette case.
 		private int f_score_t, f_score_m; // f_score: time & moves (f coût total départ->arrivée, g coût parcouru, h estimation heuristique : f=g+h)
 		private boolean goal_reached = false; // true si cet état est final (h==0)
 		
@@ -368,7 +368,7 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 			// Poussée de vache
 			LinkedList<Niveau.Occurrence> occs = grid.getVachesPushingTo(pos,dir);
 			if(!occs.isEmpty()) {
-				addMovePushedByVache(pMoves, dir, occs, new IntervalsModulo(true));
+				addMovePushedByVache(pMoves, dir, occs, null);
 			}
 			// Déplacements
 			cell = grid.addCatsObstacles(tempPos, cell); // Pour ajouter les chats comme obstacles au déplacement
@@ -377,14 +377,14 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 			int steps = 0; // Pour détecter une boucle infinie entre deux arcs-en-ciel.
 			while(cell!=null && steps < 2*Position.COL) {
 				if(!cell.isEmpty() && cell.getFirst().mod!=Integer.MAX_VALUE) // Arrêt contre une vache (et non une dynamite qui va exploser)
-					addMoveToVache(pMoves, tempPos.prev(dir), dir, cell, new IntervalsModulo(true));
+					addMoveToVache(pMoves, tempPos.prev(dir), dir, cell, null);
 				cell = grid.addCatsObstacles(tempPos, cell);
 				tempPos.simul(cell, niv, grid);
 				cell = grid.obstacle(tempPos.step(dir));
 				steps++;
 			}
 			if(cell==null) // Arrêt contre menhir
-				addMoveToMenhir(pMoves, tempPos.prev(dir), dir, new IntervalsModulo(true));
+				addMoveToMenhir(pMoves, tempPos.prev(dir), dir, null);
 			return pMoves;
 		}
 		
@@ -398,14 +398,14 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 			dest.t_travel[0] = STEPS_VACHES;
 			dest.t_travel[1] = STEPS_VACHES;
 			dest.step[0] = 0;
-			IntervalsModulo possibIntervals = grid.getFreeIntervals(dest, STEPS_VACHES, STEPS_VACHES-2);
+			IntervalsModuloHandler possibIntervals = grid.getFreeIntervals(dest, STEPS_VACHES, STEPS_VACHES-2);
 			possibIntervals.intersectArrivee(arrivVoulue, STEPS_VACHES, STEPS_VACHES);
 			possibIntervals.intersectOccArrivee(occs, path.t_cumul, STEPS_VACHES, STEPS_VACHES);
 			addMoveWithin(pMoves, dest, -dir, possibIntervals);
 		}
 		
 		private void addMoveToVache(LinkedList<Move> pMoves, Position dest, int dir, LinkedList<Niveau.Occurrence> occs, IntervalsModulo arrivVoulue) {
-			IntervalsModulo possibIntervals = dest.getDepartsIntervals(); // Instants où le départ est possible
+			IntervalsModuloHandler possibIntervals = dest.getDepartsIntervals(); // Instants où le départ est possible
 			possibIntervals.intersectArrivee(arrivVoulue, dest.t_travel[0], dest.t_travel[1]); // Instant où le départ est possible ET l'arrivée voulue
 			possibIntervals.intersectOccArrivee(occs, path.t_cumul, dest.t_travel[0], dest.t_travel[1]);
 			addMoveWithin(pMoves, dest, dir, possibIntervals);
@@ -414,23 +414,16 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		}
 		
 		private void addMoveToMenhir(LinkedList<Move> pMoves, Position dest, int dir, IntervalsModulo arrivVoulue) {
-			//System.out.println("To Menhir : "+dest.r+","+dest.c);
-			IntervalsModulo possibIntervals = dest.getDepartsIntervals(); // Instants où le départ est possible
-			//System.out.println(possibIntervals.intervals);
+			IntervalsModuloHandler possibIntervals = dest.getDepartsIntervals(); // Instants où le départ est possible
 			possibIntervals.intersectArrivee(arrivVoulue, dest.t_travel[0], dest.t_travel[1]); // Instant où le départ est possible ET l'arrivée voulue
-			//System.out.println(possibIntervals.intervals);
 			addMoveWithin(pMoves, dest, dir, possibIntervals);
 		}
 		
-		private void addMoveWithin(LinkedList<Move> pMoves, Position dest, int dir, IntervalsModulo possibIntervals) {
-			if(possibIntervals.isEmpty()) { // Voyage impossible...
-				//System.out.println("IMPOSSIBLE");
-				return;
-			}
-			//System.out.println("dep : "+possibIntervals.intervals.size()+" ; pres : "+possibPresence.intervals.size());
+		private void addMoveWithin(LinkedList<Move> pMoves, Position dest, int dir, IntervalsModuloHandler possibIntervals) {
 			int depart = possibIntervals.getFirstPossib();
-			if(depart > 0 && possibPresence.firstClose() - 2 < depart) { // attente impossible (+2 pour prendre en compte deux frames supplémentaires d'accélération après un wait)
-				//System.out.println("PARENT");
+			if(depart==Integer.MAX_VALUE) { // Voyage impossible...
+				return;
+			} else if(depart > 0 && possibPresence.firstClose() - 2 < depart) { // attente impossible (+2 pour prendre en compte deux frames supplémentaires d'accélération après un wait)
 				if(parent==null)
 					return;
 				// Appel au parent pour venir plus tard
@@ -616,7 +609,7 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		 * @param delta le temps de présence de l'animal en question (colibri) à prendre en compte
 		 * @return IntervalsModulo correspondant
 		 */
-		public IntervalsModulo getFreeIntervals(Position pos, int shift, int delta) {
+		public IntervalsModuloHandler getFreeIntervals(Position pos, int shift, int delta) {
 			LinkedList<Niveau.Occurrence> occs = new LinkedList<Niveau.Occurrence>();
 			LinkedList<Niveau.Occurrence> vaches = niv.passVaches.getOccurrences(pos.r, pos.c);
 			if(vaches!=null)
@@ -624,9 +617,9 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 			LinkedList<Niveau.Occurrence> chats = niv.passChats.getOccurrences(pos.r, pos.c);
 			if(chats!=null)
 				occs.addAll(chats);
-			IntervalsModulo im = new IntervalsModulo(true);
-			im.addOccurrences(occs, pos.t_cumul+shift, delta, false);
-			return im;
+			IntervalsModuloBuilder imb = new IntervalsModuloBuilder(true);
+			imb.addOccurrences(occs, pos.t_cumul+shift, delta, false);
+			return imb.getHandler();
 		}
 		
 		/**
@@ -829,7 +822,7 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		
 		@Override
 		public String toString() {
-			return direction+" "+wait+" "+travel+" "+posFinale.r+" "+posFinale.c+":\n"+posFinale.departsPossibles.intervals+"\n";
+			return direction+" "+wait+" "+travel+" "+posFinale.r+" "+posFinale.c+":\n"+posFinale.departsPossibles.intervalsPerMod+"\n";
 		}
 	}
 	
@@ -918,7 +911,7 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		private double[] step; // La vitesse (le pas par itéreation)
 		private int[] t_travel; // Le nombre de frames écoulées pour effectuer le déplacement
 		private int t_cumul;
-		private IntervalsModulo departsPossibles; // Les intervals de départ possibles pour faire ce déplacement
+		private IntervalsModuloBuilder departsPossibles; // Les intervals de départ possibles pour faire ce déplacement
 		
 		public Position(int r, int c, double currentStep, int t_cumul) {
 			super(r,c);
@@ -926,7 +919,7 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 			step = new double[] {currentStep, 0};
 			t_travel = new int[] {2, 1}; // Init : temps de commutation entre deux coups.
 			this.t_cumul = t_cumul;
-			departsPossibles = new IntervalsModulo(true);
+			departsPossibles = new IntervalsModuloBuilder(true);
 		}
 		
 		public Position(Position p) {
@@ -935,11 +928,11 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 			step = p.step.clone();
 			t_travel = p.t_travel.clone();
 			t_cumul = p.t_cumul;
-			departsPossibles = new IntervalsModulo(p.departsPossibles);
+			departsPossibles = new IntervalsModuloBuilder(p.departsPossibles);
 		}
 		
-		public IntervalsModulo getDepartsIntervals() {
-			return new IntervalsModulo(departsPossibles);
+		public IntervalsModuloHandler getDepartsIntervals() {
+			return departsPossibles.getHandler();
 		}
 		
 		/**
@@ -948,7 +941,6 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		 * @param niv référence vers le niveau en cours pour avoir les correspondances d'arc-en-ciel
 		 */
 		public void simul(LinkedList<Niveau.Occurrence> occs, Niveau niv, DynaGrid grid) {
-			//System.out.println("Step on "+r+","+c);
 			// Effectue le pas
 			int [] t_travel = {0, 0};
 			for(int i=0; i<2; i++) {
@@ -1033,139 +1025,29 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		}
 	}
 	
-	public static class IntervalsModulo {
-		public int mod;
-		public TreeSet<Bound> intervals;
-		public boolean state_t0; // Cas particulier pour t=0 puisque la vitesse est conservée
-		public boolean empty_state; // L'état lorsque vide.
+	/**
+	 * Cette classe permet de construire un set d'IntervalModulo de différentes
+	 * périodes à partir d'occurrences. On peut ensuite en extraire un IntervalsModuloHandler
+	 * pour effectuer d'autres opérations.
+	 * @author Louis
+	 *
+	 */
+	public static class IntervalsModuloBuilder {
+		public SparseArray<IntervalsModulo> intervalsPerMod; // Map un modulo à un IntervalsModulo
+		public boolean state_t0;
 		
-		/**
-		 * Crée un nouvel interval plein ou vide selon la valeur de full.
-		 * @param full true pour plein, false pour vide
-		 */
-		public IntervalsModulo(boolean full) {
-			mod = 1;
-			intervals = new TreeSet<Bound>();
+		public IntervalsModuloBuilder(boolean full) {
+			intervalsPerMod = new SparseArray<IntervalsModulo>();
 			state_t0 = full;
-			empty_state = full;
 		}
 		
-		/**
-		 * Crée une copie de im.
-		 * @param im
-		 */
-		@SuppressWarnings("unchecked")
-		public IntervalsModulo(IntervalsModulo im) {
-			mod = im.mod;
-			intervals = (TreeSet<Bound>) im.intervals.clone();
-			state_t0 = im.state_t0;
-			empty_state = im.empty_state;
-		}
-
-		private int lcm(int a, int b) {
-			return a * (b / gcd(a, b));
-		}
-		
-		private int gcd(int a, int b) {
-			return b==0 ? a : gcd(b, a%b);
-		}
-		
-		private int modulo(int v) {
-			return mod==Integer.MAX_VALUE ? v : (v%mod + mod)%mod;
-		}
-		
-		/**
-		 * Retourne l'instant de la première borne fermante.
-		 * @return
-		 */
-		public int firstClose() {
-			try {
-				Bound b = intervals.first();
-				if(b.open)
-					return 0;
-				else
-					return b.value;
-			} catch(NoSuchElementException e) {
-				return !empty_state ? 0 : Integer.MAX_VALUE;
+		public IntervalsModuloBuilder(IntervalsModuloBuilder imb) {
+			int len = imb.intervalsPerMod.size();
+			intervalsPerMod = new SparseArray<IntervalsModulo>(len);
+			for(int i=0; i<len; i++) {
+				intervalsPerMod.put(imb.intervalsPerMod.keyAt(i), new IntervalsModulo(imb.intervalsPerMod.valueAt(i)));
 			}
-		}
-
-		/**
-		 * Retourne le premier instant possible.
-		 * @return
-		 */
-		public int getFirstPossib() {
-			if(state_t0)
-				return 0;
-			try {
-				Bound b = intervals.first();
-				if(b.open)
-					return b.value;
-				else if(b.value > 1)
-					return 1;
-				else
-					return intervals.higher(b).value;
-			} catch(NoSuchElementException e) {
-				return empty_state ? 1 : Integer.MAX_VALUE;
-			}
-		}
-		
-		/**
-		 * Retourne l'état de l'instant t selon l'IntervalsModulo.
-		 * @param t un instant par rapport à la même origine (le 0).
-		 * @return
-		 */
-		public boolean isInstantValid(int t) {
-			if(intervals.isEmpty())
-				return empty_state;
-			Bound b = new Bound(modulo(t), true);
-			Bound b_prec = intervals.floor(b);
-			return b_prec==null ? !intervals.ceiling(b).open : b_prec.open;
-		}
-		
-		public boolean isFull() {
-			return intervals.isEmpty() && empty_state;
-		}
-		
-		public boolean isEmpty() {
-			return intervals.isEmpty() && !empty_state;
-		}
-		
-		public void setFullWithState(boolean state) {
-			intervals.clear();
-			empty_state = state;
-			mod = 1;
-		}
-		
-		/**
-		 * Étend le mod de cet IntervalsModulo et duplique les entrées pour recouvrir
-		 * le nouveau domaine.
-		 * @param newMod nouvelle valeur de mod. Doit être un multiple de mod.
-		 */
-		public void extendTo(int newMod) {
-			if(newMod==mod)
-				return;
-			Bound[] bounds = intervals.toArray(new Bound[0]);
-			for(Bound b : bounds) {
-				if(b.value>=mod)
-					break;
-				for(int p=mod; p<newMod; p+=mod) {
-					intervals.add(new Bound(b.value+p, b.open));
-				}
-			}
-			mod = newMod;
-		}
-		
-		/**
-		 * Translate l'IntervalsModulo de delta_t.
-		 * @param delta_t le temps à translater (positif ou négatif)
-		 */
-		public void translate(int delta_t) {
-			TreeSet<Bound> newIntervals = new TreeSet<Bound>();
-			for(Bound b : intervals) {
-				newIntervals.add(new Bound(modulo(b.value + delta_t), b.open));
-			}
-			intervals = newIntervals;
+			state_t0 = imb.state_t0;
 		}
 		
 		/**
@@ -1190,7 +1072,7 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		}
 		
 		/**
-		 * Insère l'état possib pour le temps des occurrences o, rapportées à l'instant
+		 * Insère l'état possib pour le temps des occurrences occs, rapportées à l'instant
 		 * t_instant et élargies de delta.
 		 * @param occs
 		 * @param t_instant
@@ -1199,62 +1081,348 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		 */
 		public void addOccurrences(LinkedList<Niveau.Occurrence> occs, int t_instant, int delta, boolean possib) {
 			for(Niveau.Occurrence o : occs) {
-				//System.out.println(t_instant+" "+o.r+", "+o.delta+"("+delta+"), "+o.mod+", "+possib+" : "+this.intervals);
-				addOccurrence(o, t_instant, delta, possib);
-				//System.out.println(this.intervals);
+				IntervalsModulo im = intervalsPerMod.get(o.mod);
+				if(im==null) {
+					im = new IntervalsModulo(o.mod, !possib);
+					intervalsPerMod.put(o.mod, im);
+				}
+				im.addOccurrence(o, t_instant, delta, possib);
 			}
+		}
+		
+		public IntervalsModuloHandler getHandler() {
+			return new IntervalsModuloHandler(this);
+		}
+	}
+	
+	/**
+	 * Cette classe permet de manipuler des IntervalsModulo, notamment pour y ajouter
+	 * des intervalles à intersecter, et appeler les fonctions firstClose et
+	 * getFirstPossib.
+	 * @author Louis
+	 *
+	 */
+	public static class IntervalsModuloHandler {
+		public int ppcmMod; // L'hyper période des IntervalsModulo périodiques.
+		public int lastSporadicEvent; // Le dernier instant des événements sporadiques.
+		public ArrayList<IntervalsModulo> intervalsSet;
+		public boolean state_t0;
+		
+		public IntervalsModuloHandler(boolean full) {
+			ppcmMod = 1;
+			lastSporadicEvent = 0;
+			intervalsSet = new ArrayList<IntervalsModulo>();
+			state_t0 = full;
+		}
+		
+		public IntervalsModuloHandler(IntervalsModuloBuilder imb) {
+			ppcmMod = 1;
+			lastSporadicEvent = 0;
+			int len = imb.intervalsPerMod.size();
+			intervalsSet = new ArrayList<IntervalsModulo>(len);
+			state_t0 = imb.state_t0;
+			for(int i = 0; i < len; i++) {
+				addIntervalsModulo(imb.intervalsPerMod.valueAt(i));
+			}
+		}
+		
+		/**
+		 * Retourne la prochaine borne ouvrante à partir de from_t de l'intersection des
+		 * IntervalsModulo de ce handler.
+		 * @param from_t l'instant à partir duquel chercher
+		 * @return le prochain instant d'ouverture après from_t
+		 */
+		public int getNextOpen(int from_t) {
+			Bound nextOpen = new Bound(from_t, true);
+			int i = 0, posCount = 0, len = intervalsSet.size(), time_limit = from_t+ppcmMod;
+			if(from_t < lastSporadicEvent)
+				time_limit+=lastSporadicEvent;
+			while(posCount < len && nextOpen.value <= time_limit) {
+				int fp = intervalsSet.get(i).getNextState(true, nextOpen);
+				if(fp==nextOpen.value) {
+					posCount++;
+				} else {
+					posCount = 1;
+					nextOpen.value = fp;
+				}
+				i++;
+				if(i==len)
+					i = 0;
+			}
+			return nextOpen.value <= time_limit ? nextOpen.value : Integer.MAX_VALUE;
+		}
+		
+		/**
+		 * Retourne la prochaine borne fermante à partir de from_t de l'intersection des
+		 * IntervalsModulo de ce handler.
+		 * @param from_t l'instant à partir duquel chercher
+		 * @return le prochain instant de fermeture après from_t
+		 */
+		public int getNextClose(int from_t) {
+			Bound nextClose = new Bound(from_t, true);
+			int minClose = Integer.MAX_VALUE;
+			int tMin;
+			for(IntervalsModulo im : intervalsSet) {
+				tMin = im.getNextState(false, nextClose);
+				if(tMin < minClose)
+					minClose = tMin;
+			}
+			return minClose;
+		}
+		
+		public int getFirstPossib() {
+			if(state_t0)
+				return 0;
+			return getNextOpen(1);
+		}
+		
+		public int firstClose() {
+			return getNextClose(0);
+		}
+		
+		private boolean isInstantValid(int t) {
+			int len = intervalsSet.size();
+			for(int i = 0; i < len; i++) {
+				if(!intervalsSet.get(i).isInstantValid(t))
+					return false;
+			}
+			return true;
+		}
+		
+		public void addIntervalsModulo(IntervalsModulo im) {
+			if(im.isFull())
+				return;
+			if(im.mod==Integer.MAX_VALUE)
+				lastSporadicEvent = Math.max(lastSporadicEvent, im.intervals.last().value);
+			else
+				ppcmMod = IntervalsModulo.lcm(ppcmMod, im.mod);
+			intervalsSet.add(im);
+		}
+		
+		public void addIntervalsModulo(IntervalsModuloHandler imh) {
+			ppcmMod = IntervalsModulo.lcm(ppcmMod, imh.ppcmMod);
+			lastSporadicEvent = Math.max(lastSporadicEvent, imh.lastSporadicEvent);
+			intervalsSet.addAll(imh.intervalsSet);
+		}
+		
+		/**
+		 * Intersectionne arrivVoulue avec this.intervals en translatant arrivVoulue
+		 * de t_travel dans le cas t==0 et t!=0.
+		 * @param arrivVoulue intervals voulus après t_travel ATTENTION: affecté par la fonction
+		 * @param t_travelVitesseCons t_travel dans le cas départ à t==0
+		 * @param t_travelVitesse0 t_travel dans le cas départ à t!=0
+		 */
+		public void intersectArrivee(IntervalsModulo arrivVoulue, int t_travelVitesseCons, int t_travelVitesse0) {
+			if(arrivVoulue==null)
+				return;
+			if(!arrivVoulue.isInstantValid(t_travelVitesseCons))
+				state_t0 = false;
+			arrivVoulue.translate(-t_travelVitesse0);
+			addIntervalsModulo(arrivVoulue);
+		}
+		
+		/**
+		 * Intersecte l'IntervalsModulo avec les instants de présence des occs.
+		 * @param occs
+		 * @param t_instant instant de référence de l'IntervalModulo
+		 * @param t_travelVitesseCons t_travel dans le cas départ à t==0
+		 * @param t_travelVitesse0 t_travel dans le cas départ à t!=0
+		 */
+		public void intersectOccArrivee(LinkedList<Niveau.Occurrence> occs, int t_instant, int t_travelVitesseCons, int t_travelVitesse0) {
+			IntervalsModuloBuilder occsIntervals = new IntervalsModuloBuilder(false);
+			occsIntervals.addOccurrences(occs, t_instant + t_travelVitesse0, -3*STEPS_VACHES/4, true);
+			IntervalsModuloHandler imh = occsIntervals.getHandler();
+			// Cas t==0 (conservation vitesse)
+			if(state_t0 && !imh.isInstantValid(t_travelVitesseCons - t_travelVitesse0))
+				state_t0 = false;
+			addIntervalsModulo(imh);
+		}
+		
+		/**
+		 * Crée un IntervalsModulo décrivant les instants d'arrivée voulus sur cette case,
+		 * permettant de partir dans possibDeparture.
+		 * Dans ce contexte, this décrit les intervalles de présence possibles sur la case,
+		 * et possibDeparture décrit les intervalles de départ possibles.
+		 * Le résultat est inclu dans this, mais chaque intervalle doit être temporellement
+		 * connexe à un intervalle de possibDeparture.
+		 * @param possibDeparture les instants de départ possibles
+		 * @return les instants d'arrivée voulus sur la case courante
+		 */
+		public IntervalsModulo getIntervalsForDepartureIn(IntervalsModuloHandler possibDeparture) {
+			int ppcm = IntervalsModulo.lcm(ppcmMod, possibDeparture.ppcmMod); // Définition de la nouvelle période commune
+			if(lastSporadicEvent!=0 || possibDeparture.lastSporadicEvent!=0)
+				ppcm*=2; // Pour prendre en compte les événements sporadiques, on étend à ppcm*2.
+			IntervalsModulo arrivVoulues = new IntervalsModulo(ppcm, false);
+			int tOpen = getNextOpen(0), tClose;
+			if(tOpen==0) {
+				tOpen = getNextOpen(getNextClose(0));
+				tClose = getNextClose(tOpen);
+			} else {
+				tClose = getNextClose(tOpen);
+			}
+			for(; tOpen <= ppcm; tOpen=getNextOpen(tClose), tClose=getNextClose(tOpen)) {
+				int tDepOpen = possibDeparture.getNextOpen(tOpen), tDepClose = 0;
+				for(; tDepOpen < tClose; tDepOpen=possibDeparture.getNextOpen(tDepClose)) {
+					tDepClose=possibDeparture.getNextClose(tDepOpen);
+					if(tDepClose >= tClose)
+						break;
+				}
+				if(tDepClose==0)
+					continue;
+				arrivVoulues.intervals.add(new Bound(tOpen==ppcm ? 0 : tOpen, true));
+				if(tDepOpen >= tClose)
+					arrivVoulues.intervals.add(new Bound(tDepClose>ppcm ? tDepClose-ppcm : tDepClose, false));
+				else
+					arrivVoulues.intervals.add(new Bound(tClose>ppcm ? tClose-ppcm : tClose, false));
+			}
+			return arrivVoulues;
+		}
+	}
+	
+	public static class IntervalsModulo {
+		public int mod;
+		public TreeSet<Bound> intervals;
+		public boolean state_t0; // Cas particulier pour t=0 puisque la vitesse est conservée
+		public boolean empty_state; // L'état lorsque vide.
+		
+		/**
+		 * Crée un nouvel interval plein ou vide selon la valeur de full.
+		 * @param period la période de cet IntervalsModulo (immutable)
+		 * @param full true pour plein, false pour vide
+		 */
+		public IntervalsModulo(int period, boolean full) {
+			mod = period;
+			intervals = new TreeSet<Bound>();
+			state_t0 = full;
+			empty_state = full;
+		}
+		
+		/**
+		 * Crée une copie de im.
+		 * @param im
+		 */
+		@SuppressWarnings("unchecked")
+		public IntervalsModulo(IntervalsModulo im) {
+			mod = im.mod;
+			intervals = (TreeSet<Bound>) im.intervals.clone();
+			state_t0 = im.state_t0;
+			empty_state = im.empty_state;
+		}
+
+		public static int lcm(int a, int b) {
+			return a * (b / gcd(a, b));
+		}
+		
+		public static int gcd(int a, int b) {
+			return b==0 ? a : gcd(b, a%b);
+		}
+		
+		private int modulo(int v) {
+			return mod==Integer.MAX_VALUE ? v : (v%mod + mod)%mod;
+		}
+
+		/**
+		 * Retourne le premier instant possible d'état open, depuis l'instant spécifié inclus.
+		 * @param open état de open à considérer
+		 * @param from_b instant à partir duquel rechercher (peut être supérieur au modulo)
+		 * @return le prochain instant d'état open après from_b, ou from_b si open est l'état présent.
+		 */
+		public int getNextState(boolean open, Bound from_b) {
+			if(intervals.isEmpty())
+				return (open == empty_state) ? from_b.value : Integer.MAX_VALUE;
+			Bound b;
+			if(from_b.value >= mod) {
+				int memValue = from_b.value;
+				from_b.value = modulo(memValue);
+				b = intervals.higher(from_b);
+				from_b.value = memValue;
+			} else {
+				b = intervals.higher(from_b);
+			}
+			int tour = 0;
+			if(b==null) {
+				if(mod==Integer.MAX_VALUE)
+					return Integer.MAX_VALUE;
+				b = intervals.first();
+				tour = 1;
+			}
+			if(b.open==open)
+				return (tour + from_b.value/mod)*mod + b.value;
+			else
+				return from_b.value;
+		}
+		
+		/**
+		 * Retourne l'état de l'instant t selon l'IntervalsModulo.
+		 * @param t un instant par rapport à la même origine (le 0).
+		 * @return
+		 */
+		private boolean isInstantValid(int t) {
+			if(intervals.isEmpty())
+				return empty_state;
+			Bound b = new Bound(modulo(t), true);
+			Bound b_prec = intervals.floor(b);
+			return b_prec==null ? !intervals.ceiling(b).open : b_prec.open;
+		}
+		
+		public boolean isFull() {
+			return intervals.isEmpty() && empty_state;
+		}
+		
+		public boolean isEmpty() {
+			return intervals.isEmpty() && !empty_state;
+		}
+		
+		private void setFullWithState(boolean state) {
+			intervals.clear();
+			empty_state = state;
+		}
+		
+		/**
+		 * Translate l'IntervalsModulo de delta_t.
+		 * @param delta_t le temps à translater (positif ou négatif)
+		 */
+		private void translate(int delta_t) {
+			TreeSet<Bound> newIntervals = new TreeSet<Bound>();
+			for(Bound b : intervals) {
+				newIntervals.add(new Bound(modulo(b.value + delta_t), b.open));
+			}
+			intervals = newIntervals;
 		}
 		
 		/**
 		 * Insère l'état possib pour le temps de l'occurrence o, rapportée à l'instant
 		 * t_instant et élargie de delta.
-		 * @param o
+		 * @param o l'occurrence qui doit être de même période que l'IntervalsModulo
 		 * @param t_instant
 		 * @param delta
 		 * @param possib
 		 */
 		public void addOccurrence(Niveau.Occurrence o, int t_instant, int delta, boolean possib) {
-			//if(o.delta+delta==0) // Ensemble vide
-			//	return;
+			if(empty_state==possib && intervals.isEmpty()) // Déjà complet
+				return;
 			if(o.mod==Integer.MAX_VALUE) { // Occurrence sporadique et non périodique => on multiplie la période par 2
 				int end = o.r + o.delta - t_instant;
-				if(end > 0) { // Pas dépassée
-					if(mod==1) // Intervalle vide
-						mod = o.mod;
-					else if(mod!=Integer.MAX_VALUE)
-						extendTo(2*mod);
+				if(end > 0) // Pas dépassée
 					addInterval(0, end, possib);
-				}
 				return;
-			}
-			if(mod==Integer.MAX_VALUE) { // Si l'IntervalsModulo ne contenait qu'une intervalle sporadique.
-				mod = 2*o.mod;
-			} else if(mod%o.mod!=0) { // On étend la période de l'IntervalsModulo au PPCM
-				extendTo(lcm(mod, o.mod));
 			}
 			if(2*(o.delta+delta)>=mod) { // Ensemble complet
 				setFullWithState(possib);
 				return;
 			}
-			for(int t=o.r; t<mod; t+=o.mod) {
-				addInterval(t-t_instant - o.delta-delta, t-t_instant + o.delta+delta, possib);
-			}
+			addInterval(o.r-t_instant - o.delta-delta, o.r-t_instant + o.delta+delta, possib);
 		}
 		
 		public void addInterval(int open, int close, boolean state) {
 			Bound b0 = new Bound(modulo(open), state);
 			Bound b1 = new Bound(modulo(close), !state);
-			//System.out.println("b0:"+b0.value+" "+state+" b1:"+b1.value+" ; mod:"+mod);
-			//System.out.println(intervals);
 			// Borne ouvrante
 			addOpenBound(b0);
-			//System.out.println(intervals);
 			// Borne fermante
 			addCloseBound(b1);
-			//System.out.println(intervals);
 			// Supprime les bornes entre les deux
 			cleanInBetween(b0,b1,state);
-			//System.out.println(intervals);
 		}
 		
 		private void cleanInBetween(Bound b0, Bound b1, boolean stateIfFull) {
@@ -1313,202 +1481,6 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 			} else if(next.open!=b.open) { // Borne strictement supérieure
 				intervals.add(b);
 			}
-		}
-		/*
-		private void addOpenBound(Bound b) {
-			Bound prev = intervals.floor(b);
-			if(prev==null) { // Pas de borne inférieure ou égale
-				prev = intervals.ceiling(b); // next
-				if(prev==null || prev.open==b.open) // Ensemble vide ou ouverture avant le prochain
-					intervals.add(b);
-			} else if(prev.equals(b)) { // La borne existe déjà
-				if(prev.open!=b.open)
-					intervals.remove(prev);
-			} else { // Il y a une borne strictement inférieure
-				if(prev.open!=b.open)
-					intervals.add(b);
-			}
-		}
-		
-		private void addCloseBound(Bound b) {
-			Bound next = intervals.ceiling(b);
-			if(next==null) { // Pas de borne supérieure ou égale
-				next = intervals.floor(b); // prev
-				if(next==null) { // Intervals vide
-					setFullWithState(!b.open);
-				} else if(next.open!=b.open) // Fermeture après avant le précédent
-					intervals.add(b);
-			} else if(next.equals(b)) { // La borne existe déjà
-				if(next.open!=b.open)
-					intervals.remove(next);
-			} else { // Il y a une borne strictement supérieure
-				if(next.open!=b.open) {
-					intervals.add(b);
-				}
-			}
-		}
-		*/
-		/**
-		 * Intersection de this.intervals et im.intervals en étendant le modulo au
-		 * ppcm des deux.
-		 * @param im l'IntervalsModulo à intersecter. ATTENTION: il est aussi affecté.
-		 */
-		public void intersect(IntervalsModulo im) {
-			if(im.intervals.isEmpty()) {
-				if(!im.empty_state) {
-					intervals.clear();
-					empty_state = false;
-				}
-				return;
-			} else if(intervals.isEmpty()) {
-				if(empty_state) {
-					intervals.addAll(im.intervals);
-					mod = im.mod;
-				}
-				return;
-			}
-			if(mod==Integer.MAX_VALUE) {
-				if(im.mod!=Integer.MAX_VALUE) {
-					im.extendTo(2*im.mod);
-				}
-			} else if(im.mod==Integer.MAX_VALUE) {
-				if(mod!=Integer.MAX_VALUE) {
-					extendTo(2*mod);
-				}
-			} else { // Les deux intervalles ne sont pas sporadiques.
-				int ppcm = lcm(im.mod, mod);
-				extendTo(ppcm);
-				im.extendTo(ppcm);
-			}
-			int openCount = 0; // +1 quand open, -1 quand close.
-			if(!intervals.first().open) openCount++; // Si première Bound close
-			if(!im.intervals.first().open) openCount++; // Idem
-			TreeSet<Bound> inter = new TreeSet<Bound>();
-			Iterator<Bound> inter1 = intervals.iterator();
-			Iterator<Bound> inter2 = im.intervals.iterator();
-			Bound b1=inter1.next(), b2=inter2.next();
-			while(b1!=null || b2!=null) {
-				if(b2==null || (b1!=null && (b1.value<b2.value || (b1.value==b2.value && !b1.open)))){ // !b1.open est pour éviter les cas où pour une même valeur on a une borne ouvrante et une fermante
-					if(b1.open) {
-						openCount++;
-						if(openCount>=2)
-							inter.add(b1);
-					} else {
-						if(openCount>=2)
-							inter.add(b1);
-						openCount--;
-					}
-					b1 = inter1.hasNext() ? inter1.next() : null;
-				} else {
-					if(b2.open) {
-						openCount++;
-						if(openCount>=2)
-							inter.add(b2);
-					} else {
-						if(openCount>=2)
-							inter.add(b2);
-						openCount--;
-					}
-					b2 = inter2.hasNext() ? inter2.next() : null;
-				}
-			}
-			intervals = inter;
-			if(intervals.isEmpty())
-				empty_state = false;
-		}
-		
-		/**
-		 * Intersectionne arrivVoulue avec this.intervals en translatant arrivVoulue
-		 * de t_travel dans le cas t==0 et t!=0.
-		 * @param arrivVoulue intervals voulus après t_travel ATTENTION: affecté par la fonction
-		 * @param t_travelVitesseCons t_travel dans le cas départ à t==0
-		 * @param t_travelVitesse0 t_travel dans le cas départ à t!=0
-		 */
-		public void intersectArrivee(IntervalsModulo arrivVoulue, int t_travelVitesseCons, int t_travelVitesse0) {
-			if(arrivVoulue.isFull())
-				return;
-			if(!arrivVoulue.isInstantValid(t_travelVitesseCons))
-				state_t0 = false;
-			arrivVoulue.translate(-t_travelVitesse0);
-			intersect(arrivVoulue);
-		}
-		
-		/**
-		 * Intersecte l'IntervalsModulo avec les instants de présence des occs.
-		 * @param occs
-		 * @param t_instant instant de référence de l'IntervalModulo
-		 * @param t_travelVitesseCons t_travel dans le cas départ à t==0
-		 * @param t_travelVitesse0 t_travel dans le cas départ à t!=0
-		 */
-		public void intersectOccArrivee(LinkedList<Niveau.Occurrence> occs, int t_instant, int t_travelVitesseCons, int t_travelVitesse0) {
-			IntervalsModulo occsIntervals = new IntervalsModulo(false);
-			occsIntervals.addOccurrences(occs, t_instant + t_travelVitesse0, -3*STEPS_VACHES/4, true);
-			// Cas t==0 (conservation vitesse)
-			if(state_t0 && !occsIntervals.isInstantValid(t_travelVitesseCons - t_travelVitesse0))
-				state_t0 = false;
-			intersect(occsIntervals);
-		}
-		
-		/**
-		 * Crée un IntervalsModulo décrivant les instants d'arrivée voulus sur cette case,
-		 * permettant de partir dans possibDeparture.
-		 * Dans ce contexte, this décrit les intervalles de présence possibles sur la case,
-		 * et possibDeparture décrit les intervalles de départ possibles.
-		 * Le résultat est inclu dans this, mais chaque intervalle doit être temporellement
-		 * connexe à un intervalle de possibDeparture.
-		 * @param possibDeparture les instants de départ possibles
-		 * @return les instants d'arrivée voulus sur la case courante
-		 */
-		public IntervalsModulo getIntervalsForDepartureIn(IntervalsModulo possibDeparture) {
-			if(possibDeparture.intervals.isEmpty() || this.intervals.isEmpty()) {
-				if(!possibDeparture.empty_state)
-					return new IntervalsModulo(false); // Si pas de départ possible, vide.
-				else
-					return new IntervalsModulo(this); // Si l'un ou l'autre plein, possibPresence
-			}
-			IntervalsModulo arrivVoulues = new IntervalsModulo(false);
-			IntervalsModulo possibPresence = new IntervalsModulo(this);
-			IntervalsModulo possibDep = new IntervalsModulo(possibDeparture);
-			int ppcm = Integer.MAX_VALUE; // Définition de la nouvelle période commune
-			if(possibDep.mod==Integer.MAX_VALUE) {
-				if(possibPresence.mod!=Integer.MAX_VALUE) {
-					ppcm = 2*possibPresence.mod;
-					possibPresence.extendTo(ppcm);
-				}
-			} else if(possibPresence.mod==Integer.MAX_VALUE) {
-				if(possibDep.mod!=Integer.MAX_VALUE) {
-					ppcm = 2*possibDep.mod;
-					possibDep.extendTo(ppcm);
-				}
-			} else { // Les deux intervalles ne sont pas sporadiques.
-				ppcm = lcm(possibPresence.mod, possibDep.mod);
-				possibPresence.extendTo(ppcm);
-				possibDep.extendTo(ppcm);
-			}
-			arrivVoulues.mod = ppcm;
-			for(Bound b : possibPresence.intervals) {
-				if(!b.open) { // Fin présence
-					Bound openingPres = possibPresence.intervals.lower(b);
-					Bound precBoundDep = possibDep.intervals.lower(b);
-					if(openingPres==null)
-						openingPres = possibPresence.intervals.last();
-					if(precBoundDep==null)
-						precBoundDep = possibDep.intervals.last();
-					if(precBoundDep.open) { // On ajoute l'intervalle de présence entier
-						arrivVoulues.intervals.add(openingPres);
-						arrivVoulues.intervals.add(b);
-					} else {
-						Bound precBoundPres = possibPresence.intervals.lower(precBoundDep);
-						if(precBoundPres==null)
-							precBoundPres = possibPresence.intervals.last();
-						if(precBoundPres==openingPres) { // On ajoute l'intervalle de présence limité à la borne de fin de départ possible.
-							arrivVoulues.intervals.add(openingPres);
-							arrivVoulues.intervals.add(precBoundDep);
-						}
-					}
-				}
-			}
-			return arrivVoulues;
 		}
 	}
 	
