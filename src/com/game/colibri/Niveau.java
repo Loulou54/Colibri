@@ -133,6 +133,8 @@ public class Niveau {
 		//graine = 8722479907385699505L;
 		//graine = -4955446407346367673L;
 		graine = 6230089956759031988L;
+		//graine = 1259394720530780785L;
+		//graine = -5161610159804422431L; // full params
 		this.geneNivRand(lon, lar, base, graine);
 		replay();
 	}
