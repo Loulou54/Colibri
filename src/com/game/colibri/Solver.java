@@ -185,11 +185,11 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 				n++;
 				if(heuristic.h_param < h_param_lim) {
 					heuristic.h_param += 2;
-					n -= 401;
+					n -= 1501;
 				}
 			}
 			if(current.goal_reached) { // <=> h=0 : FIN !
-				System.out.println("Itérations : "+(n + heuristic.h_param/2*400)+"  |  h_param : "+heuristic.h_param+"  |  openSet : "+openSet.size()+"  |  closedSet : "+closedSet.size());
+				System.out.println("Itérations : "+(n + heuristic.h_param/2*1500)+"  |  h_param : "+heuristic.h_param+"  |  openSet : "+openSet.size()+"  |  closedSet : "+closedSet.size());
 				System.out.println("Time (ms) : "+(System.currentTimeMillis()-startTime));
 				return current.path;
 			}
@@ -1380,7 +1380,7 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 
 		@Override
 		public String toString() {
-			return intervals.toString();
+			return intervals.isEmpty() ? "["+empty_state+"]" : intervals.toString();
 		}
 		
 		public static int lcm(int a, int b) {
@@ -1501,6 +1501,8 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 			s += intervals.toString()+"\n";
 			// Borne fermante
 			addCloseBound(b1);
+			if(intervals.isEmpty())
+				setFullWithState(state);
 			if(intervals.size()%2==1)
 				System.out.println("PB INTERVALS b0="+b0+" ; b1="+b1+":\n"+s+"  -->\n"+intervals.toString());
 		}
@@ -1529,8 +1531,6 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 					setFullWithState(stateIfFull);
 				}
 			}
-			if(intervals.isEmpty())
-				setFullWithState(stateIfFull);
 		}
 
 		private void addOpenBound(Bound b) {

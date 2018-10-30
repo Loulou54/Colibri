@@ -142,14 +142,15 @@ public class Niveau {
 		if(avancement<16) nDyna=0;
 		if(avancement<21) nChats=0;
 		if(avancement<23) nArcs=0;
-		// TODO:
 		//graine = -9141506973145342355L;
 		//graine = 8722479907385699505L;
 		//graine = -4955446407346367673L;
-		graine = 6230089956759031988L;
+		//graine = 6230089956759031988L;
 		//graine = 1259394720530780785L;
 		//graine = -5161610159804422431L; // full params
 		this.geneNivRand(lon, lar, base, graine);
+		if(vaches.size()+chats.size() >= 6 && lon >= 18)
+			h_param = 8;
 		replay();
 	}
 	
@@ -467,6 +468,11 @@ public class Niveau {
 			this.mod=mod;
 			this.delta=delta;
 			this.dir_in=dir_in;
+		}
+		
+		@Override
+		public String toString() {
+			return "("+r+","+mod+","+delta+")";
 		}
 		
 		private int gcd(int a, int b) { return b==0 ? a : gcd(b, a%b); }
