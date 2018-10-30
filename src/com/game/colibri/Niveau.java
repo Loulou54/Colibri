@@ -88,6 +88,20 @@ public class Niveau {
 	*/
 	public int[][] chemin;
 	
+	public Passages passColibri;
+	public Passages passVaches;
+	public Passages passChats;
+	private int frame, frameMem;
+	public long seed=0;
+	private Random random;
+	private double step,v_max,acc;
+	public int nVaches=3, nDyna=3, nChats=2, nArcs=2; // Paramètres de quantité, dans [0,6]
+	public SparseArray<int[]> rainbows;
+	public boolean[] presenceRainbows; // Indicates the presence of rainbows on cols and rows
+	
+	public LinkedList<int[]> h_fleurs; // Valeurs heuristiques de certaines fleurs pour augmenter l'efficacité du solveur.
+	public int h_param = -1; // Paramètre h_param pour le solveur, si besoin pour optimiser.
+	
 	/**
 	 * Consructeur de niveau de campagne
 	 * 		@param niveau 
@@ -170,6 +184,9 @@ public class Niveau {
 	 */
 	public void lireNiveau(InputStream ips){
 		String [][]matrice =null;
+		passVaches = new Passages(20);
+		passChats = new Passages(20);
+		rainbows = new SparseArray<int[]>();
 		try {
 			//InputStream ips=new FileInputStream("niveaux/niveau"+niveau+".txt");
 							// ouverture du fichier texte voulu
@@ -198,11 +215,21 @@ public class Niveau {
 			}
 			/*
 			 *  Changement des éléments String en éléments int pour obtenir la 
-			 *  matrice désirée
+			 *  matrice désirée + construction de la structure rainbows
 			 */
 			for(int i=0;i<12;i++){
 				for(int j=0;j<20;j++){
-					carteOrigin[i][j]=Integer.valueOf(matrice[i][j]);
+					int v = Integer.valueOf(matrice[i][j]);
+					carteOrigin[i][j] = v;
+					if(v >= 10) { // Arc-en-ciel
+						int[] arc_pair = rainbows.get(v);
+						if(arc_pair==null)
+							rainbows.put(v, new int[] {i, j, 0, 0});
+						else {
+							arc_pair[2] = i;
+							arc_pair[3] = j;
+						}
+					}
 				}
 			}
 			// La ligne 13 possède les informations de départ du colibri
@@ -227,11 +254,15 @@ public class Niveau {
 					//nombre de points de déplacements que possède la vache
 					int nombre_deplacements = (elements.length)/2;
 					int[][] list_vache = new int[nombre_deplacements][2];
+					int period = 0; // La période en frames du parcours de la vache.
 					for (int j = 0; j < nombre_deplacements; j ++) {
 						list_vache[j][0] = Integer.valueOf(elements[2*j]);
 						list_vache[j][1] = Integer.valueOf(elements[2*j+1]);
+						if(j>0)
+							period += 20*Math.max(Math.abs(list_vache[j][0]-list_vache[j-1][0]), Math.abs(list_vache[j][1]-list_vache[j-1][1]));
 					}
-					vaches.add(list_vache);
+					period += 20*Math.max(Math.abs(list_vache[0][0]-list_vache[nombre_deplacements-1][0]), Math.abs(list_vache[0][1]-list_vache[nombre_deplacements-1][1]));
+					addAnimal(list_vache, period, passVaches, vaches, 20, 18, 0);
 				}
 				/*
 				 *  Si la ligne décrit les déplacements d'un chat et est
@@ -244,16 +275,20 @@ public class Niveau {
 					//nombre de points de déplacements que possède le chat
 					int nombre_deplacements = (elements.length)/2;
 					int[][] list_chat = new int[nombre_deplacements][2];
+					int period = 0; // La période en frames du parcours du chat.
 					for (int j = 0; j < nombre_deplacements; j ++) {
 						list_chat[j][0] = Integer.valueOf(elements[2*j]);
 						list_chat[j][1] = Integer.valueOf(elements[2*j+1]);
+						if(j>0)
+							period += 2 + 4*Math.max(Math.abs(list_chat[j][0]-list_chat[j-1][0]), Math.abs(list_chat[j][1]-list_chat[j-1][1]));
 					}
-					chats.add(list_chat);
+					period += 2 + 4*Math.max(Math.abs(list_chat[0][0]-list_chat[nombre_deplacements-1][0]), Math.abs(list_chat[0][1]-list_chat[nombre_deplacements-1][1]));
+					addAnimal(list_chat, period, passChats, chats, 4, 6, 2);
 				}
 				/*
 				 *  Si la ligne décrit la solution et est donc sous la forme 
 				 *  "solution=" suivi d'une succession de nombres et de virgules
-				 *  ATTENTION : la solution dans les fochiers est décrite selon (lig,col) alors que dans notre jeu c'est (x,y) !!
+				 *  ATTENTION : la solution dans les fichiers est décrite selon (lig,col) alors que dans le jeu c'est (x,y) !!
 				 */
 				if (list[i].startsWith("solution",0)) { // Mouvements enchaînés (pas de notion de temps) (doublets (l,c))
 					String line = list[i].substring(9, list[i].length());
@@ -276,7 +311,32 @@ public class Niveau {
 						solution[j][0] = Integer.valueOf(elements[3*j+1]);
 					}
 				}
+				/*
+				 * Poids de certaines fleurs pour augmenter l'efficacité du solveur.
+				 * Format : (r,c,h)
+				 */
+				if(list[i].startsWith("h_fleur",0)) {
+					if(h_fleurs==null)
+						h_fleurs = new LinkedList<int[]>();
+					String[] elements = list[i].substring(8, list[i].length()).split(",");
+					int n = elements.length/3;
+					for(int j = 0; j < n; j++) {
+						h_fleurs.add(new int[] {
+								Integer.valueOf(elements[3*j]),
+								Integer.valueOf(elements[3*j+1]),
+								Integer.valueOf(elements[3*j+2])
+								});
+					}
+				}
+				/*
+				 * Paramètre spécifique h_param pour le solveur.
+				 * Format : h_param=8
+				 */
+				if(list[i].startsWith("h_param",0)) {
+					h_param = Integer.valueOf(list[i].substring(8, list[i].length()));
+				}
 			}
+			computePresenceRainbows();
 		}
 		//si une exception est levée au cours de l'exécution
 		catch (Exception e) {
@@ -384,7 +444,7 @@ public class Niveau {
 	 */
 	public static class Occurrence {
 		int r,mod,delta;
-		int dir_in, dir_out;
+		int dir_in = 0;
 		
 		/**
 		 * Constructeur
@@ -400,14 +460,13 @@ public class Niveau {
 			this.delta=delta;
 		}
 		
-		public Occurrence(int r, int mod, int delta, int dir_in, int dir_out) {
+		public Occurrence(int r, int mod, int delta, int dir_in) {
 			if(mod==0)
 				mod=Integer.MAX_VALUE;
 			this.r=r%mod;
 			this.mod=mod;
 			this.delta=delta;
 			this.dir_in=dir_in;
-			this.dir_out=dir_out;
 		}
 		
 		private int gcd(int a, int b) { return b==0 ? a : gcd(b, a%b); }
@@ -460,13 +519,13 @@ public class Niveau {
 		 * @param delta nombre de frames pris par l'objet pour sortir de la case
 		 * @return oc l'occurence ajoutée.
 		 */
-		public Occurrence addOccurrence(int r, int c, int time, int period, int delta) {
+		public Occurrence addOccurrence(int r, int c, int time, int period, int delta, int dr, int dc) {
 			LinkedList <Occurrence> occurences = passages.get(r*col+c);
 			if(occurences==null) {
 				occurences = new LinkedList<Occurrence>();
 				passages.put(r*col+c, occurences);
 			}
-			Occurrence oc = new Occurrence(time,period,delta);
+			Occurrence oc = new Occurrence(time,period,delta, dr==-1?1:(dr==1?4:(dc==-1?3:(dc==1?2:0))));
 			occurences.addLast(oc);
 			return oc;
 		}
@@ -534,17 +593,6 @@ public class Niveau {
 		}
 	}
 	
-	
-	public Passages passColibri;
-	public Passages passVaches;
-	public Passages passChats;
-	private int frame, frameMem;
-	public long seed=0;
-	private Random random;
-	private double step,v_max,acc;
-	public int nVaches=3, nDyna=3, nChats=2, nArcs=2; // Paramètres de quantité, dans [0,6]
-	public SparseArray<int[]> rainbows;
-	public boolean[] presenceRainbows; // Indicates the presence of rainbows on cols and rows
 	
 	private void importParam(int[] param) {
 		nVaches = Math.max(param[1],0);
@@ -824,13 +872,13 @@ public class Niveau {
 			i = (int) av;
 			chemin[rd][i]+=1;
 			frColib=(frame+frameMem)/2;
-			passColibri.addOccurrence(rd,i-s,frColib,0,frame-frameMem); // On ajoute l'occurence de la case qu'on vient de QUITTER.
+			passColibri.addOccurrence(rd,i-s,frColib,0,frame-frameMem,0,s); // On ajoute l'occurence de la case qu'on vient de QUITTER.
 			frameMem = frame;
 			if(random.nextInt(4)==0 && carteOrigin[rd][i]==0){
 				carteOrigin[rd][i]=2;
 			}
 			if(carteOrigin[rd][i]>=10) { //Arc-en-ciel
-				passColibri.addOccurrence(rd,i,frColib+1,0,frame-frameMem);
+				passColibri.addOccurrence(rd,i,frColib+1,0,frame-frameMem,0,s);
 				int[] dest = rainbows.get(carteOrigin[rd][i]);
 				if(dest[0]==rd && dest[1]==i) {
 					rd=dest[2]; i=dest[3];
@@ -842,7 +890,7 @@ public class Niveau {
 				av=i+0.5;
 			}
 		}
-		passColibri.addOccurrence(rd,i,frame+10,0,20); // Occurrence temporaire (qui sera enlevée avant le prochain déplacement) pour éviter qu'une vache dans le prochain déplacement marche ici.
+		passColibri.addOccurrence(rd,i,frame+10,0,20,0,s); // Occurrence temporaire (qui sera enlevée avant le prochain déplacement) pour éviter qu'une vache dans le prochain déplacement marche ici.
 		if(i!=cd || rd!=rdd) {
 			frame += (i!=cf && i+s>=0 && i+s<20 && carteOrigin[rd][i+s]%2==0) ? 1 : 2;
 			step=step2;
@@ -876,13 +924,13 @@ public class Niveau {
 			i = (int) av;
 			chemin[i][cd]+=1;
 			frColib=(frame+frameMem)/2;
-			passColibri.addOccurrence(i-s,cd,frColib,0,frame-frameMem); // On ajoute l'occurence de la case qu'on vient de QUITTER.
+			passColibri.addOccurrence(i-s,cd,frColib,0,frame-frameMem,s,0); // On ajoute l'occurence de la case qu'on vient de QUITTER.
 			frameMem = frame;
 			if(random.nextInt(4)==0 && carteOrigin[i][cd]==0){
 				carteOrigin[i][cd]=2;
 			}
 			if(carteOrigin[i][cd]>=10) { //Arc-en-ciel
-				passColibri.addOccurrence(i,cd,frColib+1,0,frame-frameMem);
+				passColibri.addOccurrence(i,cd,frColib+1,0,frame-frameMem,s,0);
 				int[] dest = rainbows.get(carteOrigin[i][cd]);
 				if(dest[0]==i && dest[1]==cd) {
 					i=dest[2]; cd=dest[3];
@@ -894,7 +942,7 @@ public class Niveau {
 				av=i+0.5;
 			}
 		}
-		passColibri.addOccurrence(i,cd,frame+10,0,20); // Occurrence temporaire (qui sera enlevée avant le prochain déplacement) pour éviter qu'une vache dans le prochain déplacement marche ici.
+		passColibri.addOccurrence(i,cd,frame+10,0,20,s,0); // Occurrence temporaire (qui sera enlevée avant le prochain déplacement) pour éviter qu'une vache dans le prochain déplacement marche ici.
 		if(i!=rd || cd!=cdd) {
 			frame += (i!=rf && i+s>=0 && i+s<12 && carteOrigin[i+s][cd]%2==0) ? 1 : 2;
 			step=step2;
@@ -1005,20 +1053,25 @@ public class Niveau {
 		int ca=0;
 		int cpt=0;
 		int r=itin[0][0],c=itin[0][1];
+		int dr = (int)Math.signum(r-itin[itin.length-1][0]), dc = (int)Math.signum(c-itin[itin.length-1][1]);
 		for(int[] m : itin) {
 			while(r!=m[0] || c!=m[1]) {
-				pass.addOccurrence(r, c, ca*step+cpt*accel, lon, frames);
+				pass.addOccurrence(r, c, ca*step+cpt*accel, lon, frames, dr, dc);
+				dr = (int)Math.signum(m[0]-r);
+				dc = (int)Math.signum(m[1]-c);
 				ca++;
-				r+=Math.signum(m[0]-r);
-				c+=Math.signum(m[1]-c);
+				r+=dr;
+				c+=dc;
 			}
 			cpt++;
 		}
 		while(r!=itin[0][0] || c!=itin[0][1]) {
-			pass.addOccurrence(r, c, ca*step+cpt*accel, lon, frames);
+			pass.addOccurrence(r, c, ca*step+cpt*accel, lon, frames, dr, dc);
+			dr = (int)Math.signum(itin[0][0]-r);
+			dc = (int)Math.signum(itin[0][1]-c);
 			ca++;
-			r+=Math.signum(itin[0][0]-r);
-			c+=Math.signum(itin[0][1]-c);
+			r+=dr;
+			c+=dc;
 		}
 		animaux.add(itin);
 	}
@@ -1432,7 +1485,7 @@ public class Niveau {
 				}
 			}
 		}
-		passColibri.addOccurrence(rd, cd, 0, 0, 75); // Pour éviter de se faire bouffer dans les 3 premières secondes !
+		passColibri.addOccurrence(rd, cd, 0, 0, 75, 0, 0); // Pour éviter de se faire bouffer dans les 3 premières secondes !
 		if(nChats!=0) { // On ajoute des chats si voulu.
 			for(int i=0; i<nCats; i++) {
 				int lcat=random.nextInt(12), ccat=random.nextInt(20);

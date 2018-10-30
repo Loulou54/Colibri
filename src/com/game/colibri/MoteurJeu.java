@@ -18,7 +18,7 @@ import android.view.animation.Animation.AnimationListener;
 
 public class MoteurJeu {
 	
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 	private static final int LIG=12, COL=20; // Dimensions de la grille
 	private static int SEUIL=15; // seuil de vitesse de glissement du doigt sur l'écran.
 	public static int PERIODE=1000/25; // pour 25 frames par secondes
@@ -236,7 +236,7 @@ public class MoteurJeu {
 		double vx0=c_va[0],vy0=c_va[1];
 		if(Math.abs(vx0-cx)<1 && Math.abs(vy0-cy)<1) { // teste si colision
 			double vx = vx0+va.mx*va.step, vy = vy0+va.my*va.step; // On calcule en fonction de la prochaine position de la vache.
-			if(Math.min(Math.abs(vx-cx) , Math.abs(vy-cy)) > 0.94)
+			if(Math.min(Math.abs(vx-cx) , Math.abs(vy-cy)) > 0.85)
 				return;
 			// Choisit de quel côté de la vache il faut replacer le colibri
 			int l=carte.colibri.getRow(), c=carte.colibri.getCol();
@@ -364,10 +364,10 @@ public class MoteurJeu {
 			if(buf.size()!=0) {
 				int[] next = buf.getFirst();
 				if(next[0]==mc && next[1]==ml)
-					next[2] = frame+24;
+					next[2] = frame+22;
 			} else {
 				directionDyna = getDirection(mc,ml);
-				wait = frame+24;
+				wait = frame+22;
 			}
 			carte.n_dyna--;
 			carte.animBoom(l+ml,c+mc); // Gère l'animation de l'explosion.
