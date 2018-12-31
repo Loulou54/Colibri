@@ -31,7 +31,8 @@
         android:layout_marginBottom="4dp"
         android:layout_marginRight="12dp"
         android:onClick="quitter"
-        android:text="@string/sortir" />
+        android:text="@string/sortir"
+        android:textColor="@color/theme_gris" />
 
     <LinearLayout
         android:layout_width="440dp"
@@ -42,71 +43,100 @@
         android:background="@drawable/affiche" >
         
         <LinearLayout
-            android:id="@+id/gagne_resultats"
             android:layout_width="wrap_content"
             android:layout_height="0dip"
             android:layout_weight="1"
             android:layout_gravity="center_horizontal"
-            android:background="@drawable/coins" >
+            android:gravity="center_vertical" >
             
-            <TextView
-		        android:layout_width="wrap_content"
-		        android:layout_height="match_parent"
-		        android:gravity="center_vertical|left"
-		        android:textSize="20sp"
-		        android:textColor="@color/theme_gris"
-		        android:text="@string/app_name" />
-            
-            <TextView
-		        android:layout_width="wrap_content"
-		        android:layout_height="match_parent"
-		        android:layout_marginLeft="50dp"
-		        android:gravity="center_vertical|right"
-		        android:textSize="20sp"
-		        android:textColor="@color/theme_gris"
-		        android:text="@string/app_name" />
-            
-        </LinearLayout>
+	        <LinearLayout
+	            android:id="@+id/gagne_resultats"
+	            android:layout_width="wrap_content"
+	            android:layout_height="match_parent"
+	            android:background="@drawable/coins" >
+	            
+	            <TextView
+			        android:layout_width="wrap_content"
+			        android:layout_height="match_parent"
+			        android:gravity="center_vertical|left"
+			        android:textSize="20sp"
+			        android:textColor="@color/theme_gris"
+			        android:text="@string/app_name" />
+	            
+	            <TextView
+			        android:layout_width="wrap_content"
+			        android:layout_height="match_parent"
+			        android:layout_marginLeft="10dp"
+			        android:gravity="center_vertical|right"
+			        android:textSize="20sp"
+			        android:textColor="@color/theme_gris"
+			        android:text="@string/app_name" />
+	            
+	        </LinearLayout>
+	        
+	        <Button
+	            android:layout_width="65dp"
+	            android:layout_height="65dp"
+	            android:layout_marginLeft="6dp"
+	            android:layout_marginRight="6dp"
+	            android:background="@drawable/bouton_restart"
+	            android:onClick="recommencer" />
+	        
+	        <Button
+	            android:id="@+id/continuer"
+	            android:layout_width="65dp"
+	            android:layout_height="65dp"
+	            android:layout_marginLeft="6dp"
+	            android:layout_marginRight="6dp"
+	            android:background="@drawable/bouton_continuer"
+	            android:onClick="suivant" />
+	        
+	    </LinearLayout>
         
         <TextView
             android:id="@+id/gagne_resultats_phrase"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
-	        android:textSize="16sp"
+	        android:layout_marginTop="4dp"
+	        android:layout_marginBottom="2dp"
+	        android:textSize="13sp"
 	        android:textColor="@color/theme_gris"
 	        android:visibility="gone" />
         
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:padding="4dp"
+            android:alpha="0.8" >
             
             <Button
-                android:id="@+id/gagne_recom"
-		        style="@style/pencil_button"
-		        android:layout_width="0dip"
-		        android:layout_weight="2"
-		        android:layout_marginTop="0dp"
-		        android:text="@string/recommencer"
-		        android:onClick="recommencer" />
+                android:id="@+id/gagne_sol_colibrain"
+                android:layout_width="0dip"
+                android:layout_height="46dp"
+                android:layout_weight="1"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:background="@drawable/bouton_toast"
+                android:text="@string/sol_colibrain"
+                android:textSize="14sp"
+	        	android:textColor="@color/noir"
+	        	android:drawableRight="@drawable/cerveau"
+	        	android:onClick="solutionColiBrain" />
             
             <Button
-                android:id="@+id/continuer"
-		        android:layout_width="0dip"
-		        android:layout_height="wrap_content"
-		        android:layout_weight="1"
-		        android:background="@drawable/bouton_continuer"
-		        android:onClick="suivant"
-		        android:textColor="@android:color/white"
-		        android:textSize="16sp" />
-            
-            <Button
-                android:id="@+id/gagne_sol"
-		        style="@style/pencil_button"
-		        android:layout_width="0dip"
-		        android:layout_weight="2"
-		        android:layout_marginTop="0dp"
-		        android:text="@string/solution"
-		        android:onClick="solution" />
+                android:id="@+id/gagne_sol_gen"
+                android:layout_width="0dip"
+                android:layout_height="46dp"
+                android:layout_weight="1"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:background="@drawable/bouton_toast"
+                android:layout_gravity="right"
+                android:text="@string/sol_generated"
+                android:textSize="14sp"
+	        	android:textColor="@color/noir"
+	        	android:drawableLeft="@drawable/engrenages"
+	        	android:onClick="solutionGenerated" />
             
         </LinearLayout>
         

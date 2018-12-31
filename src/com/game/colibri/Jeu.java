@@ -2,11 +2,13 @@ package com.game.colibri;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Random;
 
 import org.json.JSONException;
 
+import com.game.colibri.Solver.Move;
 import com.network.colibri.DBController;
 
 import android.annotation.SuppressLint;
@@ -24,12 +26,14 @@ import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -45,12 +49,12 @@ public class Jeu extends Activity {
 	public Niveau niv;
 	public Carte carte;
 	public MoteurJeu play;
-	public View menu_lateral;
+	public ViewGroup menu_lateral;
 	public View pause;
 	public View perdu; 
 	public View gagne; 
 	public Button bout_dyna;
-	private boolean multi, brandNew=true, solUsed=false, solvedBySol=false, solved=false, finipartous=false;
+	private boolean multi, brandNew=true, solUsed=false, forfait=false, solved=false, finipartous=false;
 	public int n_niv;
 	private Bundle opt, savedInstanceState;
 	private Defi defi=null;
@@ -78,7 +82,8 @@ public class Jeu extends Activity {
 		n_niv = opt.getInt("n_niv", 1);
 		carte = (Carte) findViewById(R.id.carte);
 		bout_dyna = (Button) findViewById(R.id.bout_dyna);
-		menu_lateral = findViewById(R.id.menu_lateral);
+		// Menu latéral
+		menu_lateral = (ViewGroup) findViewById(R.id.menu_lateral);
 		menu_lateral.findViewById(R.id.av_rapide).setOnTouchListener(new View.OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
@@ -96,6 +101,11 @@ public class Jeu extends Activity {
 				return false;
 			}
 		});
+		// Bouton ColiBrains du menu latéral
+		ImageButton coliBrains = (ImageButton) findViewById(R.id.colibrains_ingame);
+		coliBrains.setImageDrawable(new ColiBrain(this, "", 0));
+		updateColiBrains();
+		// fonts menu Pause
 		final Typeface font = Typeface.createFromAsset(getAssets(),"fonts/Passing Notes.ttf");
 		pause = findViewById(R.id.pause);
 		((ViewStub) pause).setOnInflateListener(new ViewStub.OnInflateListener() {
@@ -109,6 +119,7 @@ public class Jeu extends Activity {
 				}
 			}
 		});
+		// fonts menu Pause
         perdu = findViewById(R.id.perdu);
         ((ViewStub) perdu).setOnInflateListener(new ViewStub.OnInflateListener() {
 			@Override
@@ -117,6 +128,7 @@ public class Jeu extends Activity {
 				((TextView) inflated.findViewById(R.id.perdu_txt)).setTypeface(font);
 			}
 		});
+     // fonts menu gagne
 		gagne = findViewById(R.id.gagner);
 		((ViewStub) gagne).setOnInflateListener(new ViewStub.OnInflateListener() {
 			@Override
@@ -127,11 +139,12 @@ public class Jeu extends Activity {
 				for(int i=0; i<2; i++)
 					((TextView) res.getChildAt(i)).setTypeface(Typeface.createFromAsset(getAssets(),"fonts/YummyCupcakes.ttf"));
 				((TextView) inflated.findViewById(R.id.gagne_resultats_phrase)).setTypeface(Typeface.createFromAsset(getAssets(),"fonts/YummyCupcakes.ttf"));
-				((TextView) inflated.findViewById(R.id.gagne_recom)).setTypeface(font);
-				((TextView) inflated.findViewById(R.id.gagne_sol)).setTypeface(font);
+				((TextView) inflated.findViewById(R.id.gagne_sol_colibrain)).setTypeface(font);
+				((TextView) inflated.findViewById(R.id.gagne_sol_gen)).setTypeface(font);
 				((TextView) inflated.findViewById(R.id.gagne_quit)).setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Sketch_Block.ttf"));
 			}
 		});
+		// Création du moteur de jeu
 		play = new MoteurJeu(this,carte);
 		PathViewer.mj = play;
 		this.savedInstanceState = savedInstanceState;
@@ -156,7 +169,7 @@ public class Jeu extends Activity {
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putBoolean("solUsed", solUsed);
-		outState.putBoolean("solvedBySol", solvedBySol);
+		outState.putBoolean("forfait", forfait);
 		outState.putBoolean("solved", solved);
 		outState.putBoolean("finipartous", finipartous);
 		outState.putInt("total_frames", play.total_frames+play.frame);
@@ -173,7 +186,7 @@ public class Jeu extends Activity {
 			launch_niv(false);
 			if(savedInstanceState!=null) { // Si Jeu a été détruite mais restaurée
 				solUsed = savedInstanceState.getBoolean("solUsed", false);
-				solvedBySol = savedInstanceState.getBoolean("solvedBySol", false);
+				forfait = savedInstanceState.getBoolean("forfait", false);
 				solved = savedInstanceState.getBoolean("solved", false);
 				finipartous = savedInstanceState.getBoolean("finipartous", false);
 				play.total_frames = savedInstanceState.getInt("total_frames", 0);
@@ -183,6 +196,7 @@ public class Jeu extends Activity {
 		} else if(!hasFocus && play.state==MoteurJeu.RUNNING) {
 			play.pause(MoteurJeu.PAUSE_MENU);
 			pause.setVisibility(View.VISIBLE);
+			setLevelInfo();
 		}
 	}
 	
@@ -218,6 +232,7 @@ public class Jeu extends Activity {
 				play.pause(MoteurJeu.PAUSE_MENU);
 				menuLateral(0,null);
 				pause.setVisibility(View.VISIBLE);
+				setLevelInfo();
 				pause.startAnimation(AnimationUtils.loadAnimation(this, R.anim.aleat_opt_anim));
 			} else
 				return false;
@@ -239,13 +254,16 @@ public class Jeu extends Activity {
 		} else {
 			return false;
 		}
-	return true;
+		return true;
 	}
 	
-	private void setMenuLateral() {
+	private void setLevelInfo() {
 		TextView mode = (TextView) findViewById(R.id.mode);
 		TextView niv = (TextView) findViewById(R.id.niveau_courant);
-		mode.setText(R.string.aleatoire);
+		if(multi)
+			mode.setText(defi.nom);
+		else
+			mode.setText(R.string.aleat);
 		switch(opt.getInt("mode", 0)) {
 		case Niveau.CAMPAGNE:
 			mode.setText(R.string.campagne);
@@ -274,15 +292,26 @@ public class Jeu extends Activity {
 		}
 	}
 	
-	// Événement déclenché par "play" lorsque le niveau a été gagné.
+	private boolean infiniteColiBrains() {
+		return solved || (!multi && (opt.getInt("mode", 0)>0 || n_niv<MyApp.avancement));
+	}
+	
+	private void updateColiBrains() {
+		ImageButton coliBrains = (ImageButton) findViewById(R.id.colibrains_ingame);
+		coliBrains.setEnabled(MyApp.coliBrains > 0 || infiniteColiBrains());
+		((ColiBrain) coliBrains.getDrawable())
+			.setProgress(MyApp.expProgressColiBrain/(float)MyApp.EXP_LEVEL_PER_COLI_BRAIN)
+			.setText(infiniteColiBrains() ? "∞" : ""+MyApp.coliBrains);
+	}
+	
 	/**
-	 * Affiche que le niveau a été gagné et charge le niveau suivant 
-	 * 
+	 * Affichage des résultats de fin de niveau.
+	 * -> Événement déclenché par "play" lorsque le niveau a été gagné.
+	 * @param temps_total_ms
 	 */
 	public void gagne(int temps_total_ms) {
-		if(solvedBySol && !solved) {
-			recommencer(null);
-			return;
+		if(temps_total_ms==Participation.FORFAIT) {
+			forfait = true;
 		}
 		gagne.setVisibility(View.VISIBLE);
 		play.pause(MoteurJeu.GAGNE);
@@ -307,60 +336,72 @@ public class Jeu extends Activity {
 				temps_total_ms = finipartous ? p.t_fini : p.t_cours;
 				solUsed = (finipartous ? p.penalite_fini : p.penalite_cours)!=0;
 			}
-			String s1;
-			SpannableString s2;
-			if(temps_total_ms==Participation.FORFAIT) {
-				s1 = getString(R.string.forfait)+" !";
-				s2 = new SpannableString("");
-			} else {
-				s1 = getString(R.string.temps)+" :\n"+getString(R.string.aide)+" :";
-				String s = getFormattedTime(temps_total_ms)+"\n"+(solUsed ? getString(R.string.oui) : getString(R.string.non));
-				s2 = new SpannableString(s);
-				int virgule = s.indexOf(".");
-				s2.setSpan(new RelativeSizeSpan(0.75f), virgule+1, virgule+3, 0);
-			}
-			((TextView) res.getChildAt(0)).setText(s1);
-			((TextView) res.getChildAt(1)).setText(s2);
 			phrase.setText(!finipartous ? getString(R.string.joueur_suivant) : getString(R.string.resultats));
 			phrase.setVisibility(View.VISIBLE);
-		}
-		else {
-			int exp=0;
-			if(!solved) {
-				if(opt.getInt("mode",0)>0) {
-					exp=(solUsed) ? play.niv.experience/2 : play.niv.experience;
-				} else {
-					if(n_niv==MyApp.avancement) {
-						MyApp.avancement++;
-						exp=n_niv*(50+n_niv/4);
-					} else
-						exp=(solUsed) ? n_niv*(10+n_niv/8)/2 : n_niv*(10+n_niv/8);
-				}
-				MyApp.experience+=exp;
-				MyApp.expToSync+=exp;
-				MyApp.getApp().saveData(); // On sauvegarde la progression.
-			}
-			((TextView) res.getChildAt(0)).setText(getString(R.string.temps)+" :\n"+getString(R.string.exp)+" :\n"+getString(R.string.aide)+" :");
-			String s = getFormattedTime(temps_total_ms)+"\n + "+exp+"\n "+(solUsed ? getString(R.string.oui) : getString(R.string.non));
-			SpannableString s2 = new SpannableString(s);
-			int virgule = s.indexOf(".");
-			s2.setSpan(new RelativeSizeSpan(0.75f), virgule+1, virgule+3, 0);
-			((TextView) res.getChildAt(1)).setText(s2);
+		} else {
 			phrase.setVisibility(View.GONE);
 		}
+		// Détermination de l'expérience
+		int exp;
+		if(opt.getInt("mode",0)>0) {
+			exp = play.niv.experience;
+		} else {
+			if(n_niv==MyApp.avancement)
+				exp = n_niv*(50+n_niv/4);
+			else
+				exp = n_niv*(10+n_niv/8);
+		}
+		// A la première résolution, ajouter le progrès au profil
+		if(!solved && !forfait) {
+			if(opt.getInt("mode",0)==0 && n_niv==MyApp.avancement)
+				MyApp.avancement++;
+			MyApp.experience+=exp;
+			MyApp.expToSync+=exp;
+			MyApp.updateExpProgressColiBrain(exp);
+			MyApp.getApp().saveData(); // On sauvegarde la progression.
+			solved = true;
+			updateColiBrains();
+		}
+		// Affichage
+		String s1;
+		SpannableString s2;
+		if(temps_total_ms==Participation.FORFAIT) {
+			s1 = getString(R.string.forfait)+" !";
+			s2 = new SpannableString("");
+		} else {
+			s1 = getString(R.string.temps)+" :\n"
+					+getString(R.string.exp)+" :\n"
+					+getString(R.string.aide)+" :";
+			String s = getFormattedTime(temps_total_ms)+"\n + "
+					+(forfait ? "0 ("+exp+")" : exp)+"\n"
+					+(solUsed ? getString(R.string.oui) : getString(R.string.non));
+			s2 = new SpannableString(s);
+			int virgule = s.indexOf(".");
+			while(virgule >= 0) {
+				s2.setSpan(new RelativeSizeSpan(0.75f), virgule+1, virgule+3, 0);
+				virgule = s.indexOf(".", virgule+1);
+			}
+		}
+		((TextView) res.getChildAt(0)).setText(s1);
+		((TextView) res.getChildAt(1)).setText(s2);
 		solved = true;
 	}
 	
 	public static String getFormattedTime(int time) {
+		if(time < 0)
+			return "xxx";
 		return String.format(Locale.FRANCE, (time>=60000 ? (time/60000)+" min " : "")+"%d.%02d s", (time%60000)/1000, (time%1000)/10);
 	}
 	
 	/**
 	 * Le colibri est mort : affiche l'écran associé.
+	 * @param isVache détermine si une vache ou un chat est à l'origine de l'accident !
 	 */
-	public void mort() {
+	public void mort(boolean isVache) {
 		if(play.state!=MoteurJeu.RUNNING) {
 			perdu.setVisibility(View.VISIBLE);
+			perdu.findViewById(R.id.perdu_background)
+				.setBackgroundResource(isVache ? R.drawable.perdu_background_vache : R.drawable.perdu_background_chat);
 		}
 	}
 	
@@ -390,17 +431,41 @@ public class Jeu extends Activity {
 	}
 	
 	/**
-	 * Affiche ou cache le menu latéral par dessus le jeu.
+	 * Affiche ou cache le menu latéral par dessus le jeu, sur le côté gauche ou droit
+	 * selon la position du clic. Utilise plusieurs "tricks" pour adapter la disposition
+	 * des boutons selon l'emplacement du menu (gauche ou droite).
 	 * @param disp 0:cacher ; 1:afficher ; 2:rien
 	 */
 	private void menuLateral(int disp, MotionEvent ev) {
 		if(disp==1 && menu_lateral.getVisibility()!=View.VISIBLE) { // Afficher
 			int ww = findViewById(R.id.lay).getWidth();
-			int cote = (int) Math.signum(2*ev.getX()-ww);
+			int cote = (int) Math.signum(2*ev.getX()-ww); // -1=LEFT ; +1=RIGHT
+			// Positionnement menu
 			RelativeLayout.LayoutParams p = (RelativeLayout.LayoutParams) menu_lateral.getLayoutParams();
 			p.addRule(10-cote, 0); // pour annuler l'autre contrainte
 			p.addRule(10+cote); // car RelativeLayout.ALIGN_PARENT_LEFT = 9 & RelativeLayout.ALIGN_PARENT_RIGHT = 11
 			menu_lateral.setLayoutParams(p);
+			// Positionnement éléments du menu
+			LinearLayout boutons = (LinearLayout) menu_lateral.findViewById(R.id.menu_lateral_boutons);
+			boutons.setGravity(4+cote); // car Gravity.LEFT = 3 & Gravity.RIGHT = 5
+			int nChildren = boutons.getChildCount();
+			for(int i=0; i < nChildren; i++) {
+				View v = boutons.getChildAt(i);
+				LinearLayout.LayoutParams p2 = (LinearLayout.LayoutParams) v.getLayoutParams();
+				int m = p2.leftMargin + p2.rightMargin;
+				p2.setMargins(cote <= 0 ? m : 0, p2.topMargin, cote > 0 ? m : 0, p2.bottomMargin);
+				/*if(i==2) { // Bouton Colibrain
+					((LinearLayout) v).setGravity(4+cote);
+					TextView coliBrains = (TextView) ((LinearLayout) v).findViewById(R.id.colibrains_ingame);
+					p2 = (LinearLayout.LayoutParams) coliBrains.getLayoutParams();
+					m = p2.leftMargin + p2.rightMargin;
+					p2.setMargins(cote <= 0 ? m : 0, p2.topMargin, cote > 0 ? m : 0, p2.bottomMargin);
+					v = ((LinearLayout) v).getChildAt(0); // ImageButton
+				}*/
+				int pad = v.getPaddingLeft() + v.getPaddingRight();
+				v.setPadding(cote <= 0 ? pad : 0, 0, cote > 0 ? pad : 0, 0);
+			}
+			// Animation
 			TranslateAnimation anim = new TranslateAnimation(cote*menu_lateral.getWidth(),0,0,0);
 		    anim.setDuration(250);
 		    anim.setInterpolator(new AccelerateDecelerateInterpolator());
@@ -422,6 +487,7 @@ public class Jeu extends Activity {
 		if(replay) {
 			niv.replay();
 		} else {
+			forfait = false;
 			solved = false;
 			solUsed = false;
 			if(opt.getInt("mode", 0)>0) {
@@ -448,12 +514,11 @@ public class Jeu extends Activity {
 				}
 			}
 		}
-		solvedBySol = false;
-		setMenuLateral();
 		carte.loadNiveau(niv);
 		play.init(replay);
 		if(savedInstanceState!=null) {
 			pause.setVisibility(View.VISIBLE);
+			setLevelInfo();
 			return;
 		}
 		if(opt.containsKey("startMsg")) { // Affichage d'un message avant le démarrage du jeu.
@@ -494,40 +559,45 @@ public class Jeu extends Activity {
 	
 	public void quitter(View v) {
 		if(multi && !solved) {
-			forfaitBox();
+			passer(v);
 		} else {
 			finish();
 		}
 	}
 	
-	public void solutionT(View v) {
-		recommencer(v); // TODO: debug
-		if(play.state!=MoteurJeu.RUNNING)
+	public void coliBrainHelp(View v) {
+		if(play.state!=MoteurJeu.RUNNING || (MyApp.coliBrains <= 0 && !infiniteColiBrains()))
 			return;
 		menuLateral(0,null);
 		play.pause(MoteurJeu.SOL_RESEARCH);
-		(new Solver(niv, (PathViewer) findViewById(R.id.path_viewer))).execute(play.frame, carte.colibri.getRow(), carte.colibri.getCol(), carte.n_fleur, carte.n_dyna, 1);
-		/*
-		int[][] sol = p.getGamesMoves().toArray(new int[0][]);
-		solUsed=true;
-		solvedBySol=true;
-    	play.solution(sol);*/
+		final PathViewer pv = (PathViewer) findViewById(R.id.path_viewer);
+		(new Solver(niv, new Solver.SolverInterface() {
+			@Override
+			public void result(int r, int c, Solver.Path path) {
+				if(!infiniteColiBrains()) {
+					MyApp.coliBrains--;
+					MyApp.getApp().saveData();
+					updateColiBrains();
+				}
+				pv.setPathAndAnimate(r, c, path.getMoves());
+			}
+			@Override
+			public void progressUpdate(int r, int c, LinkedList<Move> moves) {
+				pv.setPath(r, c, moves);
+			}
+			@Override
+			public void preExecute() {
+				pv.clear();
+				pv.setVisibility(View.VISIBLE);
+			}
+			@Override
+			public void cancel() {
+				pv.cancelResearch();
+			}
+		})).execute(play.frame, carte.colibri.getRow(), carte.colibri.getCol(), carte.n_fleur, carte.n_dyna, 1);
 	}
 	
-	public void solutionM(View v) {
-		if(play.state!=MoteurJeu.RUNNING)
-			return;
-		menuLateral(0,null);
-		play.pause(MoteurJeu.SOL_RESEARCH);
-		(new Solver(niv, (PathViewer) findViewById(R.id.path_viewer))).execute(play.frame, carte.colibri.getRow(), carte.colibri.getCol(), carte.n_fleur, carte.n_dyna, 0);
-		/*
-		int[][] sol = p.getGamesMoves().toArray(new int[0][]);
-		solUsed=true;
-		solvedBySol=true;
-    	play.solution(sol);*/
-	}
-	
-	public void solution(View v) {
+	public void solutionGenerated(View v) {
 		if(niv.solution==null) // il n'y a pas de solution
 			return;
 		if(opt.getInt("mode", 0)==Niveau.CAMPAGNE && n_niv==MyApp.avancement) {
@@ -536,64 +606,56 @@ public class Jeu extends Activity {
 		}
 		recommencer(v);
 		solUsed=true;
-		solvedBySol=true;
     	play.solution(niv.solution);
 	}
 	
-	public void suivant(View v) {
-		gagne.setVisibility(View.GONE);
-		if(bout_dyna.getVisibility()==View.VISIBLE) hideDyna();
-		if(play.state==MoteurJeu.RUNNING)
-			play.pause(MoteurJeu.PAUSED);
-		if(opt.getInt("mode", 0)==Niveau.CAMPAGNE) {
-			if(n_niv==NIV_MAX) {
-				setResult(2);
-				quitter(v);
-				return;
-			}
-			if(n_niv<MyApp.avancement)
-				n_niv++;
-			else {
-				Toast.makeText(this, R.string.bloque, Toast.LENGTH_SHORT).show();
-				play.start();
-				return;
-			}
-		} else if(multi) {
-			if(!solved) { // j1 ou j2 appui bouton Suivant => Forfait
-				forfaitBox();
-			} else {
-				if(v.getId()==R.id.continuer) { // appui sur continuer
-					if(finipartous) {
-						//finDefi();
-						Intent intent = new Intent();
-						intent.putExtra("defi", defi.toJSON());
-						setResult(RESULT_FIRST_USER, intent);
-						finish();
-					} else {
-						quitter(null);
-					}
-				} else // le joueur a recommencé et appuyé sur Suivant
-					gagne(10);
-			}
+	public void solutionColiBrain(View v) {
+		if(opt.getInt("mode", 0)==Niveau.CAMPAGNE && n_niv==MyApp.avancement) {
+			Toast.makeText(this, R.string.solution_bloque, Toast.LENGTH_SHORT).show();
 			return;
 		}
-		PathViewer pv = (PathViewer) findViewById(R.id.path_viewer);
-		if(pv.getVisibility()==View.VISIBLE) {
-			pv.clear();
-			pv.setVisibility(View.GONE);
-		}
-		launch_niv(false);
+		recommencer(v);
+		play.pause(MoteurJeu.SOL_RESEARCH);
+		solUsed=true;
+		final PathViewer pv = (PathViewer) findViewById(R.id.path_viewer);
+		(new Solver(niv, new Solver.SolverInterface() {
+			@Override
+			public void result(int r, int c, Solver.Path path) {
+				play.solution(path.getGamesMoves().toArray(new int[0][]));
+				pv.cancelResearch();
+			}
+			@Override
+			public void progressUpdate(int r, int c, LinkedList<Move> moves) {
+				pv.setPath(r, c, moves);
+			}
+			@Override
+			public void preExecute() {
+				pv.clear();
+				pv.setVisibility(View.VISIBLE);
+			}
+			@Override
+			public void cancel() {
+				pv.cancelResearch();
+			}
+		})).execute(play.frame, carte.colibri.getRow(), carte.colibri.getCol(), carte.n_fleur, carte.n_dyna, 1);
 	}
 	
 	@SuppressLint("InlinedApi")
-	private void forfaitBox() {
-		play.start(); // Pour que le menu pause se déclenche ensuite.
+	public void passer(View v) {
+		if(solved) {
+			gagne(-1); // Pour réafficher les résultats
+			return;
+		} else if(!multi) {
+			if(opt.getInt("mode", 0)==Niveau.CAMPAGNE && n_niv>=MyApp.avancement)
+				Toast.makeText(this, R.string.bloque, Toast.LENGTH_SHORT).show();
+			else
+				gagne(Participation.FORFAIT);
+			return;
+		}
 		DialogInterface.OnClickListener check = new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				pause.setVisibility(View.GONE);
-				solvedBySol=false;
-				solUsed = false;
 				gagne(Participation.FORFAIT);
 			}
 		};
@@ -608,6 +670,36 @@ public class Jeu extends Activity {
 		forfait.setPositiveButton(R.string.accept, check);
 		forfait.setNegativeButton(R.string.annuler, null);
 		forfait.show();
+	}
+	
+	public void suivant(View v) {
+		gagne.setVisibility(View.GONE);
+		if(bout_dyna.getVisibility()==View.VISIBLE) hideDyna();
+		if(opt.getInt("mode", 0)==Niveau.CAMPAGNE) {
+			if(n_niv==NIV_MAX) {
+				setResult(2);
+				quitter(v);
+				return;
+			}
+			n_niv++;
+		} else if(multi) {
+			if(finipartous) {
+				//finDefi();
+				Intent intent = new Intent();
+				intent.putExtra("defi", defi.toJSON());
+				setResult(RESULT_FIRST_USER, intent);
+				finish();
+			} else {
+				quitter(null);
+			}
+			return;
+		}
+		PathViewer pv = (PathViewer) findViewById(R.id.path_viewer);
+		if(pv.getVisibility()==View.VISIBLE) {
+			pv.clear();
+			pv.setVisibility(View.GONE);
+		}
+		launch_niv(false);
 	}
 	
 }

@@ -162,5 +162,7 @@
 	<string name="maj_req">You have to update Colibri to the latest version!</string>
 	<string name="cancel_sol">Cancelled!|</string>
 	<string name="no_solution">Ouch!|No solution&#8230;</string>
+	<string name="sol_colibrain">ColiBrain solution</string>
+	<string name="sol_generated">Generated solution</string>
 	
 </resources>

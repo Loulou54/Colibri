@@ -47,8 +47,31 @@
         android:gravity="center_horizontal"
         android:orientation="vertical" >
 
+        <TextView
+	        android:id="@+id/mode"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:gravity="center"
+	        android:text="@string/campagne"
+	        android:textColor="@color/theme_gris"
+	        android:textSize="17sp"
+	        android:maxLines="1"
+	        android:ellipsize="marquee"
+	        android:scrollHorizontally="true" />
+
+        <TextView
+	        android:id="@+id/niveau_courant"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginBottom="6dp"
+	        android:text="@string/etat"
+	        android:textColor="@color/choco"
+	        android:textSize="14sp" />
+
         <Button
             style="@style/pencil_button"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
             android:onClick="reprendre"
             android:text="@string/reprendre" />
 
@@ -59,11 +82,8 @@
 
         <Button
             style="@style/pencil_button"
-            android:onClick="solution"
-            android:text="@string/solution" />
-
-        <Button
-            style="@style/pencil_button"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
             android:onClick="quitter"
             android:text="@string/sortir" />
     </LinearLayout>

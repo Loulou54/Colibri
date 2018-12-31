@@ -14,7 +14,6 @@ import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
-import android.view.View;
 
 import com.game.colibri.Niveau.Occurrence;
 
@@ -37,7 +36,7 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 	
 	public boolean OPT_TIME = true; // Optimisation du temps (true) ou du nombre de coups (false)
 	private Niveau niv; // Le niveau
-	private PathViewer pathView; // La view de visualisation de la solution
+	private SolverInterface solverInterface; // La view de visualisation de la solution
 	public int sol_r=-1, sol_c=-1; // La position pour laquelle a été calculée "solution".
 	private Heuristic heuristic; // La structure de données pour un calcul rapide de l'heuristique.
 	private HashSet<Hash> closedSet;
@@ -45,13 +44,20 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 	private HashMap<Integer, Integer> collectiblesIndexes; // Pour une clé r*COL+c, retourne l'index de l'élément ramassable dans l'ordre allant de (0,0) à (ROW,COL) de gauche à droite.
 	private LinkedList<Niveau.Occurrence> emptyCell = new LinkedList<Niveau.Occurrence>(); // Utilisé par DynaGrid.obstacle pour les cases sans obstacles.
 	
+	public interface SolverInterface {
+		public void preExecute();
+		public void progressUpdate(int r, int c, LinkedList<Move> moves);
+		public void cancel();
+		public void result(int r, int c, Path path);
+	}
+	
 	/**
 	 * Constructeur du Solveur pour le niveau niv.
 	 * @param niv
 	 */
-	public Solver(Niveau niv, PathViewer pv) {
+	public Solver(Niveau niv, SolverInterface solverInterface) {
 		this.niv = niv;
-		pathView = pv;
+		this.solverInterface = solverInterface;
 		heuristic = new Heuristic(niv);
 		if(instance!=null)
 			instance.cancel(true);
@@ -63,8 +69,7 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 	 */
 	@Override
 	protected void onPreExecute() {
-		pathView.clear();
-		pathView.setVisibility(View.VISIBLE);
+		solverInterface.preExecute();
 		super.onPreExecute();
 	}
 	
@@ -84,14 +89,14 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 	 */
 	@Override
 	protected void onProgressUpdate(LinkedList<Move>... values) {
-		pathView.setPath(sol_r, sol_c, values[0]);
+		solverInterface.progressUpdate(sol_r, sol_c, values[0]);
 		super.onProgressUpdate(values);
 	}
 	
 	@Override
 	protected void onCancelled() {
 		Toast.makeText(MyApp.getApp(), R.string.cancel_sol, Toast.LENGTH_SHORT).show();
-		pathView.cancelResearch();
+		solverInterface.cancel();
 		instance = null;
 		super.onCancelled();
 	}
@@ -100,12 +105,10 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 	protected void onPostExecute(Path result) {
 		System.out.println("Moves : "+result.length+" ; t_cumul : "+result.t_cumul);
 		if(result.length>0) {
-			//pathView.setPathAndAnimate(sol_r, sol_c, result.getMoves());
-			PathViewer.mj.solution(result.getGamesMoves().toArray(new int[0][]));
-			pathView.cancelResearch();
+			solverInterface.result(sol_r, sol_c, result);
 		} else {
 			Toast.makeText(MyApp.getApp(), R.string.no_solution, Toast.LENGTH_SHORT).show();
-			pathView.cancelResearch();
+			solverInterface.cancel();
 		}
 		instance = null;
 		super.onPostExecute(result);
@@ -445,7 +448,8 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 			arrivVoulue.translate(m.wait+m.travel); // Pour replacer l'origine de cet IntervalsModulo au même que cet état
 			LinkedList<Move> pMoves = new LinkedList<Move>();
 			if(m.direction>10) { // Pose de dynamite
-				parent.createDelayedMoveTo(path.move, arrivVoulue);
+				if(parent!=null)
+					parent.createDelayedMoveTo(path.move, arrivVoulue);
 			} else if(m.direction<0) { // Poussée de vache
 				LinkedList<Niveau.Occurrence> occs = grid.getVachesPushingTo(m.posFinale,-m.direction);
 				addMovePushedByVache(pMoves, -m.direction, occs, arrivVoulue);
@@ -1233,7 +1237,8 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		public int getFirstPossib() {
 			if(state_t0)
 				return 0;
-			return getNextOpen(1);
+			int o = getNextOpen(1);
+			return o;
 		}
 		
 		public int firstClose() {
@@ -1380,7 +1385,7 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 
 		@Override
 		public String toString() {
-			return intervals.isEmpty() ? "["+empty_state+"]" : intervals.toString();
+			return mod+":"+(intervals.isEmpty() ? "["+empty_state+"]" : intervals.toString());
 		}
 		
 		public static int lcm(int a, int b) {
@@ -1416,7 +1421,7 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 			int tour = 0;
 			if(b==null) {
 				if(mod==Integer.MAX_VALUE)
-					return Integer.MAX_VALUE;
+					return intervals.last().open==open ? from_b.value : Integer.MAX_VALUE;
 				b = intervals.first();
 				tour = 1;
 			}
@@ -1475,7 +1480,7 @@ public class Solver extends AsyncTask<Integer, LinkedList<Solver.Move>, Solver.P
 		public void addOccurrence(Niveau.Occurrence o, int t_instant, int delta, boolean possib) {
 			if(empty_state==possib && intervals.isEmpty()) // Déjà complet
 				return;
-			if(o.mod==Integer.MAX_VALUE) { // Occurrence sporadique et non périodique => on multiplie la période par 2
+			if(o.mod==Integer.MAX_VALUE) { // Occurrence sporadique et non périodique
 				int end = o.r + o.delta - t_instant;
 				if(end > 0) // Pas dépassée
 					addInterval(0, end, possib);

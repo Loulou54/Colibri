@@ -539,6 +539,7 @@ public class Multijoueur extends Activity {
 					base.getDefis(user.getId(),joueurs,adversaires);
 					adapt = new DefiExpandableAdapter(Multijoueur.this, user.getId(), adversaires);
 					lv.setAdapter(adapt);
+					MyApp.updateExpProgressColiBrain(user.getExp()-MyApp.experience);
 					MyApp.experience = user.getExp();
 					MyApp.avancement = user.getProgress();
 					MyApp.last_update = 0;
@@ -657,6 +658,7 @@ public class Multijoueur extends Activity {
 		}
 		if(res) {
 			dispUser();
+			MyApp.updateExpProgressColiBrain(user.getExp()-MyApp.experience);
 			MyApp.experience = user.getExp();
 			MyApp.avancement = user.getProgress();
 			MyApp.last_update = last_up;

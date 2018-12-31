@@ -148,6 +148,8 @@ public class Niveau {
 		//graine = 6230089956759031988L;
 		//graine = 1259394720530780785L;
 		//graine = -5161610159804422431L; // full params
+		//graine = -3162648970676374098L;
+		//graine = -8952430756904305296L; // Beginner : suboptimal solution
 		this.geneNivRand(lon, lar, base, graine);
 		if(vaches.size()+chats.size() >= 6 && lon >= 18)
 			h_param = 8;

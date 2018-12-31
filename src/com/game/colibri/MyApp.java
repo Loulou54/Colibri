@@ -11,12 +11,16 @@ public class MyApp extends Application {
 	
 	private static MyApp singleton;
 	
+	public static final int DEFAULT_MAX_COLI_BRAINS = 6;
+	public static final int EXP_LEVEL_PER_COLI_BRAIN = 4000;
+	
 	public static int id;
 	public static String pseudo;
 	public static int appareil;
 	public static Joueur user;
 	public static int avancement; // Progression du joueur dans les niveaux campagne.
 	public static int experience, expToSync; // L'expérience du joueur et l'expérience encore non synchronisée avec le serveur.
+	public static int coliBrains, maxColiBrains, expProgressColiBrain; // Le nombre de bonus d'aide colibrains, le maximum cumulable et le progrès en expérience vers le prochain colibrain.
 	public static int versionCode; // Le code de version de la dernière version de Colibri exécutée.
 	public static long last_update; // Timestamp donné par le serveur de la dernière mise-à-jour.
 	private static int nActiveActivities = 0; // Pour déterminer si l'on doit mettre en pause la musique ou non lorsqu'une activité passe en fond.
@@ -48,6 +52,9 @@ public class MyApp extends Application {
 		avancement = pref.getInt("niveau", 1);
 		experience = pref.getInt("exp", 0);
 		expToSync = pref.getInt("expToSync", experience);
+		coliBrains = pref.getInt("coliBrains", DEFAULT_MAX_COLI_BRAINS);
+		maxColiBrains = pref.getInt("maxColiBrains", DEFAULT_MAX_COLI_BRAINS);
+		expProgressColiBrain = pref.getInt("expProgressColiBrain", 0);
 		versionCode = pref.getInt("versionCode", 0);
 		last_update = pref.getLong("last_update", 0);
 		ParamAleat.loadParams(pref);
@@ -76,6 +83,14 @@ public class MyApp extends Application {
 			.commit();
 	}
 	
+	public static void updateExpProgressColiBrain(int exp) {
+		System.out.println("Progress ColiBrain : "+exp);
+		expProgressColiBrain+=exp;
+		int n = expProgressColiBrain/EXP_LEVEL_PER_COLI_BRAIN;
+		expProgressColiBrain = expProgressColiBrain % EXP_LEVEL_PER_COLI_BRAIN;
+		coliBrains = Math.min(maxColiBrains, coliBrains+n);
+	}
+	
 	/**
 	 * On sauve les préférences et l'avancement de l'utilisateur.
 	 */
@@ -83,6 +98,9 @@ public class MyApp extends Application {
 		editor.putInt("niveau", avancement)
 			.putInt("exp", experience)
 			.putInt("expToSync", expToSync)
+			.putInt("coliBrains", coliBrains)
+			.putInt("maxColiBrains", maxColiBrains)
+			.putInt("expProgressColiBrain", expProgressColiBrain)
 			.putLong("last_update", last_update)
 			.commit();
 	}

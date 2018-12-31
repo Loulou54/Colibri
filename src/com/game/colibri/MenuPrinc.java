@@ -81,6 +81,11 @@ public class MenuPrinc extends Activity {
 				exp.setText(getString(R.string.exp)+" : "+String.format("%,d", MyApp.experience));
 				exp.startAnimation(AnimationUtils.loadAnimation(MenuPrinc.this, R.anim.aleat_opt_anim));
 				findViewById(R.id.coupe).setVisibility(MyApp.avancement>Jeu.NIV_MAX ? View.VISIBLE : View.GONE);
+				TextView coliBrains = (TextView) findViewById(R.id.colibrains_home);
+				coliBrains.setText("\n/"+MyApp.maxColiBrains);
+				((ColiBrain) coliBrains.getCompoundDrawables()[0])
+					.setProgress(MyApp.expProgressColiBrain/(float)MyApp.EXP_LEVEL_PER_COLI_BRAIN)
+					.setText(""+MyApp.coliBrains);
 			}
 		} else if(requestCode==3) { // Retour des artifices
 			Toast toast = Toast.makeText(MenuPrinc.this, R.string.toast_fin2, Toast.LENGTH_LONG);
@@ -139,14 +144,25 @@ public class MenuPrinc extends Activity {
 		}
 		if(!MyApp.getApp().pref.getBoolean("musique", true))
 			((ImageButton) findViewById(R.id.bout_musique)).setImageResource(R.drawable.nosound);
+		// Display experience
 		TextView exp = (TextView) findViewById(R.id.exp_menu);
 		exp.setText(getString(R.string.exp)+" : "+String.format("%,d", MyApp.experience));
 		exp.setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Passing Notes.ttf"));
+		// Display ColiBrains
+		ColiBrain coliBrainDrawable = new ColiBrain(this, ""+MyApp.coliBrains, MyApp.expProgressColiBrain/(float)MyApp.EXP_LEVEL_PER_COLI_BRAIN);
+		TextView coliBrains = (TextView) findViewById(R.id.colibrains_home);
+		coliBrains.setText("\n/"+MyApp.maxColiBrains);
+		coliBrains.setCompoundDrawables(coliBrainDrawable, null, null, null);
+		// Title animation and font
 		TextView title = (TextView) findViewById(R.id.main_title);
 		title.setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Sketch_Block.ttf"));
 		Animation a = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
 		a.setDuration(4000);
 		title.setAnimation(a);
+		// ColiBrains animation
+		Animation a2 = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
+		a2.setDuration(2000);
+		findViewById(R.id.colibrains_home).setAnimation(a2);
 	}
 	
 	/**

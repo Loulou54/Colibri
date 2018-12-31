@@ -22,6 +22,7 @@ public class MoteurJeu {
 	private static final int LIG=12, COL=20; // Dimensions de la grille
 	private static int SEUIL=15; // seuil de vitesse de glissement du doigt sur l'écran.
 	public static int PERIODE=1000/25; // pour 25 frames par secondes
+	public static final int DYNA_DELAY=22;
 	public static final int MENHIR=1;
 	public static final int FLEUR=2;
 	public static final int FLEURM=3;
@@ -134,7 +135,7 @@ public class MoteurJeu {
 		}
 	}
 	
-	private void mort() {
+	private void mort(final boolean isVache) {
 		if(state!=RUNNING)
 			return;
 		pause(MORT);
@@ -149,7 +150,7 @@ public class MoteurJeu {
     		}
     		public void onAnimationEnd(Animation an) {
     			carte.mort.setVisibility(View.INVISIBLE);
-    			jeu.mort();
+    			jeu.mort(isVache);
     		}
     	});
 	}
@@ -259,7 +260,7 @@ public class MoteurJeu {
 					carte.colibri.mx=Math.max(carte.colibri.mx, 0);
 				}
 				carte.colibri.setPos(cx , cy);
-				if(Math.abs(vx0-cx)<0.5) mort();
+				if(Math.abs(vx0-cx)<0.5) mort(true);
 			} else { // sur la verticale
 				if(cy<vy) {
 					if(l-1<0 || niv.carte[l-1][c]==MENHIR && carte.colibri.my<1) cy=Math.max(vy0-1,l);
@@ -272,7 +273,7 @@ public class MoteurJeu {
 					carte.colibri.my=Math.max(carte.colibri.my, 0);
 				}
 				carte.colibri.setPos(cx , cy);
-				if(Math.abs(vy0-cy)<0.5) mort();
+				if(Math.abs(vy0-cy)<0.5) mort(true);
 			}
 			ramasser(); // On ramasse l'item potentiel
 			int nl=carte.colibri.getRow(), nc=carte.colibri.getCol();
@@ -300,7 +301,9 @@ public class MoteurJeu {
 		double[] c_va = va.getPos();
 		double vx=c_va[0],vy=c_va[1]+0.25; // Décalage de la queue de 0.25.
 		if(Math.abs(vx-cx)<0.75 && Math.abs(vy-cy)<0.75) { // teste si colision
-			mort();
+			if(DEBUG)
+				System.out.println("CHAT : "+frame);
+			mort(false);
 		}
 	}
 	
@@ -363,11 +366,11 @@ public class MoteurJeu {
 		if(l+ml>=0 && l+ml<LIG && c+mc>=0 && c+mc<COL && niv.carte[l+ml][c+mc]==MENHIR && ml+mc!=0) {
 			if(buf.size()!=0) {
 				int[] next = buf.getFirst();
-				if(next[0]==mc && next[1]==ml)
-					next[2] = frame+22;
+				if(next[0]==mc && next[1]==ml && next[2]-frame < DYNA_DELAY)
+					next[2] = frame+DYNA_DELAY;
 			} else {
 				directionDyna = getDirection(mc,ml);
-				wait = frame+22;
+				wait = frame+DYNA_DELAY;
 			}
 			carte.n_dyna--;
 			carte.animBoom(l+ml,c+mc); // Gère l'animation de l'explosion.
