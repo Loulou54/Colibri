@@ -82,9 +82,9 @@ public class MenuPrinc extends Activity {
 				exp.startAnimation(AnimationUtils.loadAnimation(MenuPrinc.this, R.anim.aleat_opt_anim));
 				findViewById(R.id.coupe).setVisibility(MyApp.avancement>Jeu.NIV_MAX ? View.VISIBLE : View.GONE);
 				TextView coliBrains = (TextView) findViewById(R.id.colibrains_home);
-				coliBrains.setText("\n/"+MyApp.maxColiBrains);
+				coliBrains.setText("\n/"+MyApp.maxCB);
 				((ColiBrain) coliBrains.getCompoundDrawables()[0])
-					.setProgress(MyApp.expProgressColiBrain/(float)MyApp.EXP_LEVEL_PER_COLI_BRAIN)
+					.setProgress(MyApp.expProgCB/(float)MyApp.EXP_LEVEL_PER_COLI_BRAIN)
 					.setText(""+MyApp.coliBrains);
 			}
 		} else if(requestCode==3) { // Retour des artifices
@@ -149,9 +149,9 @@ public class MenuPrinc extends Activity {
 		exp.setText(getString(R.string.exp)+" : "+String.format("%,d", MyApp.experience));
 		exp.setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Passing Notes.ttf"));
 		// Display ColiBrains
-		ColiBrain coliBrainDrawable = new ColiBrain(this, ""+MyApp.coliBrains, MyApp.expProgressColiBrain/(float)MyApp.EXP_LEVEL_PER_COLI_BRAIN);
+		ColiBrain coliBrainDrawable = new ColiBrain(this, ""+MyApp.coliBrains, MyApp.expProgCB/(float)MyApp.EXP_LEVEL_PER_COLI_BRAIN);
 		TextView coliBrains = (TextView) findViewById(R.id.colibrains_home);
-		coliBrains.setText("\n/"+MyApp.maxColiBrains);
+		coliBrains.setText("\n/"+MyApp.maxCB);
 		coliBrains.setCompoundDrawables(coliBrainDrawable, null, null, null);
 		// Title animation and font
 		TextView title = (TextView) findViewById(R.id.main_title);

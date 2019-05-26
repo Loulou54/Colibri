@@ -49,7 +49,7 @@ public class JoueursAdapter extends ArrayAdapter<Joueur> {
 			h.nom.setHorizontallyScrolling(true);
 			h.pays = (ImageView) convertView.findViewById(R.id.paysAdv);
 			h.exp = (TextView) convertView.findViewById(R.id.expAdv);
-			h.defis = (TextView) convertView.findViewById(R.id.winDefisAdv);
+			h.score = (TextView) convertView.findViewById(R.id.scoreAdv);
 			h.poubelle = (ImageView) convertView.findViewById(R.id.poubelle);
 			convertView.setTag(h);
 			convertView.setOnClickListener(new View.OnClickListener() {
@@ -86,7 +86,7 @@ public class JoueursAdapter extends ArrayAdapter<Joueur> {
 			h.pays.setVisibility(View.INVISIBLE);
 		}
 		h.exp.setText(String.format("%,d", j.getExp()));
-		h.defis.setText(j.getWin()+"/"+j.getDefis());
+		h.score.setText(String.format("%,.2f", j.getScore()));
 		h.poubelle.setVisibility(View.GONE);
 		h.poubelle.setClickable(false);
 		h.poubelle.setTag(j);
@@ -95,6 +95,6 @@ public class JoueursAdapter extends ArrayAdapter<Joueur> {
 	
 	static class ViewHolder {
 		ImageView avatar, pays, poubelle;
-		TextView nom, exp, defis;
+		TextView nom, exp, score;
 	}
 }

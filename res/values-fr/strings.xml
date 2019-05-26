@@ -86,7 +86,6 @@
 	<string name="tiret"> - </string>
 	<string name="chercher_adv">Rechercher un joueur&#8230;</string>
 	<string name="adversaires">Adversaires :</string>
-	<string name="ajout_part">Ajouter des participants.</string>
 	<string name="nojoueur">Aucun adversaire.</string>
 	<string name="nojoueurfound">Aucun adversaire supplémentaire trouvé !</string>
 	<string name="nom_defi">Nom du défi (optionel)</string>
@@ -162,5 +161,8 @@
 	<string name="no_solution">Aïe !|Pas de solution&#8230;</string>
 	<string name="sol_colibrain">Solution ColiBrain</string>
 	<string name="sol_generated">Solution générée</string>
+	<string name="score_compet">Score compétitif</string>
+	<string name="score_match">Score Match</string>
+	<string name="score_cumul">Score Total</string>
 	
 </resources>

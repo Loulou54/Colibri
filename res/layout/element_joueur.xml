@@ -18,7 +18,7 @@
         android:layout_width="0dip"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_weight="2"
+        android:layout_weight="3"
         android:paddingLeft="5dp"
         android:paddingRight="0dp"
         android:textSize="18sp"
@@ -31,7 +31,7 @@
     <ImageView
         android:id="@+id/paysAdv"
         android:layout_width="0dip"
-        android:layout_height="20dp"
+        android:layout_height="18dp"
         android:layout_weight="1"
         android:layout_gravity="center_vertical"
         android:contentDescription="@string/app_name"
@@ -40,11 +40,14 @@
     <TextView
         style="@style/valueListJoueur"
         android:id="@+id/expAdv"
+        android:layout_weight="2"
         android:textSize="12sp" />
     
     <TextView
         style="@style/valueListJoueur"
-        android:id="@+id/winDefisAdv" />
+        android:id="@+id/scoreAdv"
+        android:layout_weight="2"
+        android:textSize="12sp" />
 
     <ImageButton
         android:id="@+id/poubelle"

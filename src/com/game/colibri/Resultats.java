@@ -98,7 +98,7 @@ public class Resultats extends Activity {
 		((TextView) findViewById(R.id.nomDefiRes)).setText(defi.nom);
 		handler.sendMessageDelayed(handler.obtainMessage(0), 1200); // Commence les animations après 1200ms
 		niv = new Niveau(defi.matchFini.mode, defi.matchFini.seed, defi.matchFini.param, defi.matchFini.avancement);
-		has_won = (defi.participants.get(MyApp.id).gagne==1);
+		has_won = (defi.participants.get(MyApp.id).rank==1);
 		((Carte) findViewById(R.id.apercuResMini)).loadNiveau(niv);
 		((Carte) findViewById(R.id.apercuResMaxi)).loadNiveau(niv);
 		((Artifices) findViewById(R.id.artifices)).setVisibility(View.GONE);
@@ -137,7 +137,7 @@ public class Resultats extends Activity {
 			if(ResultatsAdapter.prog<1)
 				handler.sleep(PERIODE);
 			else
-				handler.sendMessageDelayed(handler.obtainMessage(1), 600);
+				handler.sendMessageDelayed(handler.obtainMessage(1), 400);
 		} else {
 			ResultatsAdapter.etape = what;
 			if(what==4) {
@@ -148,7 +148,7 @@ public class Resultats extends Activity {
 				adapt.sort(new Comparator<Participation>() {
 					@Override
 					public int compare(Participation lhs, Participation rhs) {
-						return lhs.t_fini+lhs.penalite_fini - (rhs.t_fini+rhs.penalite_fini);
+						return lhs.t_fini - (rhs.t_fini);
 					}
 				});
 				((ImageButton) findViewById(R.id.nextRes)).setImageResource(R.drawable.fw);

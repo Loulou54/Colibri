@@ -37,7 +37,6 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
@@ -53,7 +52,7 @@ public class Multijoueur extends Activity {
 	public DefiExpandableAdapter adapt;
 	private SparseArray<Joueur> joueurs;
 	private ArrayList<Defi> adversaires;
-	private AlertDialog boxNiv;
+	private PaperDialog boxNiv;
 	private ViewSwitcher loader;
 	public Defi defi;
 	public Joueur user;
@@ -210,7 +209,7 @@ public class Multijoueur extends Activity {
 				Toast.makeText(this, R.string.hors_connexion, Toast.LENGTH_SHORT).show();
 				finish();
 			} else {
-				user = new Joueur(userId, MyApp.pseudo, "", 0, 0, 0, 0, 0, 0, 0);
+				user = new Joueur(userId, MyApp.pseudo, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 				MyApp.last_update = 0;
 			}
 		}
@@ -218,16 +217,15 @@ public class Multijoueur extends Activity {
 	
 	@SuppressLint("InflateParams")
 	public void choixNiveau() {
-		boxNiv = new AlertDialog.Builder(this).create();
-		boxNiv.setTitle("Défi : "+defi.nom);
-		LinearLayout lay = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.choix_niveau_multi, null);
+		boxNiv = new PaperDialog(this, R.layout.choix_niveau_multi);
+		//boxNiv.setTitle("Défi : "+defi.nom);
+		LinearLayout lay = (LinearLayout) boxNiv.getContentView();
 		Typeface font = Typeface.createFromAsset(getAssets(),"fonts/Passing Notes.ttf");
 		((TextView) lay.getChildAt(0)).setTypeface(font);
 		LinearLayout opt_aleat = (LinearLayout) lay.getChildAt(1);
 		for(int i=0; i<opt_aleat.getChildCount(); i++) {
 			((TextView) opt_aleat.getChildAt(i)).setTypeface(font);
 		}
-		boxNiv.setView(lay);
 		boxNiv.show();
 	}
 	
@@ -313,36 +311,6 @@ public class Multijoueur extends Activity {
 		if(!base.getTasks().contains("\"task\":\"partieRapide\""))
 			base.partieRapide();
 		syncData();
-		/*
-		final ProgressDialog prgDialog = new ProgressDialog(this);
-		prgDialog.setMessage(getString(R.string.progress));
-		prgDialog.setCancelable(false);
-		prgDialog.show();
-		RequestParams params = new RequestParams();
-		params.setHttpEntityIsRepeatable(true);
-		params.put("token", APP_TOKEN);
-		params.put("joueur", ""+MyApp.id);
-		params.put("appareil", ""+MyApp.appareil);
-		params.put("expToSync", ""+MyApp.expToSync);
-		client.post(SERVER_URL+"/partie_rapide.php", params, new AsyncHttpResponseHandler() {
-			@Override
-			public void onSuccess(String response) {
-				prgDialog.dismiss();
-				insertJSONData(response);
-			}
-
-			@Override
-			public void onFailure(int statusCode, Throwable error, String content) {
-				prgDialog.dismiss();
-				if (statusCode == 404) {
-					Toast.makeText(Multijoueur.this, R.string.err404, Toast.LENGTH_LONG).show();
-				} else if (statusCode == 500 || statusCode == 503) {
-					Toast.makeText(Multijoueur.this, R.string.err500, Toast.LENGTH_LONG).show();
-				} else {
-					Toast.makeText(Multijoueur.this, R.string.err, Toast.LENGTH_LONG).show();
-				}
-			}
-		});*/
 	}
 	
 	public void supprDefi(View v) {
@@ -466,6 +434,7 @@ public class Multijoueur extends Activity {
 	private void dispUser() {
 		((ImageView) findViewById(R.id.user_avatar)).setImageResource(user.getAvatar());
 		((TextView) findViewById(R.id.user_name)).setText(user.getPseudo());
+		// Affichage expérience et son gain
 		String expStr = getString(R.string.exp)+" :\n\u0009"+String.format("%,d", user.getExp());
 		int dbSpan = expStr.length();
 		if(user.getExp()>MyApp.experience) {
@@ -475,8 +444,19 @@ public class Multijoueur extends Activity {
 		expTxt.setSpan(new RelativeSizeSpan(1.2f), dbSpan, expTxt.length(), 0);
 		expTxt.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.violet)), dbSpan, expTxt.length(), 0);
 		((TextView) findViewById(R.id.user_exp)).setText(expTxt);
+		// Affichage score et son gain
+		String scoreStr = getString(R.string.score_compet)+" :\n\u0009"+String.format("%,.2f", user.getScore());
+		int dbSpan2 = scoreStr.length();
+		double scoreDiff = user.getScore() - MyApp.getApp().pref.getFloat("score", (float) user.getScore());
+		if(scoreDiff >= 1.) {
+			scoreStr += (scoreDiff<0 ? " " : " +")+String.format("%,.2f", scoreDiff);
+		}
+		SpannableString scoreTxt = new SpannableString(scoreStr);
+		scoreTxt.setSpan(new RelativeSizeSpan(1.2f), dbSpan2, scoreTxt.length(), 0);
+		scoreTxt.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.violet)), dbSpan2, scoreTxt.length(), 0);
+		((TextView) findViewById(R.id.user_score)).setText(scoreTxt);
+		// Affichage défis
 		((TextView) findViewById(R.id.user_defis)).setText(getString(R.string.defis_joues)+" : "+user.getDefis());
-		((TextView) findViewById(R.id.user_wins)).setText(getString(R.string.defis_gagnés)+" : "+user.getWin());
 	}
 	
 	private final BroadcastReceiver mHandleMessageReceiver = new BroadcastReceiver() {
@@ -530,6 +510,14 @@ public class Multijoueur extends Activity {
 				return MyApp.expToSync==MyApp.experience ? MyApp.avancement : 1;
 			}
 			@Override
+			public int getColiBrains() {
+				return MyApp.expToSync==MyApp.experience ? MyApp.coliBrains : Math.max(MyApp.coliBrains - MyApp.getApp().pref.getInt("coliBrainsLastSync", MyApp.DEFAULT_MAX_COLI_BRAINS), 0);
+			}
+			@Override
+			public int getExpProgCB() {
+				return MyApp.expToSync==MyApp.experience ? MyApp.expProgCB : 0;
+			}
+			@Override
 			public boolean registered(String JSONresponse, String name, boolean sync) {
 				try {
 					JSONArray j = new JSONArray(JSONresponse);
@@ -539,14 +527,20 @@ public class Multijoueur extends Activity {
 					base.getDefis(user.getId(),joueurs,adversaires);
 					adapt = new DefiExpandableAdapter(Multijoueur.this, user.getId(), adversaires);
 					lv.setAdapter(adapt);
-					MyApp.updateExpProgressColiBrain(user.getExp()-MyApp.experience);
 					MyApp.experience = user.getExp();
 					MyApp.avancement = user.getProgress();
 					MyApp.last_update = 0;
 					if(sync)
 						syncData();
-					else
+					else {
 						MyApp.expToSync = 0;
+						MyApp.cumulExpCB = 0;
+						MyApp.getApp().editor
+							.putInt("coliBrainsLastSync", MyApp.coliBrains)
+							.putInt("expToSync", MyApp.expToSync)
+							.putInt("cumulExpCB", MyApp.cumulExpCB)
+							.commit();
+					}
 					dispUser();
 					MyApp.getApp().saveData();
 					return true;
@@ -571,9 +565,21 @@ public class Multijoueur extends Activity {
 		loader.setEnabled(false);
 		((TextView) findViewById(R.id.nvDefi)).setEnabled(false);
 		((TextView) findViewById(R.id.nvPRapide)).setEnabled(false);
-		if(MyApp.expToSync!=0) {
-			base.addExp(MyApp.expToSync);
+		int coliBrainsLastSync = MyApp.getApp().pref.getInt("coliBrainsLastSync", 0);
+		if(MyApp.expToSync!=0 || MyApp.coliBrains!=coliBrainsLastSync) {
+			int coliBrainsWon = MyApp.cumulExpCB/MyApp.EXP_LEVEL_PER_COLI_BRAIN;
+			if(MyApp.cumulExpCB % MyApp.EXP_LEVEL_PER_COLI_BRAIN > MyApp.expProgCB)
+				coliBrainsWon++;
+			// coliBrainsDiff = coliBrains-lastColiBrains = won - used <=> used = won + lastColiBrains - coliBrains
+			System.out.println(MyApp.expToSync+" "+MyApp.cumulExpCB+" "+coliBrainsWon+" "+coliBrainsLastSync+" "+MyApp.coliBrains);
+			base.syncExpAndColiBrains(MyApp.expToSync, MyApp.cumulExpCB, coliBrainsWon + coliBrainsLastSync - MyApp.coliBrains);
 			MyApp.expToSync = 0;
+			MyApp.cumulExpCB = 0;
+			MyApp.getApp().editor
+				.putInt("coliBrainsLastSync", MyApp.coliBrains)
+				.putInt("expToSync", MyApp.expToSync)
+				.putInt("cumulExpCB", MyApp.cumulExpCB)
+				.commit();
 		}
 		RequestParams params = new RequestParams();
 		params.setHttpEntityIsRepeatable(true);
@@ -583,7 +589,6 @@ public class Multijoueur extends Activity {
 		params.put("tasks", base.getTasks());
 		System.out.println(base.getTasks());
 		params.put("last_update", ""+MyApp.last_update);
-		params.put("expToSync", "0"); // TODO: à enlever à la prochaine version
 		params.put("progress", ""+MyApp.avancement);
 		client.post(SERVER_URL+"/sync_data.php", params, new AsyncHttpResponseHandler() {
 			@Override
@@ -658,11 +663,16 @@ public class Multijoueur extends Activity {
 		}
 		if(res) {
 			dispUser();
-			MyApp.updateExpProgressColiBrain(user.getExp()-MyApp.experience);
 			MyApp.experience = user.getExp();
 			MyApp.avancement = user.getProgress();
 			MyApp.last_update = last_up;
-			MyApp.getApp().editor.putInt("nNewM", 0).putInt("nRes", 0);
+			MyApp.coliBrains = user.getColiBrains();
+			MyApp.expProgCB = user.getExpProgCB();
+			MyApp.getApp().editor
+				.putInt("coliBrainsLastSync", MyApp.coliBrains)
+				.putFloat("score", (float) user.getScore()) // Pour l'affichage du score gagné après synchro
+				.putInt("nNewM", 0) // Pour les notifications
+				.putInt("nRes", 0);
 			MyApp.getApp().saveData();
 		}
 		int pRapide = base.getDefis(user.getId(),joueurs,adversaires);

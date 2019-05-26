@@ -87,7 +87,7 @@ public class ClassementAdapter extends ArrayAdapter<Joueur> {
 		h.exp.setText(String.format("%,d", j.getExp()));
 		h.defis.setText(""+j.getDefis());
 		h.wins.setText(""+j.getWin());
-		h.winLost.setText(""+(j.getWin() - j.getLost()));
+		h.winLost.setText(""+(j.getWin() - j.getLoose()));
 		return convertView;
 	}
 	

@@ -69,12 +69,55 @@ public class Defi {
 		return (new Gson()).toJson(this, Defi.class);
 	}
 	
+	public int computeScores(Participation[] classement, double[] scores) {
+		int partEffectives = 0;
+		double scoreTotal = 0;
+		double cotisations = 0;
+		// Comptage des participants (non joués exclus) et la somme de leurs scores
+		for(Participation p : classement) {
+			if(p.t_cours!=Participation.NOT_PLAYED) {
+				partEffectives++;
+				scoreTotal += Math.sqrt(p.joueur.getScore())+8;
+			}
+		}
+		if(scoreTotal==0) scoreTotal = 1;
+		// Cotisations
+		for(Participation p : classement) {
+			if(p.t_cours!=Participation.NOT_PLAYED) {
+				double cotis = 10 + 6*Math.sqrt(partEffectives)*(Math.sqrt(p.joueur.getScore())+8)/scoreTotal;
+				p.setCotisation(cotis);
+				cotisations += cotis;
+			}
+		}
+		// Redistribution
+		double C = 5.;
+		double A = cotisations/(Math.log(1+partEffectives/C)-partEffectives*Math.log(1+1./(partEffectives+C-1)));
+		double B = A*Math.log(1+1./(partEffectives+C-1));
+		int nEgal=1, t_pos=0; // permet de traiter les égalités dans le classement
+		for(int ligne=0; ligne < classement.length; ligne++) {
+			if(classement[ligne].t_cours == Participation.NOT_PLAYED) {
+				scores[ligne] = 0;
+				continue;
+			}
+			scores[ligne] = A*Math.log(1+1./(ligne+C))-B;
+			nEgal = classement[ligne].t_cours!=t_pos ? 1 : nEgal+1;
+			t_pos = classement[ligne].t_cours;
+			if(nEgal > 1) {
+				double scoreEgal = (scores[ligne-1]*(nEgal-1) + scores[ligne])/nEgal;
+				for(int i=0; i < nEgal; i++) {
+					scores[ligne-i] = scoreEgal;
+				}
+			}
+		}
+		return partEffectives;
+	}
+	
 	/**
 	 * Appelé en fin de match pour incrémenter les différents scores, etc
 	 * @param user
 	 */
-	public boolean finMatch(DBController base, int user, int temps, int penalite) {
-		participants.get(user).solved(temps,penalite);
+	public boolean finMatch(DBController base, int user, int temps) {
+		participants.get(user).solved(temps);
 		Participation[] classement = new Participation[participants.size()];
 		for(int i=0; i<classement.length; i++) {
 			classement[i] = participants.valueAt(i);
@@ -82,22 +125,18 @@ public class Defi {
 		Arrays.sort(classement, new Comparator<Participation>() {
 			@Override
 			public int compare(Participation lhs, Participation rhs) {
-				return lhs.t_cours+lhs.penalite_cours - (rhs.t_cours+rhs.penalite_cours);
+				return lhs.t_cours - rhs.t_cours;
 			}
 		});
-		int partEffectives = 0;
-		for(Participation p : classement) {
-			if(p.t_cours!=Participation.NOT_PLAYED)
-				partEffectives++;
-		}
 		boolean result = (classement[0].t_cours!=0 && (type==0 || classement.length==type));
 		if(result) { // Tous les participants ont fini.
-			int ligne=0, pos=0, t_pos=0;
-			for(Participation p : classement) {
-				ligne++;
-				pos = p.t_cours!=t_pos ? ligne : pos;
-				t_pos=p.t_cours;
-				p.fini(pos, match.exp, partEffectives);
+			double scores[] = new double[classement.length];
+			int partEffectives = computeScores(classement, scores);
+			int pos=0, t_pos=0; // permet de traiter les égalités dans le classement
+			for(int ligne=0; ligne < classement.length; ligne++) {
+				pos = classement[ligne].t_cours!=t_pos ? ligne+1 : pos;
+				t_pos = classement[ligne].t_cours;
+				classement[ligne].fini(pos, partEffectives, scores[ligne]);
 			}
 			nMatch++;
 			matchFini = match;

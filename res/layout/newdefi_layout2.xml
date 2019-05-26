@@ -20,19 +20,11 @@
             android:layout_weight="3" />
 
     </LinearLayout>
-    
-    <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
-            android:textSize="20sp"
-            android:textColor="@color/bleu_nuit"
-            android:text="@string/ajout_part" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical" >
 
         <FrameLayout
             android:layout_width="0dip"
@@ -65,7 +57,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:src="@android:drawable/ic_menu_help"
-            android:contentDescription="@string/aleatoire" />
+            android:contentDescription="@string/aleatoire"
+            android:background="@drawable/pencil_button" />
 
     </LinearLayout>
 
@@ -87,7 +80,7 @@
     <TextView
         android:id="@+id/defaultView"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="40dp"
         android:gravity="center"
         android:text="@string/nojoueur"
         android:textSize="16sp"

@@ -5,17 +5,14 @@ import java.io.InputStream;
 import java.util.Locale;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.view.ContextThemeWrapper;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class DispJoueur {
@@ -35,12 +32,12 @@ public class DispJoueur {
 	
 	@SuppressLint("InflateParams")
 	public void show() {
-		LinearLayout lay = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.details_joueur_layout, null);
-		((TextView) lay.findViewById(R.id.nomDetails)).setText(j.getPseudo());
-		((TextView) lay.findViewById(R.id.nomDetails)).setTypeface(Typeface.createFromAsset(context.getAssets(),"fonts/Passing Notes.ttf"));
-		((ImageView) lay.findViewById(R.id.avatarDetails)).setImageResource(j.getAvatar());
-		((TextView) lay.findViewById(R.id.paysDetails)).setText((new Locale("", j.getPays())).getDisplayCountry(Resources.getSystem().getConfiguration().locale));
-		ImageView pays = (ImageView) lay.findViewById(R.id.flagDetails);
+		PaperDialog box = new PaperDialog(context, R.layout.details_joueur_layout);
+		((TextView) box.findViewById(R.id.nomDetails)).setText(j.getPseudo());
+		((TextView) box.findViewById(R.id.nomDetails)).setTypeface(Typeface.createFromAsset(context.getAssets(),"fonts/Passing Notes.ttf"));
+		((ImageView) box.findViewById(R.id.avatarDetails)).setImageResource(j.getAvatar());
+		((TextView) box.findViewById(R.id.paysDetails)).setText((new Locale("", j.getPays())).getDisplayCountry(Resources.getSystem().getConfiguration().locale));
+		ImageView pays = (ImageView) box.findViewById(R.id.flagDetails);
 		try {
 			InputStream file = context.getAssets().open("drapeaux/"+j.getPays().toLowerCase(Locale.FRANCE)+".png");
 			pays.setImageBitmap(BitmapFactory.decodeStream(file));
@@ -48,14 +45,13 @@ public class DispJoueur {
 		} catch (IOException e) {
 			pays.setVisibility(View.INVISIBLE);
 		}
-		((TextView) lay.findViewById(R.id.lastConnectDetails)).setText(""+j.getLastVisit(context));
-		((TextView) lay.findViewById(R.id.expDetails)).setText(String.format("%,d", j.getExp()));
-		((TextView) lay.findViewById(R.id.progressDetails)).setText(""+(j.getProgress()-1)+"/"+Jeu.NIV_MAX);
-		((TextView) lay.findViewById(R.id.defisDetails)).setText(""+j.getDefis());
-		((TextView) lay.findViewById(R.id.winsDetails)).setText(""+j.getWin());
-		((TextView) lay.findViewById(R.id.looseDetails)).setText(""+j.getLost());
-		AlertDialog.Builder box = new AlertDialog.Builder(context);
-		box.setView(lay);
+		((TextView) box.findViewById(R.id.lastConnectDetails)).setText(""+j.getLastVisit(context));
+		((TextView) box.findViewById(R.id.progressDetails)).setText(""+(j.getProgress()-1)+"/"+Jeu.NIV_MAX);
+		((TextView) box.findViewById(R.id.expDetails)).setText(String.format("%,d", j.getExp()));
+		((TextView) box.findViewById(R.id.scoreDetails)).setText(String.format("%,.2f", j.getScore()));
+		((TextView) box.findViewById(R.id.defisDetails)).setText(""+j.getDefis());
+		((TextView) box.findViewById(R.id.winsDetails)).setText(""+j.getWin());
+		((TextView) box.findViewById(R.id.looseDetails)).setText(""+j.getLoose());
 		box.show();
 	}
 	

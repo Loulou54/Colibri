@@ -17,10 +17,9 @@ public class MyApp extends Application {
 	public static int id;
 	public static String pseudo;
 	public static int appareil;
-	public static Joueur user;
 	public static int avancement; // Progression du joueur dans les niveaux campagne.
 	public static int experience, expToSync; // L'expérience du joueur et l'expérience encore non synchronisée avec le serveur.
-	public static int coliBrains, maxColiBrains, expProgressColiBrain; // Le nombre de bonus d'aide colibrains, le maximum cumulable et le progrès en expérience vers le prochain colibrain.
+	public static int coliBrains, maxCB, expProgCB, cumulExpCB; // Le nombre de bonus d'aide colibrains, le maximum cumulable et le progrès en expérience vers le prochain colibrain.
 	public static int versionCode; // Le code de version de la dernière version de Colibri exécutée.
 	public static long last_update; // Timestamp donné par le serveur de la dernière mise-à-jour.
 	private static int nActiveActivities = 0; // Pour déterminer si l'on doit mettre en pause la musique ou non lorsqu'une activité passe en fond.
@@ -52,9 +51,10 @@ public class MyApp extends Application {
 		avancement = pref.getInt("niveau", 1);
 		experience = pref.getInt("exp", 0);
 		expToSync = pref.getInt("expToSync", experience);
-		coliBrains = pref.getInt("coliBrains", DEFAULT_MAX_COLI_BRAINS);
-		maxColiBrains = pref.getInt("maxColiBrains", DEFAULT_MAX_COLI_BRAINS);
-		expProgressColiBrain = pref.getInt("expProgressColiBrain", 0);
+		coliBrains = pref.getInt("coliBrains", 0);
+		maxCB = pref.getInt("maxCB", DEFAULT_MAX_COLI_BRAINS);
+		expProgCB = pref.getInt("expProgCB", 0);
+		cumulExpCB = pref.getInt("cumulExpCB", 0);
 		versionCode = pref.getInt("versionCode", 0);
 		last_update = pref.getLong("last_update", 0);
 		ParamAleat.loadParams(pref);
@@ -83,12 +83,18 @@ public class MyApp extends Application {
 			.commit();
 	}
 	
-	public static void updateExpProgressColiBrain(int exp) {
+	public static void updateExpProgCB(int exp) {
 		System.out.println("Progress ColiBrain : "+exp);
-		expProgressColiBrain+=exp;
-		int n = expProgressColiBrain/EXP_LEVEL_PER_COLI_BRAIN;
-		expProgressColiBrain = expProgressColiBrain % EXP_LEVEL_PER_COLI_BRAIN;
-		coliBrains = Math.min(maxColiBrains, coliBrains+n);
+		expProgCB += exp;
+		int n = expProgCB/EXP_LEVEL_PER_COLI_BRAIN;
+		expProgCB = expProgCB % EXP_LEVEL_PER_COLI_BRAIN;
+		coliBrains = Math.min(maxCB, coliBrains+n);
+		if(coliBrains == maxCB) {
+			cumulExpCB += exp-expProgCB;
+			expProgCB = 0;
+		} else {
+			cumulExpCB += exp;
+		}
 	}
 	
 	/**
@@ -99,8 +105,9 @@ public class MyApp extends Application {
 			.putInt("exp", experience)
 			.putInt("expToSync", expToSync)
 			.putInt("coliBrains", coliBrains)
-			.putInt("maxColiBrains", maxColiBrains)
-			.putInt("expProgressColiBrain", expProgressColiBrain)
+			.putInt("maxCB", maxCB)
+			.putInt("expProgCB", expProgCB)
+			.putInt("cumulExpCB", cumulExpCB)
 			.putLong("last_update", last_update)
 			.commit();
 	}

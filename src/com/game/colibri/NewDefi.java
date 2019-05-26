@@ -15,20 +15,16 @@ import com.loopj.android.http.RequestParams;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Build;
 import android.view.ContextThemeWrapper;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -69,29 +65,29 @@ public class NewDefi {
 	 */
 	@SuppressLint("InflateParams")
 	public void show() {
-		final LinearLayout lay = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.newdefi_layout1, null);
-		AlertDialog.Builder boxParticipants = new AlertDialog.Builder(context);
-		boxParticipants.setTitle(R.string.nouveau_defi);
-		DialogInterface.OnClickListener check = new DialogInterface.OnClickListener() {
+		final PaperDialog defiBox = new PaperDialog(context, R.layout.newdefi_layout1, true);
+		defiBox.setTitle(R.string.nouveau_defi);
+		((EditText) defiBox.findViewById(R.id.defiName)).setText(nomDefi);
+		defiBox.setPositiveButton(new View.OnClickListener() {
 			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				if(which==DialogInterface.BUTTON_POSITIVE) {
-					nomDefi = ((EditText) lay.findViewById(R.id.defiName)).getText().toString().trim();
-					t_max = fetchTimeSecond(((Spinner) lay.findViewById(R.id.defiLimit)).getSelectedItemPosition());
-					if(nomDefi.length()>30) {
-						Toast.makeText(context, R.string.nom_invalide_defi, Toast.LENGTH_LONG).show();
-						show();
-					} else {
-						showParticipants();
-					}
+			public void onClick(View v) {
+				nomDefi = ((EditText) defiBox.findViewById(R.id.defiName)).getText().toString().trim();
+				t_max = fetchTimeSecond(((Spinner) defiBox.findViewById(R.id.defiLimit)).getSelectedItemPosition());
+				if(nomDefi.length()>30) {
+					Toast.makeText(context, R.string.nom_invalide_defi, Toast.LENGTH_LONG).show();
+				} else {
+					defiBox.dismiss();
+					showParticipants();
 				}
 			}
-		};
-		((EditText) lay.findViewById(R.id.defiName)).setText(nomDefi);
-		boxParticipants.setPositiveButton(R.string.accept, check);
-		boxParticipants.setNegativeButton(R.string.annuler, check);
-		boxParticipants.setView(lay);
-		boxParticipants.show();
+		}, null);
+		defiBox.setNegativeButton(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				defiBox.dismiss();
+			}
+		}, null);
+		defiBox.show();
 	}
 	
 	/**
@@ -99,9 +95,9 @@ public class NewDefi {
 	 */
 	@SuppressLint("InflateParams")
 	public void showParticipants() {
-		final LinearLayout lay = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.newdefi_layout2, null);
-		final SuggestionsEditText actv = (SuggestionsEditText) lay.findViewById(R.id.searchAdv);
-		actv.setLoadingIndicator((ProgressBar) lay.findViewById(R.id.loading_indicator)); 
+		final PaperDialog defiBox = new PaperDialog(context, R.layout.newdefi_layout2, true);
+		final SuggestionsEditText actv = (SuggestionsEditText) defiBox.findViewById(R.id.searchAdv);
+		actv.setLoadingIndicator((ProgressBar) defiBox.findViewById(R.id.loading_indicator)); 
 		actv.setAdapter(dropDownAdapter);
 		actv.setOnItemClickListener(new OnItemClickListener() {
 			@Override
@@ -110,7 +106,7 @@ public class NewDefi {
 				actv.setText("");
 			}
 		});
-		ImageButton advAuto = (ImageButton) lay.findViewById(R.id.advAuto);
+		ImageButton advAuto = (ImageButton) defiBox.findViewById(R.id.advAuto);
 		advAuto.setOnClickListener(new ImageButton.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -118,33 +114,33 @@ public class NewDefi {
 				hide_keyboard_from(context, actv);
 			}
 		});
-		ListView jlv = (ListView) lay.findViewById(R.id.listAdv);
-		jAdapter.setTextView((TextView) lay.findViewById(R.id.advTextView));
+		ListView jlv = (ListView) defiBox.findViewById(R.id.listAdv);
+		jAdapter.setTextView((TextView) defiBox.findViewById(R.id.advTextView));
 		jlv.setAdapter(jAdapter);
 		jAdapter.updateTextView();
-		jlv.setEmptyView((TextView) lay.findViewById(R.id.defaultView));
+		jlv.setEmptyView((TextView) defiBox.findViewById(R.id.defaultView));
 		
-		AlertDialog.Builder boxParticipants = new AlertDialog.Builder(context);
-		boxParticipants.setTitle(R.string.nouveau_defi);
-		boxParticipants.setCancelable(false);
-		DialogInterface.OnClickListener check = new DialogInterface.OnClickListener() {
+		defiBox.setTitle(R.string.nouveau_defi);
+		defiBox.setCancelable(false);
+		defiBox.setPositiveButton(new View.OnClickListener() {
 			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				if(which==DialogInterface.BUTTON_POSITIVE) {
-					if(jAdapter.getCount()==0) {
-						Toast.makeText(context, R.string.nojoueur, Toast.LENGTH_LONG).show();
-						showParticipants();
-					} else
-						createDefi();
+			public void onClick(View v) {
+				if(jAdapter.getCount()==0) {
+					Toast.makeText(context, R.string.nojoueur, Toast.LENGTH_LONG).show();
 				} else {
-					prgDialog.dismiss();
+					defiBox.dismiss();
+					createDefi();
 				}
 			}
-		};
-		boxParticipants.setPositiveButton(R.string.creer, check);
-		boxParticipants.setNegativeButton(R.string.annuler, check);
-		boxParticipants.setView(lay);
-		boxParticipants.show();
+		}, context.getResources().getString(R.string.creer));
+		defiBox.setNegativeButton(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				prgDialog.dismiss();
+				defiBox.dismiss();
+			}
+		}, null);
+		defiBox.show();
 	}
 	
 	public static void hide_keyboard_from(Context context, View view) {
@@ -197,28 +193,6 @@ public class NewDefi {
 	
 	private void createDefi() {
 		callback.create(nomDefi, getJSONListOfJoueurs(), t_max);
-		/*prgDialog.show();
-		RequestParams params = new RequestParams();
-		params.setHttpEntityIsRepeatable(true);
-		params.put("token", APP_TOKEN);
-		params.put("joueur", ""+user);
-		params.put("appareil", ""+appareil);
-		params.put("nom", nomDefi);
-		params.put("participants", "["+getStringListOfJoueurs()+"]");
-		params.put("t_max", ""+t_max);
-		client.post(SERVER_URL+"/newdefi.php", params, new AsyncHttpResponseHandler() {
-			@Override
-			public void onSuccess(String response) {
-				prgDialog.dismiss();
-				callback.create(response);
-			}
-
-			@Override
-			public void onFailure(int statusCode, Throwable error, String content) {
-				prgDialog.dismiss();
-				Toast.makeText(context, R.string.err, Toast.LENGTH_LONG).show();
-			}
-		});*/
 	}
 	
 	public interface callBackInterface {

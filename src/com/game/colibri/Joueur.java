@@ -9,39 +9,44 @@ public class Joueur {
 		R.drawable.megusta, R.drawable.pro_cry, R.drawable.pro_haha, R.drawable.pro_happy, R.drawable.pro_how_cute, R.drawable.pro_derpina_brown, R.drawable.pro_derpina_blond, R.drawable.pro_derpina_blond_haha, R.drawable.pro_troll, R.drawable.pro_rage, R.drawable.pro_serious, R.drawable.pro_stop_it, R.drawable.pro_thumbs_up, R.drawable.pro_lol};
 	
 	private String pseudo, pays;
-	private int id, exp, progress, defis, win, loose, avatar, rang;
-	private long time;
+	private int id, exp, progress, coliBrains, expProgCB, defis, win, loose, avatar, rang;
+	private double score;
+	private long playTime, time;
 	
 	/**
-	 * Récupération des paramètres du joueur propriétaire du smartphone.
-	 * @param sav
+	 * Crée un nouveau Joueur.
+	 * @param id
+	 * @param pseudo
+	 * @param pays
+	 * @param exp
+	 * @param progress
+	 * @param coliBrains
+	 * @param expProgCB
+	 * @param defis
+	 * @param win
+	 * @param loose
+	 * @param score
+	 * @param playTime
+	 * @param avatar
+	 * @param time
 	 */
-	/*public Joueur(SharedPreferences sav) {
-		pseudo=sav.getString("pseudo", null);
-		pays=Resources.getSystem().getConfiguration().locale.getCountry();
-		exp=sav.getInt("exp", 0);
-		defis=sav.getInt("defis", 0);
-		win=sav.getInt("win", 0);
-		loose=sav.getInt("loose", 0);
-		avatar=img[0];
-	}*/
-	
-	/**
-	 * Créer un nouveau joueur.
-	 * @param sav
-	 */
-	public Joueur(int id, String nom, String loc, int e, int prog, int d, int w, int l, int av, long lv) {
+	public Joueur(int id, String pseudo, String pays, int exp, int progress, int coliBrains,
+			int expProgCB, int defis, int win, int loose, double score, long playTime, int avatar, long time) {
 		this.id=id;
-		pseudo=nom;
-		pays=loc;
-		exp=e;
-		progress=prog;
-		defis=d;
-		win=w;
-		loose=l;
-		avatar=av;
-		time=lv;
-		rang=0;
+		this.pseudo=pseudo;
+		this.pays=pays;
+		this.exp=exp;
+		this.progress=progress;
+		this.coliBrains=coliBrains;
+		this.expProgCB=expProgCB;
+		this.defis=defis;
+		this.win=win;
+		this.loose=loose;
+		this.score=score;
+		this.playTime=playTime;
+		this.avatar=avatar;
+		this.time=time;
+		this.rang=0;
 	}
 	
 	public int getId() {
@@ -64,6 +69,14 @@ public class Joueur {
 		return progress;
 	}
 	
+	public int getColiBrains() {
+		return coliBrains;
+	}
+	
+	public int getExpProgCB() {
+		return expProgCB;
+	}
+	
 	public int getDefis() {
 		return defis;
 	}
@@ -72,8 +85,16 @@ public class Joueur {
 		return win;
 	}
 	
-	public int getLost() {
+	public int getLoose() {
 		return loose;
+	}
+	
+	public double getScore() {
+		return score;
+	}
+	
+	public long getPlayTime() {
+		return playTime;
 	}
 	
 	public int getAvatar() {
@@ -85,9 +106,6 @@ public class Joueur {
 	}
 	
 	public String getLastVisit(Context c) {
-		/*DateFormat df = SimpleDateFormat.getDateTimeInstance();
-		Date d = new Date(time*1000);
-		return df.format(d);*/
 		long t = System.currentTimeMillis()/1000-time;
 		if(t<3600)
 			return c.getResources().getString(R.string.minutesAgo, t/60, t/60>1 ? "s" : "");
@@ -121,8 +139,8 @@ public class Joueur {
 	/**
 	 * Incrémente le compteur de défaites du joueur.
 	 */
-	public void loose() {
-		loose++;
+	public void loose(int n) {
+		loose+=n;
 	}
 	
 	/**
@@ -133,8 +151,24 @@ public class Joueur {
 		exp+=e;
 	}
 	
+	/**
+	 * Ajoute les points p (positif ou négatif) au score de ce joueur.
+	 * @param p points gagnés ou perdus
+	 */
+	public void addScore(double points) {
+		score += points;
+	}
+	
+	/**
+	 * Ajoute le temps de jeu t.
+	 * @param t temps de jeu à ajouter en ms.
+	 */
+	public void addPlayTime(long t) {
+		playTime += t;
+	}
+	
 	@Override
 	public String toString() {
-		return pseudo+";"+pays+";"+exp+";"+progress+";"+defis+";"+win+";"+loose+";"+avatar+";"+time;
+		return pseudo+";"+pays+";"+exp+";"+progress+";"+coliBrains+";"+expProgCB+";"+defis+";"+win+";"+loose+";"+score+";"+playTime+";"+avatar+";"+time;
 	}
 }

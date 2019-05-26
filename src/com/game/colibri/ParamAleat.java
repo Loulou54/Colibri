@@ -1,9 +1,7 @@
 package com.game.colibri;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.view.ContextThemeWrapper;
@@ -13,7 +11,6 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -30,7 +27,7 @@ public class ParamAleat {
 	public static int[] param = new int[6];
 	public final static int[] paramDefaut = new int[] {12, 3, 3, 2, 2, 1};
 	
-	private AlertDialog.Builder boxAleat = null;
+	private PaperDialog boxAleat = null;
 	private Context context;
 	private callBackInterface callback;
 	private int avancement;
@@ -64,14 +61,17 @@ public class ParamAleat {
 		void launchFunction(int mode);
 	}
 	
-	private void prepareParam(final LinearLayout parent) {
+	private void prepareParam(final LinearLayout parent, ParamElement[] sliders) {
 		final TextView tv = (TextView) parent.findViewById(R.id.long_text);
 		final SeekBar sb = (SeekBar) parent.findViewById(R.id.long_seekbar);
 		final CheckBox cb = (CheckBox) parent.findViewById(R.id.base_checkbox);
-		sb.setProgress(param[0]-5);
-		cb.setChecked(param[5]==1);
-		tv.setText(context.getString(R.string.longueur)+" "+(param[0]+param[0]/4)+" ± "+(param[0]/4));
+		sb.setProgress(tp.p[0]-5);
+		cb.setChecked(tp.p[5]==1);
+		tv.setText(context.getString(R.string.longueur)+" "+(tp.p[0]+tp.p[0]/4)+" ± "+(tp.p[0]/4));
 		tp.updateExp(parent);
+		for(ParamElement pe : sliders) {
+			pe.setValueFromParams();
+		}
 		sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {}
@@ -92,37 +92,40 @@ public class ParamAleat {
 		});
 	}
 	
-	@SuppressLint("InflateParams")
 	public void show() {
 		tp = new TempParam();
-		final ScrollView content = (ScrollView) LayoutInflater.from(context).inflate(R.layout.param_aleat, null);
-		final LinearLayout lay = (LinearLayout) content.findViewById(R.id.param_lay);
-		prepareParam(lay);
-		int index = 1;
-		new ParamElement(index++,lay,8,R.drawable.vache_0,R.string.vaches);
-		new ParamElement(index++,lay,15,R.drawable.dynamite,R.string.dynamites);
-		new ParamElement(index++,lay,20,R.drawable.chat_0,R.string.chats);
-		new ParamElement(index++,lay,22,R.drawable.rainbow,R.string.arcs);
-		boxAleat = new AlertDialog.Builder(context);
-		boxAleat.setTitle(R.string.paramAleat);
-		DialogInterface.OnClickListener check = new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface d,int i) {
-				if(i==DialogInterface.BUTTON_POSITIVE) {
-					tp.commit();
-					saveParams(MyApp.getApp().editor);
-					callback.launchFunction(Niveau.PERSO);
-				} else if(i==DialogInterface.BUTTON_NEUTRAL) {
-					param = paramDefaut.clone();
-					saveParams(MyApp.getApp().editor);
-					ParamAleat.this.show();
-				}
-			}
+		boxAleat = new PaperDialog(context, R.layout.param_aleat);
+		final LinearLayout lay = (LinearLayout) boxAleat.getContentView();
+		final ParamElement sliders[] = {
+			new ParamElement(1,lay,8,R.drawable.vache_0,R.string.vaches),
+			new ParamElement(2,lay,15,R.drawable.dynamite,R.string.dynamites),
+			new ParamElement(3,lay,20,R.drawable.chat_0,R.string.chats),
+			new ParamElement(4,lay,22,R.drawable.rainbow,R.string.arcs)
 		};
-		boxAleat.setPositiveButton(R.string.accept, check);
-		boxAleat.setNeutralButton(R.string.defaut, check);
-		boxAleat.setNegativeButton(R.string.annuler, check);
-		boxAleat.setView(content);
+		prepareParam(lay, sliders);
+		boxAleat.setTitle(R.string.paramAleat);
+		boxAleat.setPositiveButton(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				tp.commit();
+				saveParams(MyApp.getApp().editor);
+				callback.launchFunction(Niveau.PERSO);
+				boxAleat.dismiss();
+			}
+		}, null);
+		boxAleat.setNeutralButton(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				tp.p = paramDefaut.clone();
+				prepareParam(lay, sliders);
+			}
+		}, null);
+		boxAleat.setNegativeButton(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				boxAleat.dismiss();
+			}
+		}, null);
 		boxAleat.show();
 	}
 	
@@ -134,6 +137,9 @@ public class ParamAleat {
 	private class ParamElement {
 		
 		private LinearLayout elem;
+		private LinearLayout parent;
+		private int paramIndex;
+		private int seuil;
 		
 		/**
 		 * Constructeur d'un élément de réglage pour les paramètres des niveaux aléatoires.
@@ -146,10 +152,18 @@ public class ParamAleat {
 		 */
 		@SuppressLint("InflateParams")
 		public ParamElement(int index, final LinearLayout parent, int seuil, int resDrawable, int resString) {
-			final int i = index;
+			paramIndex = index;
+			this.parent = parent;
+			this.seuil = seuil;
 			elem =(LinearLayout) LayoutInflater.from(context).inflate(R.layout.param_element, null);
 			((ImageView) elem.findViewById(R.id.imageParam)).setImageResource(resDrawable);
 			((TextView) elem.findViewById(R.id.textParam)).setText(resString);
+			setValueFromParams();
+			parent.addView(elem, index);
+		}
+		
+		public void setValueFromParams() {
+			final int i = paramIndex;
 			if(avancement<seuil) { // L'option n'est pas encore débloquée
 				tp.p[i] = -Math.abs(tp.p[i]);
 				setEnabled(false);
@@ -160,9 +174,9 @@ public class ParamAleat {
 			} else {
 				CheckBox cb = (CheckBox) elem.findViewById(R.id.checkBoxParam);
 				SeekBar sb = (SeekBar) elem.findViewById(R.id.seekBarParam);
-				cb.setChecked(param[i]>0);
-				sb.setEnabled(param[i]>0);
-				sb.setProgress(Math.abs(param[i])-1);
+				cb.setChecked(tp.p[i]>0);
+				sb.setEnabled(tp.p[i]>0);
+				sb.setProgress(Math.abs(tp.p[i])-1);
 				cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 					@Override
 					public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -183,7 +197,6 @@ public class ParamAleat {
 					}
 				});
 			}
-			parent.addView(elem, i);
 		}
 		
 		public void setEnabled(boolean e) {

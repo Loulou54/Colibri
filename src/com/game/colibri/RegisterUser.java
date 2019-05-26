@@ -181,6 +181,8 @@ public class RegisterUser {
 	public interface callBackInterface {
 		int getExp();
 		int getProgress();
+		int getColiBrains();
+		int getExpProgCB();
 		boolean registered(String JSONresponse, String name, boolean sync);
 		void cancelled();
 	}
@@ -195,6 +197,8 @@ public class RegisterUser {
 		params.put("avatar", ""+avatar);
 		params.put("exp", ""+callback.getExp());
 		params.put("progress", ""+callback.getProgress());
+		params.put("coliBrains", ""+callback.getColiBrains());
+		params.put("expProgCB", ""+callback.getExpProgCB());
 		params.put("regId", GCMRegistrar.getRegistrationId(context));
 		params.put("pays", Resources.getSystem().getConfiguration().locale.getCountry());
 		prgDialog.show();

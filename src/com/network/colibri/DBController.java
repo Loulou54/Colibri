@@ -23,7 +23,7 @@ import android.util.SparseArray;
 public class DBController  extends SQLiteOpenHelper {
 	
 	public DBController(Context applicationcontext) {
-        super(applicationcontext, "Colibri.db", null, 10);
+        super(applicationcontext, "Colibri.db", null, 11);
     }
 	
 	//Creates Tables
@@ -49,9 +49,13 @@ public class DBController  extends SQLiteOpenHelper {
         		+ " pays varchar(10) DEFAULT NULL,"
 				+ " exp int NOT NULL DEFAULT 0,"
 				+ " progress int NOT NULL DEFAULT 1,"
+				+ " coliBrains int NOT NULL DEFAULT 0,"
+				+ " expProgCB int NOT NULL DEFAULT 0,"
 				+ " defis int NOT NULL DEFAULT 0,"
 				+ " win int NOT NULL DEFAULT 0,"
 				+ " loose int NOT NULL DEFAULT 0,"
+				+ " score real NOT NULL DEFAULT 0,"
+				+ " playTime int NOT NULL DEFAULT 0,"
 				+ " avatar int NOT NULL DEFAULT 0,"
 				+ " time int NOT NULL DEFAULT 0,"
 				+ " PRIMARY KEY (pseudo)"
@@ -60,13 +64,11 @@ public class DBController  extends SQLiteOpenHelper {
         query = "CREATE TABLE IF NOT EXISTS participations ("
         		+ " defi int NOT NULL,"
         		+ " joueur int NOT NULL,"
-				+ " win int NOT NULL DEFAULT 0,"
+				+ " cumul_score real NOT NULL DEFAULT 0,"
 				+ " t_cours int NOT NULL DEFAULT 0,"
-				+ " penalite_cours int NOT NULL DEFAULT 0,"
 				+ " t_fini int NOT NULL DEFAULT 0,"
-				+ " penalite_fini int NOT NULL DEFAULT 0,"
-				+ " exp int NOT NULL DEFAULT 0,"
-				+ " gagne int NOT NULL DEFAULT 0,"
+				+ " score real NOT NULL DEFAULT 0,"
+				+ " rank int NOT NULL DEFAULT 0,"
 				+ " PRIMARY KEY (defi, joueur),"
 				+ "FOREIGN KEY(defi) REFERENCES defis(id) ON DELETE CASCADE ON UPDATE CASCADE,"
 				+ "FOREIGN KEY(joueur) REFERENCES joueurs(pseudo) ON DELETE CASCADE ON UPDATE CASCADE"
@@ -129,13 +131,11 @@ public class DBController  extends SQLiteOpenHelper {
 				JSONObject d = jsonArray.getJSONObject(i);
 				values.put("defi",d.getInt("defi"));
 				values.put("joueur",d.getString("joueur"));
-				values.put("win",d.getInt("win"));
+				values.put("cumul_score",d.getDouble("cumul_score"));
 				values.put("t_cours",d.getInt("t_cours"));
-				values.put("penalite_cours",d.getInt("penalite_cours"));
 				values.put("t_fini",d.getInt("t_fini"));
-				values.put("penalite_fini",d.getInt("penalite_fini"));
-				values.put("exp",d.getInt("exp"));
-				values.put("gagne",d.getInt("gagne"));
+				values.put("score",d.getDouble("score"));
+				values.put("rank",d.getInt("rank"));
 				database.insertWithOnConflict("participations", null, values, SQLiteDatabase.CONFLICT_REPLACE);
 			} catch (JSONException e) {
 				e.printStackTrace();
@@ -155,9 +155,13 @@ public class DBController  extends SQLiteOpenHelper {
 				values.put("pays",d.getString("pays"));
 				values.put("exp",d.getInt("exp"));
 				values.put("progress",d.getInt("progress"));
+				values.put("coliBrains",d.getInt("coliBrains"));
+				values.put("expProgCB",d.getInt("expProgCB"));
 				values.put("defis",d.getInt("defis"));
 				values.put("win",d.getInt("win"));
 				values.put("loose",d.getInt("loose"));
+				values.put("score",d.getDouble("score"));
+				values.put("playTime",d.getInt("playTime"));
 				values.put("avatar",d.getInt("avatar"));
 				values.put("time",System.currentTimeMillis()/1000 - d.getLong("time"));
 				database.insertWithOnConflict("joueurs", null, values, SQLiteDatabase.CONFLICT_REPLACE);
@@ -222,12 +226,12 @@ public class DBController  extends SQLiteOpenHelper {
 	 */
 	public void getJoueurs(SparseArray<Joueur> joueurs) {
 		joueurs.clear();
-		String selectQuery = "SELECT id,pseudo,pays,exp,progress,defis,win,loose,avatar,time FROM `joueurs`";
+		String selectQuery = "SELECT id,pseudo,pays,exp,progress,coliBrains,expProgCB,defis,win,loose,score,playTime,avatar,time FROM `joueurs`";
 	    SQLiteDatabase database = this.getWritableDatabase();
 	    Cursor cursor = database.rawQuery(selectQuery, null);
 	    if (cursor.moveToFirst()) {
 	        do {
-	        	joueurs.put(cursor.getInt(0), new Joueur(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getInt(3), cursor.getInt(4), cursor.getInt(5), cursor.getInt(6), cursor.getInt(7), cursor.getInt(8), cursor.getLong(9)));
+	        	joueurs.put(cursor.getInt(0), new Joueur(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getInt(3), cursor.getInt(4), cursor.getInt(5), cursor.getInt(6), cursor.getInt(7), cursor.getInt(8), cursor.getInt(9), cursor.getDouble(10), cursor.getLong(11), cursor.getInt(12), cursor.getLong(13)));
 	        } while(cursor.moveToNext());
 	    }
 	    database.close();
@@ -250,12 +254,12 @@ public class DBController  extends SQLiteOpenHelper {
 	    Cursor cursor = database.rawQuery(selectQuery, new String[] {""+user});
 	    if (cursor.moveToFirst()) {
 	        do {
-	        	String selectQuery2 = "SELECT joueur,win,t_cours,penalite_cours,t_fini,penalite_fini,exp,gagne FROM `participations` WHERE defi="+cursor.getInt(0);
+	        	String selectQuery2 = "SELECT joueur,cumul_score,t_cours,t_fini,score,rank FROM `participations` WHERE defi="+cursor.getInt(0);
 	        	Cursor cursor2 = database.rawQuery(selectQuery2, null);
 	        	SparseArray<Participation> part = new SparseArray<Participation>(cursor2.getCount());
 	        	if(cursor2.moveToFirst()) {
 		        	do {
-		        		Participation p = new Participation(joueurs.get(cursor2.getInt(0)),cursor2.getInt(1),cursor2.getInt(2),cursor2.getInt(3),cursor2.getInt(4),cursor2.getInt(5),cursor2.getInt(6),cursor2.getInt(7));
+		        		Participation p = new Participation(joueurs.get(cursor2.getInt(0)),cursor2.getDouble(1),cursor2.getInt(2),cursor2.getInt(3),cursor2.getDouble(4),cursor2.getInt(5));
 		        		part.put(cursor2.getInt(0), p);
 		        	} while(cursor2.moveToNext());
 	        	}
@@ -346,20 +350,20 @@ public class DBController  extends SQLiteOpenHelper {
 			Participation p = defi.participants.valueAt(i);
 			// MAJ Participations
 			values = new ContentValues();
-			values.put("win", p.win);
+			values.put("cumul_score", p.cumul_score);
 			values.put("t_cours", p.t_cours);
-			values.put("penalite_cours", p.penalite_cours);
 			values.put("t_fini", p.t_fini);
-			values.put("penalite_fini", p.penalite_fini);
-			values.put("exp", p.exp);
-			values.put("gagne", p.gagne);
+			values.put("score", p.score);
+			values.put("rank", p.rank);
 			database.update("participations", values, "defi="+defi.id+" AND joueur="+p.joueur.getId(), null);
 			// MAJ Joueurs
 			values = new ContentValues();
 			values.put("exp", p.joueur.getExp());
 			values.put("defis", p.joueur.getDefis());
 			values.put("win", p.joueur.getWin());
-			values.put("loose", p.joueur.getLost());
+			values.put("loose", p.joueur.getLoose());
+			values.put("score", p.joueur.getScore());
+			values.put("playTime", p.joueur.getPlayTime());
 			database.update("joueurs", values, "pseudo="+p.joueur.getId(), null);
 		}
 		// Requête serveur
@@ -370,7 +374,6 @@ public class DBController  extends SQLiteOpenHelper {
 			o.put("task","finMatch");
 			o.put("defi",defi.id);
 			o.put("temps",(p.t_cours!=0) ? p.t_cours : p.t_fini);
-			o.put("penalite",(p.t_cours!=0) ? p.penalite_cours : p.penalite_fini);
 			o.put("nMatch", nMatch);
 			values.put("task", o.toString());
 			database.insert("tasks", null, values);
@@ -387,13 +390,11 @@ public class DBController  extends SQLiteOpenHelper {
 	public void updateParticipation(Participation p, int defi, int nMatch) {
 		SQLiteDatabase database = this.getWritableDatabase();
 		ContentValues values = new ContentValues();
-		values.put("win", p.win);
+		values.put("cumul_score", p.cumul_score);
 		values.put("t_cours", p.t_cours);
-		values.put("penalite_cours", p.penalite_cours);
 		values.put("t_fini", p.t_fini);
-		values.put("penalite_fini", p.penalite_fini);
-		values.put("exp", p.exp);
-		values.put("gagne", p.gagne);
+		values.put("score", p.score);
+		values.put("rank", p.rank);
 		database.update("participations", values, "defi="+defi+" AND joueur="+p.joueur.getId(), null);
 		// Requète Serveur
 		values = new ContentValues();
@@ -402,7 +403,6 @@ public class DBController  extends SQLiteOpenHelper {
 			o.put("task","finMatch");
 			o.put("defi",defi);
 			o.put("temps",(p.t_cours!=0) ? p.t_cours : p.t_fini);
-			o.put("penalite",(p.t_cours!=0) ? p.penalite_cours : p.penalite_fini);
 			o.put("nMatch", nMatch);
 			values.put("task", o.toString());
 			database.insert("tasks", null, values);
@@ -431,7 +431,6 @@ public class DBController  extends SQLiteOpenHelper {
 			o.put("task","finMatch");
 			o.put("defi",defi);
 			o.put("temps",Participation.FORFAIT);
-			o.put("penalite",0);
 			o.put("nMatch", cursor.getInt(0));
 			values.put("task", o.toString());
 			database.insert("tasks", null, values);
@@ -507,16 +506,25 @@ public class DBController  extends SQLiteOpenHelper {
 	}
 	
 	/**
-	 * Crée une tâche serveur pour ajouter exp en expérience.
-	 * @param exp
+	 * Crée une tâche serveur pour ajouter exp en expérience et mettre à jour les ColiBrains
+	 * et l'expérience associée.
+	 * Côté serveur :
+	 * expProgCB += cumulExpColiBrains;
+	 * coliBrains = min(coliBrains-usedColiBrains+expProgCB/EXP_LEVEL_PER_COLI_BRAIN, maxCB);
+	 * expProgCB = coliBrains==maxCB ? 0 : expProgCB%EXP_LEVEL_PER_COLI_BRAIN;
+	 * @param expToSync
+	 * @param cumulExpColiBrains
+	 * @param usedColiBrains
 	 */
-	public void addExp(int exp) {
+	public void syncExpAndColiBrains(int expToSync, int cumulExpColiBrains, int usedColiBrains) {
 		SQLiteDatabase database = this.getWritableDatabase();
 		ContentValues values = new ContentValues();
 		JSONObject o = new JSONObject();
 		try {
-			o.put("task", "addExp");
-			o.put("exp", exp);
+			o.put("task", "addExpAndCB");
+			o.put("exp", expToSync);
+			o.put("cumulExpCB", cumulExpColiBrains);
+			o.put("usedCB", usedColiBrains);
 			values.put("task", o.toString());
 			database.insert("tasks", null, values);
 		} catch (JSONException e) {

@@ -13,8 +13,6 @@ import com.network.colibri.DBController;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Build;
@@ -300,7 +298,7 @@ public class Jeu extends Activity {
 		ImageButton coliBrains = (ImageButton) findViewById(R.id.colibrains_ingame);
 		coliBrains.setEnabled(MyApp.coliBrains > 0 || infiniteColiBrains());
 		((ColiBrain) coliBrains.getDrawable())
-			.setProgress(MyApp.expProgressColiBrain/(float)MyApp.EXP_LEVEL_PER_COLI_BRAIN)
+			.setProgress(MyApp.expProgCB/(float)MyApp.EXP_LEVEL_PER_COLI_BRAIN)
 			.setText(infiniteColiBrains() ? "∞" : ""+MyApp.coliBrains);
 	}
 	
@@ -310,6 +308,8 @@ public class Jeu extends Activity {
 	 * @param temps_total_ms
 	 */
 	public void gagne(int temps_total_ms) {
+		boolean solved = this.solved;
+		this.solved = true;
 		if(temps_total_ms==Participation.FORFAIT) {
 			forfait = true;
 		}
@@ -319,28 +319,6 @@ public class Jeu extends Activity {
 		play.total_frames = 0;
 		if(carte.n_dyna>0) hideDyna();
 		menuLateral(0,null);
-		LinearLayout res = (LinearLayout) findViewById(R.id.gagne_resultats);
-		TextView phrase = (TextView) findViewById(R.id.gagne_resultats_phrase);
-		if (multi) { // Mode multijoueur
-			if(!solved) {
-				MyApp.getApp().editor.remove("defi_fuit");
-				MyApp.getApp().editor.commit();
-				finipartous = defi.finMatch(new DBController(this), MyApp.id, temps_total_ms, (solUsed) ? niv.solution.length*500 : 0);
-				Multijoueur multijoueur = Jeu.multijoueur!=null ? Jeu.multijoueur.get() : null;
-				if(multijoueur!=null) {
-					finipartous = multijoueur.defi.finMatch(null, MyApp.id, temps_total_ms, (solUsed) ? niv.solution.length*500 : 0);
-					multijoueur.syncData();
-				}
-			} else {
-				Participation p = defi.participants.get(MyApp.id);
-				temps_total_ms = finipartous ? p.t_fini : p.t_cours;
-				solUsed = (finipartous ? p.penalite_fini : p.penalite_cours)!=0;
-			}
-			phrase.setText(!finipartous ? getString(R.string.joueur_suivant) : getString(R.string.resultats));
-			phrase.setVisibility(View.VISIBLE);
-		} else {
-			phrase.setVisibility(View.GONE);
-		}
 		// Détermination de l'expérience
 		int exp;
 		if(opt.getInt("mode",0)>0) {
@@ -357,9 +335,8 @@ public class Jeu extends Activity {
 				MyApp.avancement++;
 			MyApp.experience+=exp;
 			MyApp.expToSync+=exp;
-			MyApp.updateExpProgressColiBrain(exp);
+			MyApp.updateExpProgCB(exp);
 			MyApp.getApp().saveData(); // On sauvegarde la progression.
-			solved = true;
 			updateColiBrains();
 		}
 		// Affichage
@@ -382,9 +359,29 @@ public class Jeu extends Activity {
 				virgule = s.indexOf(".", virgule+1);
 			}
 		}
+		LinearLayout res = (LinearLayout) findViewById(R.id.gagne_resultats);
+		TextView phrase = (TextView) findViewById(R.id.gagne_resultats_phrase);
+		if (multi) { // Mode multijoueur
+			if(!solved) {
+				MyApp.getApp().editor.remove("defi_fuit");
+				MyApp.getApp().editor.commit();
+				finipartous = defi.finMatch(new DBController(this), MyApp.id, temps_total_ms);
+				Multijoueur multijoueur = Jeu.multijoueur!=null ? Jeu.multijoueur.get() : null;
+				if(multijoueur!=null) {
+					finipartous = multijoueur.defi.finMatch(null, MyApp.id, temps_total_ms);
+					multijoueur.syncData();
+				}
+			} else {
+				Participation p = defi.participants.get(MyApp.id);
+				temps_total_ms = finipartous ? p.t_fini : p.t_cours;
+			}
+			phrase.setText(!finipartous ? getString(R.string.joueur_suivant) : getString(R.string.resultats));
+			phrase.setVisibility(View.VISIBLE);
+		} else {
+			phrase.setVisibility(View.GONE);
+		}
 		((TextView) res.getChildAt(0)).setText(s1);
 		((TextView) res.getChildAt(1)).setText(s2);
-		solved = true;
 	}
 	
 	public static String getFormattedTime(int time) {
@@ -652,23 +649,26 @@ public class Jeu extends Activity {
 				gagne(Participation.FORFAIT);
 			return;
 		}
-		DialogInterface.OnClickListener check = new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				pause.setVisibility(View.GONE);
-				gagne(Participation.FORFAIT);
-			}
-		};
-		AlertDialog.Builder forfait;
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-			forfait = new AlertDialog.Builder(new ContextThemeWrapper(this, android.R.style.Theme_Holo_Light_Dialog));
-		} else {
-			forfait = new AlertDialog.Builder(this);
-		}
+		final PaperDialog forfait = new PaperDialog(
+			Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ?
+				new ContextThemeWrapper(this, android.R.style.Theme_Holo_Light_Dialog)
+				: this, 0);
 		forfait.setTitle(R.string.forfait);
 		forfait.setMessage(R.string.forfait_msg);
-		forfait.setPositiveButton(R.string.accept, check);
-		forfait.setNegativeButton(R.string.annuler, null);
+		forfait.setPositiveButton(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				pause.setVisibility(View.GONE);
+				gagne(Participation.FORFAIT);
+				forfait.dismiss();
+			}
+		}, null);
+		forfait.setNegativeButton(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				forfait.dismiss();
+			}
+		}, null);
 		forfait.show();
 	}
 	

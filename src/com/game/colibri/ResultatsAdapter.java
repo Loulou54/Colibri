@@ -44,39 +44,36 @@ public class ResultatsAdapter extends ArrayAdapter<Participation> {
 			h.nom.setSelected(true);
 			h.nom.setHorizontallyScrolling(true);
 			h.temps = (TextView) convertView.findViewById(R.id.tempsJoueurRes);
-			h.penalite = (TextView) convertView.findViewById(R.id.penaliteJoueurRes);
-			h.exp = (TextView) convertView.findViewById(R.id.expJoueurRes);
 			h.score = (TextView) convertView.findViewById(R.id.scoreJoueurRes);
+			h.cumul_score = (TextView) convertView.findViewById(R.id.cumulScoreJoueurRes);
 			convertView.setTag(h);
 		} else {
 			h = (ViewHolder) convertView.getTag();
 		}
 		h.avatar.setImageResource(p.joueur.getAvatar());
 		h.nom.setText(p.joueur.getPseudo());
-		h.score.setText(""+(p.gagne==1 && partEffectives>1 && etape<3 ? p.win-1 : p.win));
-		if(p.gagne!=0) {
-			h.temps.setText(Jeu.getFormattedTime(etape<2 ? Math.min(p.t_fini, (int) (t_max*prog*prog)) : p.t_fini+p.penalite_fini));
-			if(etape>=1)
-				h.penalite.setText(Jeu.getFormattedTime(p.penalite_fini));
-			if(etape>=3)
-				h.exp.setText(""+p.exp);
-			if(etape==3 && p.gagne==1)
-				h.score.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.aleat_opt_anim));
+		h.cumul_score.setText(String.format("%,.2f", partEffectives>1 && etape<3 ? p.cumul_score-p.score : p.cumul_score));
+		if(p.t_fini<Participation.FORFAIT) {
+			h.temps.setText(Jeu.getFormattedTime(etape<2 ? Math.min(p.t_fini, (int) (t_max*prog*prog)) : p.t_fini));
 		} else {
 			int strRes = (p.t_fini==Participation.FORFAIT) ? R.string.forfait : R.string.not_played;
 			h.temps.setText(getContext().getString(strRes)+" !");
-			h.penalite.setText("");
-			h.exp.setText("");
 		}
+		if(p.t_fini==Participation.NOT_PLAYED)
+			h.score.setText("");
+		else if(etape>=2)
+			h.score.setText((p.score < 0 ? "" : "+")+String.format("%,.2f", p.score));
+		if(etape==3)
+			h.cumul_score.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.aleat_opt_anim));
 		if(etape>=4) {
-			if(p.gagne==1)
+			if(p.rank==1)
 				h.nom.setTextColor(getContext().getResources().getColor(R.color.vert_fonce));
 			else if(p.t_fini==Participation.NOT_PLAYED)
 				h.nom.setTextColor(getContext().getResources().getColor(R.color.theme_gris));
 			else
 				h.nom.setTextColor(getContext().getResources().getColor(R.color.red));
-			if(p.gagne!=0) {
-				h.rang.setText(""+p.gagne);
+			if(p.t_fini!=Participation.NOT_PLAYED) {
+				h.rang.setText(""+p.rank);
 				h.rang.setVisibility(View.VISIBLE);
 			} else
 				h.rang.setVisibility(View.INVISIBLE);
@@ -86,6 +83,6 @@ public class ResultatsAdapter extends ArrayAdapter<Participation> {
 	
 	static class ViewHolder {
 		ImageView avatar;
-		TextView rang, nom, temps, penalite, exp, score;
+		TextView rang, nom, temps, score, cumul_score;
 	}
 }
