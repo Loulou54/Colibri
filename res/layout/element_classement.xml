@@ -9,9 +9,9 @@
         android:layout_width="0dip"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_weight="1"
+        android:layout_weight="2"
         android:gravity="center"
-        android:textSize="20sp"
+        android:textSize="18sp"
         android:textColor="@color/theme_vert"
         android:textStyle="bold"
         android:text="@string/tiret" />
@@ -20,7 +20,7 @@
         android:id="@+id/avatarAdv"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_margin="5dp"
+        android:layout_margin="4dp"
         android:layout_gravity="center_vertical"
         android:contentDescription="@string/app_name"
         android:src="@drawable/colibri_d1" />
@@ -30,7 +30,7 @@
         android:layout_width="0dip"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_weight="2"
+        android:layout_weight="4"
         android:paddingLeft="5dp"
         android:paddingRight="0dp"
         android:textSize="18sp"
@@ -44,7 +44,7 @@
         android:id="@+id/paysAdv"
         android:layout_width="0dip"
         android:layout_height="20dp"
-        android:layout_weight="1"
+        android:layout_weight="2"
         android:layout_gravity="center_vertical"
         android:contentDescription="@string/app_name"
         android:src="@drawable/colibri_d1" />
@@ -52,18 +52,31 @@
     <TextView
         style="@style/valueListJoueur"
         android:id="@+id/expAdv"
-        android:textSize="12sp" />
+        android:textSize="13sp"
+        android:layout_weight="3" />
     
     <TextView
         style="@style/valueListJoueur"
-        android:id="@+id/defisAdv" />
+        android:id="@+id/scoreAdv"
+        android:textSize="14sp"
+        android:layout_weight="3" />
     
     <TextView
         style="@style/valueListJoueur"
-        android:id="@+id/winDefisAdv" />
+        android:id="@+id/defisAdv"
+        android:textSize="13sp"
+        android:layout_weight="2" />
+    
+    <TextView
+        style="@style/valueListJoueur"
+        android:id="@+id/winDefisAdv"
+        android:textSize="13sp"
+        android:layout_weight="2" />
 	
     <TextView
         style="@style/valueListJoueur"
-        android:id="@+id/winLostAdv" />
+        android:id="@+id/winLostAdv"
+        android:textSize="13sp"
+        android:layout_weight="2" />
 
 </LinearLayout>

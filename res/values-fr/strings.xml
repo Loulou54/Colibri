@@ -140,7 +140,7 @@
 	<string name="connect">Se connecter</string>
 	<string name="mdp">Mot de passe</string>
 	<string name="mdp_invalide">Mot de passe invalide (au moins 6 caractères)</string>
-	<string name="not_registered">Ce pseudo n\'est pas inscrit. Cliquez sur "S'inscrire" pour vous inscrire sous ce nom.</string>
+	<string name="not_registered">Ce pseudo ou e-mail n\'est pas inscrit. Cliquez sur "S'inscrire" pour créer un nouveau compte.</string>
 	<string name="wrong_password">Mauvais mot de passe !</string>
 	<string name="connected">Connecté !|Vous vous êtes connecté avec succès !</string>
 	<string name="force_quit_msg">Vous avez forcé l\'arrêt de l\'application pendant un défi : vous faites Forfait.</string>
@@ -161,8 +161,18 @@
 	<string name="no_solution">Aïe !|Pas de solution&#8230;</string>
 	<string name="sol_colibrain">Solution ColiBrain</string>
 	<string name="sol_generated">Solution générée</string>
+	<string name="score_titre">Score</string>
 	<string name="score_compet">Score compétitif</string>
 	<string name="score_match">Score Match</string>
 	<string name="score_cumul">Score Total</string>
+	<string name="name_or_mail">Nom ou e-mail</string>
+	<string name="colibrains">ColiBrains</string>
+	<string name="colibrains_info1">\u0009Les « ColiBrains » permettent d\'obtenir une aide en cours de jeu en vous suggérant les prochains pas à effectuer, ou en vous indiquant si vous êtes bloqués.</string>
+	<string name="colibrains_info2">\u0009Les ColiBrains sont accessibles en cours de jeu par le menu latéral dépliable avec un simple clic sur l\'écran.</string>
+	<string name="colibrains_info3">\u21AA Pour les Cartes Aléatoires ou les niveaux déjà résolus, les ColiBrains sont illimités et vous pouvez les utiliser librement pour vous exercer.</string>
+	<string name="colibrains_info4">\u21AA Pour les Défis Multijoueurs ou pour les niveaux non résolus du mode Campagne, les ColiBrains sont limités ! Le nombre de ColiBrains restants est indiqué sur l\'icone.</string>
+	<string name="colibrains_info5">\u0009Il vous suffit de résoudre des niveaux pour gagner progressivement de nouveaux ColiBrains ! Cependant, vous ne pourrez pas en cumuler plus que la limite indiquée dans le menu principal.</string>
+	<string name="colibrains_info6">\u0009En plus de pouvoir vous débloquer, les ColiBrains peuvent être utilisés de façon stratégique en mode Multijoueur pour accélérer la résolution d\'un niveau où l\'enjeu est fort ! (adversaires nombreux ou haut classés)</string>
+	<string name="colibrains_info7">\u21AA Enfin, l\'algorithme de résolution de niveau « ColiBrain » est aussi accessible en fin de niveau pour visualiser la solution la plus rapide trouvée par l\'algorithme !</string>
 	
 </resources>

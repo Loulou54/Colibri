@@ -47,7 +47,7 @@
 		<item name="android:layout_gravity">center_vertical</item>
 		<item name="android:text">@string/tiret</item>
 		<item name="android:textColor">@color/orange</item>
-		<item name="android:textSize">18sp</item>
+		<item name="android:textSize">15sp</item>
 	</style>
 	
 	<style name="titleListJoueur">

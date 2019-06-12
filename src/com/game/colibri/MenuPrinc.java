@@ -16,6 +16,7 @@ import android.view.animation.Animation.AnimationListener;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -40,7 +41,7 @@ public class MenuPrinc extends Activity {
 	private Carte carte; // L'instance de carte permettant de faire un apercu dans le menu de sélection de niveaux.
 	private LinearLayout opt_aleat;
 	private LinearLayout opt_infos;
-	private View instrus, infos;
+	private View instrus, infos, coliBrainsInfos;
 	private float initialX;
 	private double[][] points = new double[][] {{0.07625, 0.8145833333333333}, {0.18875, 0.7645833333333333}, {0.31625, 0.7354166666666667}, {0.24875, 0.8208333333333333}, {0.1125, 0.94375}, {0.25, 0.9458333333333333}, {0.405, 0.9208333333333333}, {0.52, 0.9416666666666667}, {0.6275, 0.9333333333333333}, {0.765, 0.9354166666666667}, {0.765, 0.8166666666666667}, {0.83, 0.74375}};
 	
@@ -136,6 +137,27 @@ public class MenuPrinc extends Activity {
 				infos = inflated;
 			}
 		});
+		// ColiBrains infos
+		coliBrainsInfos = findViewById(R.id.colibrains_infos);
+		((ViewStub) coliBrainsInfos).setOnInflateListener(new ViewStub.OnInflateListener() {
+			@Override
+			public void onInflate(ViewStub stub, View inflated) {
+				((TextView) inflated.findViewById(R.id.titreColibrains)).setTypeface(font);
+				((TextView) inflated.findViewById(R.id.quitColibrains)).setTypeface(font);
+				LinearLayout content = ((LinearLayout) inflated.findViewById(R.id.contentColibrains));
+				for(int i=0; i < content.getChildCount(); i++) {
+					View v = content.getChildAt(i);
+					if(v instanceof TextView) {
+						((TextView) v).setTypeface(font);
+					}
+				}
+				ColiBrain cb = new ColiBrain(MenuPrinc.this, "2", 0.6f);
+				((ImageView) findViewById(R.id.limitedColibrains)).setImageDrawable(cb);
+				cb = new ColiBrain(MenuPrinc.this, "∞", 0);
+				((ImageView) findViewById(R.id.unlimitedColibrains)).setImageDrawable(cb);
+				coliBrainsInfos = inflated;
+			}
+		});
 		placeButton();
 		if(MyApp.avancement==1) {
 			((TextView) findViewById(R.id.bout1)).setText(R.string.commencer);
@@ -188,6 +210,7 @@ public class MenuPrinc extends Activity {
 		opt_infos = null;
 		instrus = null;
 		infos = null;
+		coliBrainsInfos = null;
 		MenuSel = null;
 		carte = null;
 	}
@@ -247,11 +270,14 @@ public class MenuPrinc extends Activity {
 			else if (opt_infos.getVisibility()==View.VISIBLE) {
 				opt_infos.setVisibility(View.INVISIBLE);
 			}
-			else if (instrus.getVisibility()==View.VISIBLE) {
-				quitInstrus(null);
+			else if (coliBrainsInfos.getVisibility()==View.VISIBLE) {
+				quitColiBrainsInfos(null);
 			}
 			else if (infos.getVisibility()==View.VISIBLE) {
 				quitInfos(null);
+			}
+			else if (instrus.getVisibility()==View.VISIBLE) {
+				quitInstrus(null);
 			}
 			else if(opt_aleat.getVisibility()==View.INVISIBLE) {
 				MyApp.getApp().releaseMusic();
@@ -577,6 +603,16 @@ public class MenuPrinc extends Activity {
 	public void quitInstrus(View v) {
 		instrus.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right));
 		instrus.setVisibility(View.GONE);
+	}
+	
+	public void coliBrainsInfos(View v) {
+		coliBrainsInfos.setVisibility(View.VISIBLE);
+		coliBrainsInfos.startAnimation(AnimationUtils.loadAnimation(this, R.anim.aleat_opt_anim));
+	}
+	
+	public void quitColiBrainsInfos(View v) {
+		coliBrainsInfos.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right));
+		coliBrainsInfos.setVisibility(View.GONE);
 	}
 	
 	public void musique(View v) {

@@ -35,7 +35,8 @@ public class PathViewer extends RelativeLayout {
 	private static final int MOVE_TIME_FAST = 120;
 	private static final int MOVE_TIME_COLIB = 500;
 	private static final float TIME_FACTOR = 0.9f;
-	private static final int DURATION_BLUR_ANIM = 1400;
+	private static final int DURATION_BLUR_ANIM_BASE = 800;
+	private static final int DURATION_BLUR_ANIM_PROP = 30;
 	private static final int DURATION_FRAME = 1000/25;
 	private static final int STEPS_COLIBRI = 6;
 	public static MoteurJeu mj;
@@ -48,8 +49,8 @@ public class PathViewer extends RelativeLayout {
 	public AlphaAnimation anim;
 	private View fond; // Le fond de la view avec le dessin de solPath
 	private View colibri; // Le colibri fantôme pour la solution
-	private Bitmap explo, dyna_img, vache_img;
-	private LinkedList<int[]> dynaPos, vachePos; // Position (x,y) des images de dynamites et vaches
+	private Bitmap explo, dyna_img, vache_img, warning;
+	private LinkedList<int[]> dynaPos, vachePos, waitPos; // Position (x,y) des images de dynamites et vaches
 	private float STROKE_WIDTH_MIN, STROKE_WIDTH_DELTA, BLUR_RADIUS_MIN, BLUR_RADIUS_DELTA;
 	private int moveTime, stepsCount;
 	private float blurStep;
@@ -108,6 +109,9 @@ public class PathViewer extends RelativeLayout {
     			for(int[] pos : vachePos) {
     				can.drawBitmap(vache_img, pos[0], pos[1], null);
     			}
+    			for(int[] pos : waitPos) {
+    				can.drawBitmap(warning, pos[0], pos[1], null);
+    			}
     		}
     	};
     	fond.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
@@ -118,6 +122,7 @@ public class PathViewer extends RelativeLayout {
     	addView(colibri);
     	dynaPos = new LinkedList<int[]>();
     	vachePos = new LinkedList<int[]>();
+    	waitPos = new LinkedList<int[]>();
     }
     
 	public void clear() {
@@ -125,7 +130,11 @@ public class PathViewer extends RelativeLayout {
 			explo = Bitmap.createScaledBitmap(((BitmapDrawable) getContext().getResources().getDrawable(R.drawable.explo0)).getBitmap(), (int)(3*Carte.cw/2), (int)(3*Carte.ch/2), true);
 			dyna_img = Bitmap.createScaledBitmap(((BitmapDrawable) getContext().getResources().getDrawable(R.drawable.dynamite_allumee)).getBitmap(), (int)(3*Carte.cw/2), (int)(3*Carte.ch/2), true);
 	    	vache_img = Bitmap.createScaledBitmap(((BitmapDrawable) getContext().getResources().getDrawable(R.drawable.vache_ghost)).getBitmap(), (int)(Carte.cw*1.25), (int)(Carte.ch*1.25), true);
+	    	warning = Bitmap.createScaledBitmap(((BitmapDrawable) getContext().getResources().getDrawable(R.drawable.warning)).getBitmap(), (int)(Carte.cw*0.6), (int)(Carte.ch*0.6), true);
 		}
+		dynaPos.clear();
+		vachePos.clear();
+		waitPos.clear();
 		handler.removeMessages(RefreshHandler.ANIM_COLIB);
 		colibri.setAnimation(null);
 		colibri.setVisibility(View.GONE);
@@ -150,6 +159,7 @@ public class PathViewer extends RelativeLayout {
 		solPath = new Path();
 		dynaPos.clear();
 		vachePos.clear();
+		waitPos.clear();
 		xc = (float) (cd*Carte.cw);
 		yc = (float) (rd*Carte.ch);
 		solPath.moveTo(xc + (float) (0.5*Carte.cw), yc + (float) (0.5*Carte.ch));
@@ -218,6 +228,7 @@ public class PathViewer extends RelativeLayout {
 		solPath = new Path();
 		dynaPos.clear();
 		vachePos.clear();
+		waitPos.clear();
 		xc = xd; yc = yd;
 		solPath.moveTo(xc + (float) (0.5*Carte.cw), yc + (float) (0.5*Carte.ch));
 		animStepFast();
@@ -231,13 +242,12 @@ public class PathViewer extends RelativeLayout {
 		if(!movesIterator.hasNext()) {
 			setBackgroundResource(0); // On enlève le filtre sombre
 			// Init phase 2 :
-			blurStep = 2*(float)DURATION_FRAME/DURATION_BLUR_ANIM;
+			blurStep = 2*(float)DURATION_FRAME/(DURATION_BLUR_ANIM_BASE + DURATION_BLUR_ANIM_PROP*moves.size());
 			blurProgress = blurStep;
 			animBlurPath();
 			return;
 		}
 		Solver.Move m = movesIterator.next();
-		// TODO: détecter les arc-en-ciels et décomposer en plusieurs moves
 		curveTo(m);
 		fond.invalidate();
 		moveTime *= TIME_FACTOR;
@@ -260,6 +270,7 @@ public class PathViewer extends RelativeLayout {
 			solPath.reset();
 			dynaPos.clear();
 			vachePos.clear();
+			waitPos.clear();
 			xc = xd; yc = yd;
 			solPath.moveTo(xc + (float) (0.5*Carte.cw), yc + (float) (0.5*Carte.ch));
 			pathPaint.setStrokeWidth(STROKE_WIDTH_MIN + STROKE_WIDTH_DELTA);
@@ -336,6 +347,9 @@ public class PathViewer extends RelativeLayout {
 		if(m.step==-1) { // Arrêt contre Vache
 			Solver.Position p_vache = m.posFinale.next(m.direction);
 			vachePos.add(new int[] {(int) ((p_vache.c-0.125)*Carte.cw), (int) ((p_vache.r-0.125)*Carte.ch)});
+		}
+		if(m.wait > 2) { // Attente
+			waitPos.add(new int[] {(int) (xc-0.3*Carte.cw), (int) (yc-0.3*Carte.ch)});
 		}
 		xc = xf; yc = yf;
 	}

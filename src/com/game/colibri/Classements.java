@@ -35,6 +35,7 @@ public class Classements extends Activity {
 	private static final int AUTOCOMPLETE_DELAY = 800;
 	
 	private ViewFlipper vf;
+	private int classementIndex = 0;
 	private boolean filterFriends = false;
 	private String search = "";
 	private final InputHandler inputHandler = new InputHandler(this);
@@ -106,7 +107,24 @@ public class Classements extends Activity {
 		rh = ((ClassementAdapter) lv.getAdapter()).refresh(filterFriends, search);
 	}
 	
+	private TextView selectTitleColumn(int cl) {
+		return (TextView) (
+				cl==0 ? findViewById(R.id.expTitleRanking)
+				: cl==1 ? findViewById(R.id.scoreTitleRanking)
+				: cl==2 ? findViewById(R.id.defisTitleRanking)
+				: cl==3 ? findViewById(R.id.winLostTitleRanking)
+				: null
+		);
+	}
+	
 	private void dispClassement(int cl) {
+		TextView selected = selectTitleColumn(classementIndex);
+		if(selected!=null)
+			selected.setTypeface(null, Typeface.NORMAL);
+		classementIndex = cl;
+		selected = selectTitleColumn(cl);
+		if(selected!=null)
+			selected.setTypeface(selected.getTypeface(), Typeface.BOLD);
 		int nCl = vf.getChildCount();
 		int dpINpx = (int)Math.ceil(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, getResources().getDisplayMetrics()));
 		LinearLayout tabs = (LinearLayout) findViewById(R.id.tabs);
@@ -191,6 +209,7 @@ public class Classements extends Activity {
 			pays.setVisibility(View.INVISIBLE);
 		}
 		((TextView) lay.findViewById(R.id.expAdv)).setText(String.format("%,d", j.getExp()));
+		((TextView) lay.findViewById(R.id.scoreAdv)).setText(String.format("%,.2f", j.getScore()));
 		((TextView) lay.findViewById(R.id.defisAdv)).setText(""+j.getDefis());
 		((TextView) lay.findViewById(R.id.winDefisAdv)).setText(""+j.getWin());
 		((TextView) lay.findViewById(R.id.winLostAdv)).setText(""+(j.getWin() - j.getLoose()));

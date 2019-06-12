@@ -67,9 +67,18 @@ public class ClassementAdapter extends ArrayAdapter<Joueur> {
 			h.nom.setHorizontallyScrolling(true);
 			h.pays = (ImageView) convertView.findViewById(R.id.paysAdv);
 			h.exp = (TextView) convertView.findViewById(R.id.expAdv);
+			h.score = (TextView) convertView.findViewById(R.id.scoreAdv);
 			h.defis = (TextView) convertView.findViewById(R.id.defisAdv);
 			h.wins = (TextView) convertView.findViewById(R.id.winDefisAdv);
 			h.winLost = (TextView) convertView.findViewById(R.id.winLostAdv);
+			TextView selected =
+					type==0 ? h.exp
+					: type==1 ? h.score
+					: type==2 ? h.defis
+					: type==3 ? h.winLost
+					: null;
+			if(selected!=null)
+				selected.setTypeface(selected.getTypeface(), Typeface.BOLD);
 			convertView.setTag(h);
 		} else {
 			h = (ViewHolder) convertView.getTag();
@@ -85,6 +94,7 @@ public class ClassementAdapter extends ArrayAdapter<Joueur> {
 			h.pays.setVisibility(View.INVISIBLE);
 		}
 		h.exp.setText(String.format("%,d", j.getExp()));
+		h.score.setText(String.format("%,.2f", j.getScore()));
 		h.defis.setText(""+j.getDefis());
 		h.wins.setText(""+j.getWin());
 		h.winLost.setText(""+(j.getWin() - j.getLoose()));
@@ -93,7 +103,7 @@ public class ClassementAdapter extends ArrayAdapter<Joueur> {
 	
 	static class ViewHolder {
 		ImageView avatar, pays;
-		TextView rank, nom, exp, defis, wins, winLost;
+		TextView rank, nom, exp, score, defis, wins, winLost;
 	}
 	
 	public RequestHandle refresh(boolean f, String s) {

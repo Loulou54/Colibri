@@ -19,12 +19,12 @@
         <Button
             style="@style/tabStyle"
             android:tag="1"
-            android:text="@string/defis_joues" />
+            android:text="@string/score_titre" />
         
         <Button
             style="@style/tabStyle"
             android:tag="2"
-            android:text="@string/defis_gagnés" />
+            android:text="@string/defis_joues" />
         
         <Button
             style="@style/tabStyle"
@@ -77,7 +77,8 @@
 	    
 		<TextView
 		    style="@style/titleListJoueur"
-		    android:text="@string/rank" />
+		    android:text="@string/rank"
+		    android:layout_weight="2" />
 		<TextView
 		    style="@style/titleListJoueur"
 		    android:layout_width="50dp"
@@ -85,23 +86,36 @@
 		    android:text="@string/avatar" />
 		<TextView
 		    style="@style/titleListJoueur"
-		    android:layout_weight="2"
+		    android:layout_weight="4"
 		    android:text="@string/name" />
 		<TextView
 		    style="@style/titleListJoueur"
-		    android:text="@string/pays" />
+		    android:text="@string/pays"
+		    android:layout_weight="2" />
 		<TextView
 		    style="@style/titleListJoueur"
-		    android:text="@string/exp" />
+		    android:id="@+id/expTitleRanking"
+		    android:text="@string/exp"
+		    android:layout_weight="3" />
 		<TextView
 		    style="@style/titleListJoueur"
-		    android:text="@string/defis_joues" />
+		    android:id="@+id/scoreTitleRanking"
+		    android:text="@string/score_titre"
+		    android:layout_weight="3" />
 		<TextView
 		    style="@style/titleListJoueur"
-		    android:text="@string/defis_gagnés" />
+		    android:id="@+id/defisTitleRanking"
+		    android:text="@string/defis_joues"
+		    android:layout_weight="2" />
 		<TextView
 		    style="@style/titleListJoueur"
-		    android:text="@string/winlost" />
+		    android:text="@string/defis_gagnés"
+		    android:layout_weight="2" />
+		<TextView
+		    style="@style/titleListJoueur"
+		    android:id="@+id/winLostTitleRanking"
+		    android:text="@string/winlost"
+		    android:layout_weight="2" />
 
 	</LinearLayout>
     

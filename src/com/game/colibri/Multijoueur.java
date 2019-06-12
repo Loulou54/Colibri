@@ -21,7 +21,6 @@ import com.loopj.android.http.RequestParams;
 import com.network.colibri.ConnectionDetector;
 import com.network.colibri.DBController;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -39,6 +38,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.ExpandableListView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -96,6 +96,9 @@ public class Multijoueur extends Activity {
 			gcmActive = false;
 			System.out.println("No GCM : Notification system disabled.");
 		}
+		// Initialisation ColiBrains
+		ColiBrain coliBrainDrawable = new ColiBrain(this, ""+MyApp.coliBrains, MyApp.expProgCB/(float)MyApp.EXP_LEVEL_PER_COLI_BRAIN);
+		((ImageButton) findViewById(R.id.colibrains_multi)).setImageDrawable(coliBrainDrawable);
 		loadData();
 	}
 	
@@ -215,10 +218,9 @@ public class Multijoueur extends Activity {
 		}
 	}
 	
-	@SuppressLint("InflateParams")
 	public void choixNiveau() {
 		boxNiv = new PaperDialog(this, R.layout.choix_niveau_multi);
-		//boxNiv.setTitle("Défi : "+defi.nom);
+		boxNiv.setTitle(defi.nom);
 		LinearLayout lay = (LinearLayout) boxNiv.getContentView();
 		Typeface font = Typeface.createFromAsset(getAssets(),"fonts/Passing Notes.ttf");
 		((TextView) lay.getChildAt(0)).setTypeface(font);
@@ -457,6 +459,10 @@ public class Multijoueur extends Activity {
 		((TextView) findViewById(R.id.user_score)).setText(scoreTxt);
 		// Affichage défis
 		((TextView) findViewById(R.id.user_defis)).setText(getString(R.string.defis_joues)+" : "+user.getDefis());
+		// Affichage ColiBrains
+		((ColiBrain) ((ImageButton) findViewById(R.id.colibrains_multi)).getDrawable())
+			.setProgress(MyApp.expProgCB/(float)MyApp.EXP_LEVEL_PER_COLI_BRAIN)
+			.setText(""+MyApp.coliBrains);
 	}
 	
 	private final BroadcastReceiver mHandleMessageReceiver = new BroadcastReceiver() {
@@ -541,8 +547,8 @@ public class Multijoueur extends Activity {
 							.putInt("cumulExpCB", MyApp.cumulExpCB)
 							.commit();
 					}
-					dispUser();
 					MyApp.getApp().saveData();
+					dispUser();
 					return true;
 				} catch (JSONException e) {
 					e.printStackTrace();
@@ -662,7 +668,6 @@ public class Multijoueur extends Activity {
 				Toast.makeText(Multijoueur.this, R.string.err500, Toast.LENGTH_LONG).show();
 		}
 		if(res) {
-			dispUser();
 			MyApp.experience = user.getExp();
 			MyApp.avancement = user.getProgress();
 			MyApp.last_update = last_up;
@@ -674,6 +679,7 @@ public class Multijoueur extends Activity {
 				.putInt("nNewM", 0) // Pour les notifications
 				.putInt("nRes", 0);
 			MyApp.getApp().saveData();
+			dispUser();
 		}
 		int pRapide = base.getDefis(user.getId(),joueurs,adversaires);
 		adapt.notifyDataSetChanged();

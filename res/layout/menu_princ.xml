@@ -80,7 +80,8 @@
 		android:textSize="12sp"
        	android:textColor="@color/noir"
        	android:gravity="left"
-       	android:drawableLeft="@drawable/cerveau" />
+       	android:drawableLeft="@drawable/cerveau"
+       	android:onClick="coliBrainsInfos" />
     
     <ImageButton
         android:id="@+id/bout_musique"
@@ -173,6 +174,16 @@
     <ViewStub
 	    android:id="@+id/a_propos"
 	    android:layout="@layout/info"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:layout_marginTop="20dp"
+	    android:layout_marginBottom="20dp"
+	    android:layout_marginLeft="40dp"
+	    android:layout_marginRight="40dp" />
+    
+    <ViewStub
+	    android:id="@+id/colibrains_infos"
+	    android:layout="@layout/colibrains_info"
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"
 	    android:layout_marginTop="20dp"

@@ -63,7 +63,6 @@ public class NewDefi {
 	/**
 	 * Affiche la boîte de dialogue de création de nouveau défi.
 	 */
-	@SuppressLint("InflateParams")
 	public void show() {
 		final PaperDialog defiBox = new PaperDialog(context, R.layout.newdefi_layout1, true);
 		defiBox.setTitle(R.string.nouveau_defi);
@@ -93,7 +92,6 @@ public class NewDefi {
 	/**
 	 * Affiche la boîte de dialogue de recherche de participants.
 	 */
-	@SuppressLint("InflateParams")
 	public void showParticipants() {
 		final PaperDialog defiBox = new PaperDialog(context, R.layout.newdefi_layout2, true);
 		final SuggestionsEditText actv = (SuggestionsEditText) defiBox.findViewById(R.id.searchAdv);

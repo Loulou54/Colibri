@@ -30,7 +30,6 @@ public class DispJoueur {
 		j = joueur;
 	}
 	
-	@SuppressLint("InflateParams")
 	public void show() {
 		PaperDialog box = new PaperDialog(context, R.layout.details_joueur_layout);
 		((TextView) box.findViewById(R.id.nomDetails)).setText(j.getPseudo());

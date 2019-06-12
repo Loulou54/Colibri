@@ -140,7 +140,7 @@
 	<string name="connect">Connect</string>
 	<string name="mdp">Password</string>
 	<string name="mdp_invalide">Invalid password (6 characters at least)</string>
-	<string name="not_registered">This nickname is not registered. Switch to "Register" if you want to register this name.</string>
+	<string name="not_registered">This nickname or e-mail is not registered. Switch to "Register" if you want to create a new account.</string>
 	<string name="wrong_password">Wrong password!</string>
 	<string name="connected">Connected!|You\'ve been successfully connected!</string>
 	<string name="force_quit_msg">You killed the application during a challenge: Forfeit.</string>
@@ -163,8 +163,18 @@
 	<string name="no_solution">Ouch!|No solution&#8230;</string>
 	<string name="sol_colibrain">ColiBrain solution</string>
 	<string name="sol_generated">Generated solution</string>
+	<string name="score_titre">Score</string>
 	<string name="score_compet">Competitive score</string>
 	<string name="score_match">Score Match</string>
 	<string name="score_cumul">Total Score</string>
+	<string name="name_or_mail">Name or e-mail</string>
+	<string name="colibrains">ColiBrains</string>
+	<string name="colibrains_info1">\u0009The « ColiBrains » provide in-game hints by suggesting you the next steps, or by indicating you if you are blocked.</string>
+	<string name="colibrains_info2">\u0009The ColiBrains are accessible during the game using the side menu by a simple clic on the screen.</string>
+	<string name="colibrains_info3">\u21AA For Random Maps or levels you already solved, ColiBrains are unlimited and you can use them freely to exercise.</string>
+	<string name="colibrains_info4">\u21AA For Multiplayer Challenges or for unsolved Campaign levels, ColiBrains are limited ! The number of remaining ColiBrains is indicated over the icon.</string>
+	<string name="colibrains_info5">\u0009You simply have to solve levels to earn new ColiBrains progressively! However, you won\'t be able to accumulate more than the limit indicated on the main menu.</string>
+	<string name="colibrains_info6">\u0009In addition to help unblock you, ColiBrains can be used strategically in Multiplayer Mode to accelerate the resolution of levels of important stake! (with numerous or high-ranked opponents)</string>
+	<string name="colibrains_info7">\u21AA Finally, the « ColiBrain » algorithm is also accessible at the end of each levels to let you visualize the fastest solution found by the algorithm!</string>
 	
 </resources>

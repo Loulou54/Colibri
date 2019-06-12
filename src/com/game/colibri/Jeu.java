@@ -102,7 +102,6 @@ public class Jeu extends Activity {
 		// Bouton ColiBrains du menu latéral
 		ImageButton coliBrains = (ImageButton) findViewById(R.id.colibrains_ingame);
 		coliBrains.setImageDrawable(new ColiBrain(this, "", 0));
-		updateColiBrains();
 		// fonts menu Pause
 		final Typeface font = Typeface.createFromAsset(getAssets(),"fonts/Passing Notes.ttf");
 		pause = findViewById(R.id.pause);
@@ -337,7 +336,6 @@ public class Jeu extends Activity {
 			MyApp.expToSync+=exp;
 			MyApp.updateExpProgCB(exp);
 			MyApp.getApp().saveData(); // On sauvegarde la progression.
-			updateColiBrains();
 		}
 		// Affichage
 		String s1;
@@ -451,14 +449,6 @@ public class Jeu extends Activity {
 				LinearLayout.LayoutParams p2 = (LinearLayout.LayoutParams) v.getLayoutParams();
 				int m = p2.leftMargin + p2.rightMargin;
 				p2.setMargins(cote <= 0 ? m : 0, p2.topMargin, cote > 0 ? m : 0, p2.bottomMargin);
-				/*if(i==2) { // Bouton Colibrain
-					((LinearLayout) v).setGravity(4+cote);
-					TextView coliBrains = (TextView) ((LinearLayout) v).findViewById(R.id.colibrains_ingame);
-					p2 = (LinearLayout.LayoutParams) coliBrains.getLayoutParams();
-					m = p2.leftMargin + p2.rightMargin;
-					p2.setMargins(cote <= 0 ? m : 0, p2.topMargin, cote > 0 ? m : 0, p2.bottomMargin);
-					v = ((LinearLayout) v).getChildAt(0); // ImageButton
-				}*/
 				int pad = v.getPaddingLeft() + v.getPaddingRight();
 				v.setPadding(cote <= 0 ? pad : 0, 0, cote > 0 ? pad : 0, 0);
 			}
@@ -513,6 +503,7 @@ public class Jeu extends Activity {
 		}
 		carte.loadNiveau(niv);
 		play.init(replay);
+		updateColiBrains();
 		if(savedInstanceState!=null) {
 			pause.setVisibility(View.VISIBLE);
 			setLevelInfo();
